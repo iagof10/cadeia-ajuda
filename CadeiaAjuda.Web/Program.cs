@@ -58,6 +58,11 @@ builder.Services.AddHttpClient<ReasonApiClient>(client =>
     client.BaseAddress = new("https+http://apiservice");
 });
 
+builder.Services.AddHttpClient<HelpRequestApiClient>(client =>
+{
+    client.BaseAddress = new("https+http://apiservice");
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthStateService>();
 
@@ -179,6 +184,38 @@ bffAreas.MapDelete("/{id:guid}", async (Guid id, AreaApiClient api) =>
 {
     var response = await api.DeleteAsync(id);
     if (response.IsSuccessStatusCode) return Results.Ok();
+    var body = await response.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
+});
+
+// --- BFF: HelpRequestTypes (filtered by tenant) ---
+var bffHelpRequestTypes = app.MapGroup("/bff/help-request-types").DisableAntiforgery();
+bffHelpRequestTypes.MapGet("/", async (HelpRequestTypeApiClient api, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    return Results.Ok(await api.GetByTenantIdAsync(user.TenantId));
+});
+
+// --- BFF: HelpRequests ---
+var bffHelpRequests = app.MapGroup("/bff/help-requests").DisableAntiforgery();
+
+bffHelpRequests.MapGet("/", async (HelpRequestApiClient api, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    return Results.Ok(await api.GetByTenantIdAsync(user.TenantId));
+});
+
+bffHelpRequests.MapGet("/{id:guid}", async (Guid id, HelpRequestApiClient api) =>
+{
+    var item = await api.GetByIdAsync(id);
+    return item is null ? Results.NotFound() : Results.Ok(item);
+});
+
+bffHelpRequests.MapPost("/", async (HelpRequestCreateModel model, HelpRequestApiClient api) =>
+{
+    var response = await api.CreateAsync(model);
     var body = await response.Content.ReadAsStringAsync();
     return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
 });

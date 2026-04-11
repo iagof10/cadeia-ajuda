@@ -1,0 +1,325 @@
+@page "/help-requests"
+@attribute [LayoutAttribute(typeof(EmptyLayout))]
+
+<!DOCTYPE html>
+<html lang="pt-BR" data-textdirection="ltr">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <title>Cadeia de Ajuda - Chamados</title>
+    <base href="/" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i%7CQuicksand:300,400,500,700" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="app-assets/vendors/css/vendors.min.css" />
+    <link rel="stylesheet" type="text/css" href="app-assets/css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="app-assets/css/bootstrap-extended.css" />
+    <link rel="stylesheet" type="text/css" href="app-assets/css/colors.css" />
+    <link rel="stylesheet" type="text/css" href="app-assets/css/components.css" />
+    <link rel="stylesheet" type="text/css" href="app-assets/css/core/menu/menu-types/vertical-compact-menu.css" />
+    <link rel="stylesheet" type="text/css" href="app-assets/css/core/colors/palette-gradient.css" />
+    <link rel="stylesheet" type="text/css" href="app-assets/fonts/simple-line-icons/style.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <style>
+        /* ---- Wizard ---- */
+        .wizard-steps { display:flex; justify-content:center; gap:0; margin-bottom:1.5rem; position:relative; }
+        .wizard-step { display:flex; align-items:center; gap:.5rem; padding:.6rem 1.5rem; background:#f5f7fa; border:1px solid #e4e7ed; cursor:default; position:relative; transition:all .2s; }
+        .wizard-step:first-child { border-radius:8px 0 0 8px; }
+        .wizard-step:last-child { border-radius:0 8px 8px 0; }
+        .wizard-step .step-number { display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:#e4e7ed; color:#6b6f82; font-weight:700; font-size:.85rem; flex-shrink:0; transition:all .2s; }
+        .wizard-step .step-label { font-size:.85rem; font-weight:600; color:#6b6f82; transition:all .2s; }
+        .wizard-step.active { background:#fff; border-color:#1e9ff2; z-index:1; }
+        .wizard-step.active .step-number { background:linear-gradient(135deg,#1e9ff2 0%,#1565c0 100%); color:#fff; }
+        .wizard-step.active .step-label { color:#1e9ff2; }
+        .wizard-step.done { background:#e8f5e9; border-color:#4caf50; cursor:pointer; }
+        .wizard-step.done:hover { background:#c8e6c9; }
+        .wizard-step.done .step-number { background:#4caf50; color:#fff; }
+        .wizard-step.done .step-label { color:#4caf50; }
+
+        .wizard-panel { display:none; }
+        .wizard-panel.active { display:block; }
+
+        /* ---- Selection Cards ---- */
+        .selection-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:.75rem; }
+        .selection-card { border:2px solid #e4e7ed; border-radius:10px; padding:1rem; cursor:pointer; transition:all .2s; background:#fff; text-align:center; }
+        .selection-card:hover { border-color:#1e9ff2; background:#f0f8ff; }
+        .selection-card.selected { border-color:#1e9ff2; background:#e3f2fd; box-shadow:0 0 0 3px rgba(30,159,242,.15); }
+        .selection-card .card-icon { font-size:1.8rem; margin-bottom:.5rem; }
+        .selection-card .card-name { font-weight:700; font-size:.95rem; color:#404e67; }
+        .selection-card .card-desc { font-size:.8rem; color:#8d9daa; margin-top:.25rem; }
+        .selection-card .check-mark { display:none; position:absolute; top:8px; right:8px; color:#1e9ff2; font-size:1.2rem; }
+        .selection-card.selected .check-mark { display:block; }
+        .selection-card { position:relative; }
+
+        /* Color dot for sector */
+        .sector-dot { display:inline-block; width:14px; height:14px; border-radius:50%; margin-right:6px; vertical-align:middle; border:2px solid rgba(0,0,0,.1); }
+
+        /* ---- Type list ---- */
+        .type-list-item { display:flex; align-items:center; padding:.75rem 1rem; border:2px solid #e4e7ed; border-radius:8px; cursor:pointer; transition:all .2s; background:#fff; margin-bottom:.5rem; gap:.75rem; }
+        .type-list-item:hover { border-color:#1e9ff2; background:#f0f8ff; }
+        .type-list-item.selected { border-color:#1e9ff2; background:#e3f2fd; }
+        .type-list-item .type-radio { width:20px; height:20px; border:2px solid #ccc; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+        .type-list-item.selected .type-radio { border-color:#1e9ff2; background:#1e9ff2; }
+        .type-list-item.selected .type-radio::after { content:''; width:8px; height:8px; border-radius:50%; background:#fff; }
+        .type-list-item .type-info { flex:1; }
+        .type-list-item .type-name { font-weight:600; color:#404e67; }
+        .type-list-item .type-desc { font-size:.8rem; color:#8d9daa; }
+
+        /* ---- Area leaf cards ---- */
+        .area-leaf-card { display:flex; align-items:center; padding:.65rem 1rem; border:2px solid #e4e7ed; border-radius:8px; cursor:pointer; transition:all .2s; background:#fff; margin-bottom:.5rem; gap:.75rem; }
+        .area-leaf-card:hover { border-color:#1e9ff2; background:#f0f8ff; }
+        .area-leaf-card.selected { border-color:#1e9ff2; background:#e3f2fd; }
+        .area-leaf-card .area-radio { width:20px; height:20px; border:2px solid #ccc; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+        .area-leaf-card.selected .area-radio { border-color:#1e9ff2; background:#1e9ff2; }
+        .area-leaf-card.selected .area-radio::after { content:''; width:8px; height:8px; border-radius:50%; background:#fff; }
+        .area-leaf-card .area-path { font-size:.75rem; color:#8d9daa; }
+        .area-leaf-card .area-name { font-weight:600; color:#404e67; }
+
+        /* ---- Status badges ---- */
+        .status-open { background:#fff3cd; color:#856404; }
+        .status-inprogress { background:#cce5ff; color:#004085; }
+        .status-escalated { background:#f8d7da; color:#721c24; }
+        .status-resolved { background:#d4edda; color:#155724; }
+        .status-closed { background:#e2e3e5; color:#383d41; }
+
+        /* ---- List table ---- */
+        .help-request-code { font-family:'Courier New',monospace; font-weight:700; color:#1e9ff2; }
+
+        /* Summary card */
+        .summary-section { background:#f8f9fa; border-radius:8px; padding:1rem 1.25rem; margin-bottom:1rem; }
+        .summary-label { font-size:.8rem; color:#8d9daa; text-transform:uppercase; letter-spacing:.5px; margin-bottom:.25rem; }
+        .summary-value { font-weight:700; color:#404e67; }
+    </style>
+</head>
+<body class="vertical-layout vertical-compact-menu 2-columns fixed-navbar" data-open="click" data-menu="vertical-compact-menu" data-col="2-columns">
+
+    <!-- Navbar -->
+    <nav class="header-navbar navbar-expand-md navbar navbar-with-menu navbar-without-dd-arrow fixed-top navbar-light navbar-shadow navbar-brand-center">
+        <div class="navbar-wrapper">
+            <div class="navbar-header">
+                <ul class="nav navbar-nav flex-row">
+                    <li class="nav-item mobile-menu d-md-none mr-auto">
+                        <a class="nav-link nav-menu-main menu-toggle hidden-xs" href="javascript:void(0)"><i class="ft-menu font-large-1"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="navbar-brand" href="/admin/dashboard">
+                            <img class="brand-logo" alt="Cadeia Ajuda logo" src="app-assets/images/logo/logo.png">
+                            <h3 class="brand-text">Cadeia Ajuda</h3>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="navbar-container content">
+                <div class="collapse navbar-collapse" id="navbar-mobile">
+                    <ul class="nav navbar-nav mr-auto float-left">
+                        <li class="nav-item d-none d-md-block">
+                            <a class="nav-link nav-menu-main menu-toggle hidden-xs" href="javascript:void(0)"><i class="ft-menu"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="main-menu menu-fixed menu-light menu-accordion menu-shadow" data-scroll-to-active="true">
+        <div class="main-menu-content">
+            <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
+                <li class="nav-item"><a href="/admin/dashboard"><i class="la la-home"></i><span class="menu-title">Dashboard</span></a></li>
+                <li class="nav-item active"><a href="/help-requests"><i class="la la-life-ring"></i><span class="menu-title">Cadeia de Ajuda</span></a></li>
+                <li class="nav-item"><a href="/admin/areas"><i class="la la-cubes"></i><span class="menu-title">Áreas</span></a></li>
+                <li class="nav-item">
+                    <a href="javascript:void(0)"><i class="la la-cog"></i><span class="menu-title">Administração</span></a>
+                    <ul class="menu-content">
+                        <li><a class="menu-item" href="/admin/tenants"><i class="la la-building"></i><span>Empresas</span></a></li>
+                        <li><a class="menu-item" href="/admin/users"><i class="la la-users"></i><span>Usuários</span></a></li>
+                        <li><a class="menu-item" href="/admin/sectors"><i class="la la-sitemap"></i><span>Setores</span></a></li>
+                        <li><a class="menu-item" href="/admin/escalation-levels"><i class="la la-level-up"></i><span>Escalonamento</span></a></li>
+                        <li><a class="menu-item" href="/admin/help-request-types"><i class="la la-question-circle"></i><span>Tipos de Solicitação</span></a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="app-content content">
+        <div class="content-overlay"></div>
+        <div class="content-wrapper">
+            <div class="content-header row"></div>
+            <div class="content-body">
+
+                <!-- ========== LIST VIEW ========== -->
+                <div id="viewList">
+                    <div class="row mb-2">
+                        <div class="col-12 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="content-header-title mb-0">Cadeia de Ajuda</h4>
+                                <p class="text-muted mt-1 mb-0">Chamados de ajuda abertos.</p>
+                            </div>
+                            <button class="btn btn-primary" id="btnNewRequest">
+                                <i class="ft-plus"></i> Novo Chamado
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="alertList"></div>
+
+                    <div id="loadingList" class="text-center py-3">
+                        <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+                    </div>
+
+                    <div id="emptyList" style="display:none;">
+                        <div class="card">
+                            <div class="card-body text-center text-muted py-4">
+                                <i class="la la-life-ring font-large-2 d-block mb-1"></i>
+                                Nenhum chamado encontrado. Clique em "Novo Chamado" para criar.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="listCard" style="display:none;">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Código</th>
+                                                <th>Setor</th>
+                                                <th>Tipo</th>
+                                                <th>Recurso</th>
+                                                <th>Solicitante</th>
+                                                <th>Status</th>
+                                                <th>Data</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="listBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== CREATE WIZARD ========== -->
+                <div id="viewCreate" style="display:none;">
+                    <div class="row mb-2">
+                        <div class="col-12">
+                            <h4 class="content-header-title mb-0">Novo Chamado</h4>
+                            <p class="text-muted mt-1 mb-0">Siga os passos para abrir um chamado de ajuda.</p>
+                        </div>
+                    </div>
+
+                    <div id="alertCreate"></div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- Steps indicator -->
+                            <div class="wizard-steps" id="wizardSteps">
+                                <div class="wizard-step active" data-step="0">
+                                    <span class="step-number">1</span>
+                                    <span class="step-label">Setor</span>
+                                </div>
+                                <div class="wizard-step" data-step="1">
+                                    <span class="step-number">2</span>
+                                    <span class="step-label">Tipo de Solicitação</span>
+                                </div>
+                                <div class="wizard-step" data-step="2">
+                                    <span class="step-number">3</span>
+                                    <span class="step-label">Recurso</span>
+                                </div>
+                                <div class="wizard-step" data-step="3">
+                                    <span class="step-number">4</span>
+                                    <span class="step-label">Confirmação</span>
+                                </div>
+                            </div>
+
+                            <!-- Panel 0: Setor -->
+                            <div class="wizard-panel active" id="panel0">
+                                <h5 class="mb-3"><i class="la la-sitemap text-primary"></i> Selecione o Setor</h5>
+                                <p class="text-muted mb-3">Escolha para qual setor deseja enviar o chamado de ajuda.</p>
+                                <div id="sectorGrid" class="selection-grid"></div>
+                                <div id="sectorLoading" class="text-center py-3">
+                                    <i class="la la-spinner la-spin font-large-1"></i> Carregando setores...
+                                </div>
+                            </div>
+
+                            <!-- Panel 1: Tipo -->
+                            <div class="wizard-panel" id="panel1">
+                                <h5 class="mb-3"><i class="la la-question-circle text-primary"></i> Selecione o Tipo de Solicitação</h5>
+                                <p class="text-muted mb-3">Escolha o tipo de ajuda que você precisa.</p>
+                                <div id="typeList"></div>
+                                <div id="typeEmpty" class="text-center text-muted py-3" style="display:none;">
+                                    <i class="la la-info-circle"></i> Nenhum tipo de solicitação encontrado para este setor.
+                                </div>
+                            </div>
+
+                            <!-- Panel 2: Recurso (Área / Planta) -->
+                            <div class="wizard-panel" id="panel2">
+                                <h5 class="mb-3"><i class="la la-cubes text-primary"></i> Selecione o Recurso</h5>
+                                <p class="text-muted mb-3">Escolha em qual recurso (posto/equipamento) você está.</p>
+                                <div id="areaList"></div>
+                                <div id="areaEmpty" class="text-center text-muted py-3" style="display:none;">
+                                    <i class="la la-info-circle"></i> Nenhum recurso (nó final) encontrado.
+                                </div>
+                            </div>
+
+                            <!-- Panel 3: Confirmação -->
+                            <div class="wizard-panel" id="panel3">
+                                <h5 class="mb-3"><i class="la la-check-circle text-primary"></i> Confirme o Chamado</h5>
+                                <p class="text-muted mb-3">Revise as informações antes de abrir o chamado.</p>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="summary-section">
+                                            <div class="summary-label">Setor</div>
+                                            <div class="summary-value" id="summSector">—</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="summary-section">
+                                            <div class="summary-label">Tipo de Solicitação</div>
+                                            <div class="summary-value" id="summType">—</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="summary-section">
+                                            <div class="summary-label">Recurso</div>
+                                            <div class="summary-value" id="summArea">—</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Navigation buttons -->
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                <button class="btn btn-light" id="btnBackToList" style="border-radius:6px;">
+                                    <i class="ft-arrow-left"></i> Voltar
+                                </button>
+                                <button class="btn btn-success" id="btnSubmit" style="display:none;border-radius:6px;padding:8px 32px;">
+                                    <i class="la la-check"></i> Abrir Chamado
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="sidenav-overlay"></div>
+    <div class="drag-target"></div>
+
+    <footer class="footer footer-static footer-light navbar-border navbar-shadow">
+        <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2">
+            <span class="float-md-left d-block d-md-inline-block">Copyright &copy; 2025 <a class="text-bold-800 grey darken-2" href="javascript:void(0)">Cadeia Ajuda</a></span>
+            <span class="float-md-right d-none d-lg-block">Painel Administrativo</span>
+        </p>
+    </footer>
+
+    <script src="app-assets/vendors/js/vendors.min.js"></script>
+    <script src="app-assets/js/core/app-menu.js"></script>
+    <script src="app-assets/js/core/app.js"></script>
+    <script src="js/help-requests.js"></script>
+</body>
+</html>

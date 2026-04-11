@@ -23,6 +23,7 @@ builder.Services.AddScoped<IHelpRequestTypeRepository, HelpRequestTypeRepository
 builder.Services.AddScoped<IEscalationLevelRepository, EscalationLevelRepository>();
 builder.Services.AddScoped<IAreaRepository, AreaRepository>();
 builder.Services.AddScoped<IReasonRepository, ReasonRepository>();
+builder.Services.AddScoped<IHelpRequestRepository, HelpRequestRepository>();
 
 // Services
 builder.Services.AddScoped<ITenantService, TenantService>();
@@ -32,6 +33,7 @@ builder.Services.AddScoped<IHelpRequestTypeService, HelpRequestTypeService>();
 builder.Services.AddScoped<IEscalationLevelService, EscalationLevelService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IReasonService, ReasonService>();
+builder.Services.AddScoped<IHelpRequestService, HelpRequestService>();
 
 var app = builder.Build();
 
@@ -404,6 +406,34 @@ reasons.MapPatch("/{id:guid}/toggle-active", async (Guid id, IReasonService serv
 {
     var result = await service.ToggleActiveAsync(id);
     return result ? Results.Ok() : Results.NotFound();
+});
+
+// --- HelpRequests ---
+var helpRequests = app.MapGroup("/api/help-requests");
+
+helpRequests.MapGet("/", async (IHelpRequestService service) =>
+    Results.Ok(await service.GetAllAsync()));
+
+helpRequests.MapGet("/by-tenant/{tenantId:guid}", async (Guid tenantId, IHelpRequestService service) =>
+    Results.Ok(await service.GetByTenantIdAsync(tenantId)));
+
+helpRequests.MapGet("/{id:guid}", async (Guid id, IHelpRequestService service) =>
+{
+    var item = await service.GetByIdAsync(id);
+    return item is null ? Results.NotFound() : Results.Ok(item);
+});
+
+helpRequests.MapPost("/", async (CadeiaAjuda.ApiService.Application.DTOs.HelpRequestCreateDto dto, IHelpRequestService service) =>
+{
+    try
+    {
+        var created = await service.CreateAsync(dto);
+        return Results.Created($"/api/help-requests/{created.Id}", created);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
 });
 
 app.MapDefaultEndpoints();

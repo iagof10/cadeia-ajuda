@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<TenantSettings> TenantSettings => Set<TenantSettings>();
     public DbSet<Area> Areas => Set<Area>();
     public DbSet<Reason> Reasons => Set<Reason>();
+    public DbSet<HelpRequest> HelpRequests => Set<HelpRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
