@@ -1,4 +1,4 @@
-@page "/admin/areas"
+@page "/admin/plants"
 @attribute [LayoutAttribute(typeof(EmptyLayout))]
 
 <!DOCTYPE html>
@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
-    <title>Áreas - Cadeia Ajuda</title>
+    <title>Plantas - Cadeia Ajuda</title>
     <base href="/" />
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i%7CQuicksand:300,400,500,700" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="app-assets/vendors/css/vendors.min.css" />
@@ -86,31 +86,19 @@
         <div class="main-menu-content">
             <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
                 <li class="nav-item"><a href="/admin/dashboard"><i class="la la-home"></i><span class="menu-title">Dashboard</span></a></li>
-                <li class="nav-item"><a href="/admin/tenants"><i class="la la-building"></i><span class="menu-title">Empresas</span></a></li>
-                <li class="nav-item">
-                    <a href="javascript:void(0)"><i class="la la-users"></i><span class="menu-title">Usuários</span></a>
+                <li class="nav-item active">
+                    <a href="javascript:void(0)"><i class="la la-clipboard"></i><span class="menu-title">Cadastro</span></a>
                     <ul class="menu-content">
-                        <li><a class="menu-item" href="/admin/users"><i class="la la-user"></i><span>Usuários</span></a></li>
-                        <li><a class="menu-item" href="/admin/roles"><i class="la la-shield"></i><span>Perfis</span></a></li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a href="javascript:void(0)"><i class="la la-sitemap"></i><span class="menu-title">Setores</span></a>
-                    <ul class="menu-content">
+                        <li><a class="menu-item" href="/admin/help-request-types"><i class="la la-question-circle"></i><span>Tipo de Ajuda</span></a></li>
+                        <li><a class="menu-item" href="/admin/reasons"><i class="la la-list"></i><span>Motivos</span></a></li>
                         <li><a class="menu-item" href="/admin/sectors"><i class="la la-sitemap"></i><span>Setores</span></a></li>
-                        <li><a class="menu-item" href="/admin/escalation-levels"><i class="la la-level-up"></i><span>Escalonamento</span></a></li>
+                        <li class="active"><a class="menu-item" href="/admin/plants"><i class="la la-map"></i><span>Planta</span></a></li>
                     </ul>
                 </li>
-                <li class="nav-item active"><a href="/admin/areas"><i class="la la-cubes"></i><span class="menu-title">Áreas</span></a></li>
-                <li class="nav-item"><a href="/admin/locations"><i class="la la-map-marker"></i><span class="menu-title">Localizações</span></a></li>
-                <li class="nav-item">
-                    <a href="javascript:void(0)"><i class="la la-cog"></i><span class="menu-title">Configurações</span></a>
-                    <ul class="menu-content">
-                        <li><a class="menu-item" href="/admin/help-request-types"><i class="la la-question-circle"></i><span>Tipos de Solicitação</span></a></li>
-                        <li><a class="menu-item" href="/admin/priorities"><i class="la la-flag"></i><span>Prioridades</span></a></li>
-                        <li><a class="menu-item" href="/admin/settings"><i class="la la-sliders"></i><span>Geral</span></a></li>
-                    </ul>
-                </li>
+                <li class="nav-item"><a href="/admin/help-chain"><i class="la la-link"></i><span class="menu-title">Cadeia de Ajuda</span></a></li>
+                <li class="nav-item"><a href="/admin/andon"><i class="la la-bell"></i><span class="menu-title">Andon</span></a></li>
+                <li class="nav-item"><a href="/admin/users"><i class="la la-user"></i><span class="menu-title">Usuário</span></a></li>
+                <li class="nav-item"><a href="/admin/reports"><i class="la la-bar-chart"></i><span class="menu-title">Relatórios</span></a></li>
             </ul>
         </div>
     </div>
@@ -125,11 +113,11 @@
                 <div class="row mb-2">
                     <div class="col-12 d-flex justify-content-between align-items-center">
                         <div>
-                            <h4 class="content-header-title mb-0">Áreas</h4>
-                            <p class="text-muted mt-1 mb-0">Gerencie a hierarquia de áreas (fábricas, plantas, linhas, postos).</p>
+                            <h4 class="content-header-title mb-0">Plantas</h4>
+                            <p class="text-muted mt-1 mb-0">Gerencie a hierarquia de plantas (fábricas, linhas, postos).</p>
                         </div>
                         <button class="btn btn-primary" id="btnAddRoot">
-                            <i class="ft-plus"></i> Nova Área
+                            <i class="ft-plus"></i> Nova Planta
                         </button>
                     </div>
                 </div>
@@ -146,8 +134,8 @@
                 <div id="emptyState" style="display:none;">
                     <div class="card">
                         <div class="card-body text-center text-muted py-4">
-                            <i class="la la-cubes font-large-2 d-block mb-1"></i>
-                            Nenhuma área cadastrada. Clique em "Nova Área" para começar.
+                            <i class="la la-map font-large-2 d-block mb-1"></i>
+                            Nenhuma planta cadastrada. Clique em "Nova Planta" para começar.
                         </div>
                     </div>
                 </div>
@@ -179,7 +167,7 @@
             <div class="modal-content" style="border:none;border-radius:12px;overflow:hidden;">
                 <div class="modal-header" style="padding:1.25rem 1.5rem .75rem;">
                     <div>
-                        <h5 class="modal-title" id="modalTitle" style="margin-bottom:2px;">Nova Área</h5>
+                        <h5 class="modal-title" id="modalTitle" style="margin-bottom:2px;">Nova Planta</h5>
                         <small class="text-muted" id="modalSubtitle">Preencha os dados abaixo.</small>
                     </div>
                     <button type="button" class="close" data-dismiss="modal" style="margin-top:-8px;"><span>&times;</span></button>
@@ -191,7 +179,7 @@
                             <div class="modal-section-title"><i class="la la-info-circle"></i> Informações</div>
                             <div class="form-group mb-2">
                                 <label>Nome <span class="text-danger">*</span></label>
-                                <input type="text" id="fName" class="form-control" placeholder="Ex: Fábrica SP, Planta A, Linha 1..." required />
+                                <input type="text" id="fName" class="form-control" placeholder="Ex: Fábrica SP, Linha 1, Posto A..." required />
                             </div>
                             <div class="form-group mb-2">
                                 <label>Descrição</label>
@@ -204,11 +192,11 @@
                                 </select>
                             </div>
                             <div class="form-group mb-2">
-                                <label>Área Pai</label>
+                                <label>Planta Pai</label>
                                 <select id="fParent" class="form-control">
-                                    <option value="">— Nenhuma (área raiz) —</option>
+                                    <option value="">— Nenhuma (planta raiz) —</option>
                                 </select>
-                                <small class="text-muted">Selecione a área à qual esta pertence, ou deixe vazio para criar uma área raiz.</small>
+                                <small class="text-muted">Selecione a planta à qual esta pertence, ou deixe vazio para criar uma planta raiz.</small>
                             </div>
                             <div id="hierarchyPreview" class="hierarchy-preview mt-2" style="display:none;">
                                 <i class="la la-sitemap"></i> <strong>Hierarquia:</strong> <span id="hierarchyPath"></span>
@@ -235,8 +223,8 @@
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <p>Deseja realmente excluir a área <strong id="deleteNameLabel"></strong>?</p>
-                    <p class="text-muted small">Essa ação não pode ser desfeita. Áreas com sub-áreas não podem ser excluídas.</p>
+                    <p>Deseja realmente excluir a planta <strong id="deleteNameLabel"></strong>?</p>
+                    <p class="text-muted small">Essa ação não pode ser desfeita. Plantas com sub-plantas não podem ser excluídas.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-dismiss="modal" style="border-radius:6px;">Cancelar</button>

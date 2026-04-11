@@ -17,5 +17,6 @@ public class Tenant : EntityBase
     public ICollection<Priority> Priorities { get; set; } = [];
     public ICollection<EscalationLevel> EscalationLevels { get; set; } = [];
     public ICollection<Area> Areas { get; set; } = [];
+    public ICollection<Reason> Reasons { get; set; } = [];
     public TenantSettings? Settings { get; set; }
 }

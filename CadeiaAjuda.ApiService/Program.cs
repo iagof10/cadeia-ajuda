@@ -22,6 +22,7 @@ builder.Services.AddScoped<ISectorRepository, SectorRepository>();
 builder.Services.AddScoped<IHelpRequestTypeRepository, HelpRequestTypeRepository>();
 builder.Services.AddScoped<IEscalationLevelRepository, EscalationLevelRepository>();
 builder.Services.AddScoped<IAreaRepository, AreaRepository>();
+builder.Services.AddScoped<IReasonRepository, ReasonRepository>();
 
 // Services
 builder.Services.AddScoped<ITenantService, TenantService>();
@@ -30,6 +31,7 @@ builder.Services.AddScoped<ISectorService, SectorService>();
 builder.Services.AddScoped<IHelpRequestTypeService, HelpRequestTypeService>();
 builder.Services.AddScoped<IEscalationLevelService, EscalationLevelService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
+builder.Services.AddScoped<IReasonService, ReasonService>();
 
 var app = builder.Build();
 
@@ -345,6 +347,51 @@ app.MapPost("/api/auth/login", async (CadeiaAjuda.ApiService.Application.DTOs.Lo
     return user is null
         ? Results.Unauthorized()
         : Results.Ok(user);
+});
+
+// --- Reasons ---
+var reasons = app.MapGroup("/api/reasons");
+
+reasons.MapGet("/", async (IReasonService service) =>
+    Results.Ok(await service.GetAllAsync()));
+
+reasons.MapGet("/{id:guid}", async (Guid id, IReasonService service) =>
+{
+    var item = await service.GetByIdAsync(id);
+    return item is null ? Results.NotFound() : Results.Ok(item);
+});
+
+reasons.MapPost("/", async (CadeiaAjuda.ApiService.Application.DTOs.ReasonCreateDto dto, IReasonService service) =>
+{
+    try
+    {
+        var created = await service.CreateAsync(dto);
+        return Results.Created($"/api/reasons/{created.Id}", created);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+reasons.MapPut("/{id:guid}", async (Guid id, CadeiaAjuda.ApiService.Application.DTOs.ReasonUpdateDto dto, IReasonService service) =>
+{
+    dto.Id = id;
+    try
+    {
+        var updated = await service.UpdateAsync(dto);
+        return updated is null ? Results.NotFound() : Results.Ok(updated);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+reasons.MapPatch("/{id:guid}/toggle-active", async (Guid id, IReasonService service) =>
+{
+    var result = await service.ToggleActiveAsync(id);
+    return result ? Results.Ok() : Results.NotFound();
 });
 
 app.MapDefaultEndpoints();

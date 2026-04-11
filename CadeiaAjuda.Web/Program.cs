@@ -53,6 +53,11 @@ builder.Services.AddHttpClient<AreaApiClient>(client =>
     client.BaseAddress = new("https+http://apiservice");
 });
 
+builder.Services.AddHttpClient<ReasonApiClient>(client =>
+{
+    client.BaseAddress = new("https+http://apiservice");
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthStateService>();
 

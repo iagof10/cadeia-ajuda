@@ -1,0 +1,146 @@
+@page "/admin/reasons"
+@inject ReasonApiClient Api
+
+<PageTitle>Motivos - Cadeia Ajuda</PageTitle>
+
+<section class="reasons-list-wrapper">
+    <div class="row mb-2">
+        <div class="col-12">
+            <NavLink href="/admin/reasons/new" class="btn btn-primary btn-icon mr-1" title="Adicionar motivo">
+                <i class="ft-plus"></i>
+            </NavLink>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible mb-2" role="alert">
+            <button type="button" class="close" @onclick="() => successMessage = null"><span>&times;</span></button>
+            <i class="la la-check-circle"></i> @successMessage
+        </div>
+    }
+
+    <div class="reasons-list-table">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Descrição</th>
+                                    <th>Empresa</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (isLoading)
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center py-3">
+                                            <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+                                        </td>
+                                    </tr>
+                                }
+                                else if (!reasons.Any())
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center py-3 text-muted">Nenhum motivo encontrado.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var reason in reasons)
+                                    {
+                                        <tr>
+                                            <td>@reason.Name</td>
+                                            <td>@reason.Description</td>
+                                            <td>@reason.TenantName</td>
+                                            <td>
+                                                @if (reason.Active)
+                                                {
+                                                    <span class="badge badge-success">Ativo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-danger">Inativo</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn btn-sm btn-link p-0 text-secondary reason-actions-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mais ações">
+                                                        <i class="ft-more-vertical"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <NavLink href="@($"/admin/reasons/edit/{reason.Id}")" class="dropdown-item">
+                                                            <i class="ft-edit-2 mr-1"></i> Editar
+                                                        </NavLink>
+                                                        <button type="button" class="dropdown-item @(reason.Active ? "text-warning" : "text-success")"
+                                                                @onclick="() => ToggleActive(reason)">
+                                                            <i class="ft-power mr-1"></i> @(reason.Active ? "Inativar" : "Ativar")
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .reasons-list-table .table-responsive {
+        overflow: visible;
+    }
+
+    .reason-actions-toggle {
+        box-shadow: none !important;
+        background: transparent !important;
+        border: 0 !important;
+        text-decoration: none !important;
+    }
+
+    .reason-actions-toggle:hover,
+    .reason-actions-toggle:focus,
+    .reason-actions-toggle:active {
+        color: #404e67 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        text-decoration: none !important;
+    }
+
+    .reason-actions-toggle i {
+        font-size: 1.1rem;
+    }
+</style>
+
+@code {
+    private List<ReasonViewModel> reasons = [];
+    private bool isLoading = true;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        reasons = await Api.GetAllAsync();
+        isLoading = false;
+    }
+
+    private async Task ToggleActive(ReasonViewModel reason)
+    {
+        var response = await Api.ToggleActiveAsync(reason.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            reason.Active = !reason.Active;
+            successMessage = $"Motivo \"{reason.Name}\" {(reason.Active ? "ativado" : "inativado")} com sucesso.";
+        }
+    }
+}
