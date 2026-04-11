@@ -1,0 +1,202 @@
+@page "/admin/help-request-types/new"
+@page "/admin/help-request-types/edit/{Id:guid}"
+@inject HelpRequestTypeApiClient Api
+@inject TenantApiClient TenantApi
+@inject SectorApiClient SectorApi
+@inject NavigationManager Navigation
+
+<PageTitle>@(isEdit ? "Editar Tipo de Solicitação" : "Novo Tipo de Solicitação") - Cadeia Ajuda</PageTitle>
+
+<section>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">@(isEdit ? "Editar Tipo de Solicitação" : "Novo Tipo de Solicitação")</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger alert-dismissible mb-2" role="alert">
+                                <button type="button" class="close" @onclick="() => errorMessage = null"><span>&times;</span></button>
+                                <i class="la la-warning"></i> @errorMessage
+                            </div>
+                        }
+
+                        <EditForm Model="model" OnValidSubmit="HandleSubmit" FormName="helpRequestTypeForm">
+                            <DataAnnotationsValidator />
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Nome <span class="text-danger">*</span></label>
+                                        <InputText @bind-Value="model.Name" class="form-control" placeholder="Nome do tipo de solicitação" />
+                                        <ValidationMessage For="() => model.Name" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Descrição</label>
+                                        <InputText @bind-Value="model.Description" class="form-control" placeholder="Descrição do tipo" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Empresa <span class="text-danger">*</span></label>
+                                        <InputSelect @bind-Value="model.SelectedTenantId" class="form-control">
+                                            <option value="">— Selecione —</option>
+                                            @foreach (var tenant in tenants)
+                                            {
+                                                <option value="@tenant.Id">@tenant.Name</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="() => model.SelectedTenantId" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Setor <span class="text-danger">*</span></label>
+                                        <InputSelect @bind-Value="model.SelectedSectorId" class="form-control">
+                                            <option value="">— Selecione —</option>
+                                            @foreach (var sector in allSectors.Where(s => s.Active))
+                                            {
+                                                <option value="@sector.Id">@sector.Name (@sector.TenantName)</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="() => model.SelectedSectorId" />
+                                    </div>
+                                </div>
+                                @if (isEdit)
+                                {
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <InputSelect @bind-Value="model.ActiveValue" class="form-control">
+                                                <option value="true">Ativo</option>
+                                                <option value="false">Inativo</option>
+                                            </InputSelect>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="form-actions text-right mt-2">
+                                <NavLink href="/admin/help-request-types" class="btn btn-light mr-1">
+                                    <i class="ft-x"></i> Cancelar
+                                </NavLink>
+                                <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                    @if (isSaving)
+                                    {
+                                        <i class="la la-spinner la-spin"></i>
+                                    }
+                                    <i class="la la-check"></i> @(isEdit ? "Salvar Alterações" : "Cadastrar")
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private HelpRequestTypeFormModel model { get; set; } = new();
+    private bool isEdit => Id.HasValue;
+    private bool isSaving;
+    private string? errorMessage;
+
+    private List<TenantViewModel> tenants = [];
+    private List<SectorViewModel> allSectors = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        tenants = await TenantApi.GetAllAsync();
+        allSectors = await SectorApi.GetAllAsync();
+
+        if (isEdit && string.IsNullOrEmpty(model.Name))
+        {
+            var item = await Api.GetByIdAsync(Id!.Value);
+            if (item is not null)
+            {
+                model = new HelpRequestTypeFormModel
+                {
+                    Name = item.Name,
+                    Description = item.Description,
+                    SelectedTenantId = item.TenantId.ToString(),
+                    SelectedSectorId = item.SectorId.ToString(),
+                    ActiveValue = item.Active.ToString().ToLower()
+                };
+            }
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        if (!Guid.TryParse(model.SelectedTenantId, out var tenantId))
+        {
+            errorMessage = "Selecione uma empresa.";
+            isSaving = false;
+            return;
+        }
+
+        if (!Guid.TryParse(model.SelectedSectorId, out var sectorId))
+        {
+            errorMessage = "Selecione um setor.";
+            isSaving = false;
+            return;
+        }
+
+        model.TenantId = tenantId;
+        model.SectorId = sectorId;
+        model.Active = bool.TryParse(model.ActiveValue, out var active) ? active : true;
+
+        HttpResponseMessage response;
+
+        if (isEdit)
+        {
+            response = await Api.UpdateAsync(Id!.Value, model);
+        }
+        else
+        {
+            response = await Api.CreateAsync(model);
+        }
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/admin/help-request-types");
+        }
+        else
+        {
+            try
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                var error = System.Text.Json.JsonSerializer.Deserialize<ErrorResponse>(body,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                errorMessage = error?.Error ?? "Ocorreu um erro ao salvar.";
+            }
+            catch
+            {
+                errorMessage = "Ocorreu um erro ao salvar.";
+            }
+        }
+
+        isSaving = false;
+    }
+
+    private class ErrorResponse
+    {
+        public string? Error { get; set; }
+    }
+}

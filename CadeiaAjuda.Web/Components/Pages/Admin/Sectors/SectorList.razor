@@ -1,0 +1,157 @@
+@page "/admin/sectors"
+@inject SectorApiClient Api
+
+<PageTitle>Setores - Cadeia Ajuda</PageTitle>
+
+<section class="sectors-list-wrapper">
+    <div class="row mb-2">
+        <div class="col-12">
+            <NavLink href="/admin/sectors/new" class="btn btn-primary btn-icon mr-1" title="Adicionar setor">
+                <i class="ft-plus"></i>
+            </NavLink>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible mb-2" role="alert">
+            <button type="button" class="close" @onclick="() => successMessage = null"><span>&times;</span></button>
+            <i class="la la-check-circle"></i> @successMessage
+        </div>
+    }
+
+    <div class="sectors-list-table">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Cor</th>
+                                    <th>Empresa</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (isLoading)
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center py-3">
+                                            <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+                                        </td>
+                                    </tr>
+                                }
+                                else if (!sectors.Any())
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center py-3 text-muted">Nenhum setor encontrado.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var sector in sectors)
+                                    {
+                                        <tr>
+                                            <td>@sector.Name</td>
+                                            <td>
+                                                <span class="sector-color-badge" style="background-color: @sector.Color;" title="@sector.Color"></span>
+                                            </td>
+                                            <td>@sector.TenantName</td>
+                                            <td>
+                                                @if (sector.Active)
+                                                {
+                                                    <span class="badge badge-success">Ativo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-danger">Inativo</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn btn-sm btn-link p-0 text-secondary sector-actions-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mais ações">
+                                                        <i class="ft-more-vertical"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <NavLink href="@($"/admin/sectors/edit/{sector.Id}")" class="dropdown-item">
+                                                            <i class="ft-edit-2 mr-1"></i> Editar
+                                                        </NavLink>
+                                                        <button type="button" class="dropdown-item @(sector.Active ? "text-warning" : "text-success")"
+                                                                @onclick="() => ToggleActive(sector)">
+                                                            <i class="ft-power mr-1"></i> @(sector.Active ? "Inativar" : "Ativar")
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .sectors-list-table .table-responsive {
+        overflow: visible;
+    }
+
+    .sector-color-badge {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        vertical-align: middle;
+    }
+
+    .sector-actions-toggle {
+        box-shadow: none !important;
+        background: transparent !important;
+        border: 0 !important;
+        text-decoration: none !important;
+    }
+
+    .sector-actions-toggle:hover,
+    .sector-actions-toggle:focus,
+    .sector-actions-toggle:active {
+        color: #404e67 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        text-decoration: none !important;
+    }
+
+    .sector-actions-toggle i {
+        font-size: 1.1rem;
+    }
+</style>
+
+@code {
+    private List<SectorViewModel> sectors = [];
+    private bool isLoading = true;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        sectors = await Api.GetAllAsync();
+        isLoading = false;
+    }
+
+    private async Task ToggleActive(SectorViewModel sector)
+    {
+        var response = await Api.ToggleActiveAsync(sector.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            sector.Active = !sector.Active;
+            successMessage = $"Setor \"{sector.Name}\" {(sector.Active ? "ativado" : "inativado")} com sucesso.";
+        }
+    }
+}

@@ -1,0 +1,214 @@
+@page "/admin/users/new"
+@page "/admin/users/edit/{Id:guid}"
+@inject UserApiClient Api
+@inject TenantApiClient TenantApi
+@inject NavigationManager Navigation
+
+<PageTitle>@(isEdit ? "Editar Usuário" : "Novo Usuário") - Cadeia Ajuda</PageTitle>
+
+<section>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">@(isEdit ? "Editar Usuário" : "Novo Usuário")</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger alert-dismissible mb-2" role="alert">
+                                <button type="button" class="close" @onclick="() => errorMessage = null"><span>&times;</span></button>
+                                <i class="la la-warning"></i> @errorMessage
+                            </div>
+                        }
+
+                        <EditForm Model="model" OnValidSubmit="HandleSubmit" FormName="userForm">
+                            <DataAnnotationsValidator />
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Nome <span class="text-danger">*</span></label>
+                                        <InputText @bind-Value="model.Name" class="form-control" placeholder="Nome completo" />
+                                        <ValidationMessage For="() => model.Name" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>E-mail <span class="text-danger">*</span></label>
+                                        <InputText @bind-Value="model.Email" class="form-control" placeholder="usuario@empresa.com" />
+                                        <ValidationMessage For="() => model.Email" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Login <span class="text-danger">*</span></label>
+                                        <InputText @bind-Value="model.Login" class="form-control" placeholder="login.usuario" />
+                                        <ValidationMessage For="() => model.Login" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Senha @(isEdit ? "" : "*")</label>
+                                        <InputText @bind-Value="model.Password" class="form-control" type="password"
+                                                   placeholder="@(isEdit ? "Deixe vazio para manter a atual" : "Senha de acesso")" />
+                                        @if (!isEdit)
+                                        {
+                                            <ValidationMessage For="() => model.Password" />
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Telefone</label>
+                                        <InputText @bind-Value="model.Phone" class="form-control" placeholder="(00) 00000-0000" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Empresa <span class="text-danger">*</span></label>
+                                        <InputSelect @bind-Value="model.SelectedTenantId" class="form-control">
+                                            <option value="">— Selecione —</option>
+                                            @foreach (var tenant in tenants)
+                                            {
+                                                <option value="@tenant.Id">@tenant.Name</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="() => model.SelectedTenantId" />
+                                    </div>
+                                </div>
+                                @if (isEdit)
+                                {
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <InputSelect @bind-Value="model.ActiveValue" class="form-control">
+                                                <option value="true">Ativo</option>
+                                                <option value="false">Inativo</option>
+                                            </InputSelect>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="form-actions text-right mt-2">
+                                <NavLink href="/admin/users" class="btn btn-light mr-1">
+                                    <i class="ft-x"></i> Cancelar
+                                </NavLink>
+                                <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                    @if (isSaving)
+                                    {
+                                        <i class="la la-spinner la-spin"></i>
+                                    }
+                                    <i class="la la-check"></i> @(isEdit ? "Salvar Alterações" : "Cadastrar")
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private UserFormModel model { get; set; } = new();
+    private bool isEdit => Id.HasValue;
+    private bool isSaving;
+    private string? errorMessage;
+
+    private List<TenantViewModel> tenants = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        tenants = await TenantApi.GetAllAsync();
+
+        if (isEdit && string.IsNullOrEmpty(model.Name))
+        {
+            var user = await Api.GetByIdAsync(Id!.Value);
+            if (user is not null)
+            {
+                model = new UserFormModel
+                {
+                    Name = user.Name,
+                    Email = user.Email,
+                    Phone = user.Phone,
+                    Login = user.Login,
+                    SelectedTenantId = user.TenantId.ToString(),
+                    ActiveValue = user.Active.ToString().ToLower()
+                };
+            }
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        if (!Guid.TryParse(model.SelectedTenantId, out var tenantId))
+        {
+            errorMessage = "Selecione uma empresa.";
+            isSaving = false;
+            return;
+        }
+
+        if (!isEdit && string.IsNullOrWhiteSpace(model.Password))
+        {
+            errorMessage = "Informe a senha.";
+            isSaving = false;
+            return;
+        }
+
+        model.TenantId = tenantId;
+        model.Active = bool.TryParse(model.ActiveValue, out var active) ? active : true;
+
+        HttpResponseMessage response;
+
+        if (isEdit)
+        {
+            response = await Api.UpdateAsync(Id!.Value, model);
+        }
+        else
+        {
+            response = await Api.CreateAsync(model);
+        }
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/admin/users");
+        }
+        else
+        {
+            try
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                var error = System.Text.Json.JsonSerializer.Deserialize<ErrorResponse>(body,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                errorMessage = error?.Error ?? "Ocorreu um erro ao salvar.";
+            }
+            catch
+            {
+                errorMessage = "Ocorreu um erro ao salvar.";
+            }
+        }
+
+        isSaving = false;
+    }
+
+    private class ErrorResponse
+    {
+        public string? Error { get; set; }
+    }
+}

@@ -1,0 +1,102 @@
+@using CadeiaAjuda.Web.Services
+
+<div class="area-tree-item">
+    <div class="area-row">
+        @if (HasChildren)
+        {
+            <button class="toggle-btn" @onclick="() => OnToggleExpand.InvokeAsync(Area.Id)" title="@(IsExpanded ? "Recolher" : "Expandir")">
+                <i class="ft-chevron-@(IsExpanded ? "down" : "right")"></i>
+            </button>
+        }
+        else
+        {
+            <span class="area-leaf-icon">
+                <i class="ft-circle" style="font-size: 0.5rem;"></i>
+            </span>
+        }
+
+        <span class="area-name">@Area.Name</span>
+
+        @if (!string.IsNullOrEmpty(Area.Description))
+        {
+            <span class="area-desc">— @Area.Description</span>
+        }
+
+        @if (HasChildren)
+        {
+            <span class="area-node-badge badge badge-light">
+                @ChildCount sub-área(s)
+            </span>
+        }
+        else
+        {
+            <span class="area-node-badge badge badge-info">
+                <i class="ft-target" style="font-size: 0.65rem;"></i> nó final
+            </span>
+        }
+
+        @if (Area.Active)
+        {
+            <span class="badge badge-success" style="font-size: 0.7rem;">Ativo</span>
+        }
+        else
+        {
+            <span class="badge badge-danger" style="font-size: 0.7rem;">Inativo</span>
+        }
+
+        <div class="area-actions">
+            <NavLink href="@($"/admin/areas/new?parentId={Area.Id}")" class="btn btn-sm btn-outline-primary" title="Adicionar sub-área">
+                <i class="ft-plus"></i>
+            </NavLink>
+            <NavLink href="@($"/admin/areas/edit/{Area.Id}")" class="btn btn-sm btn-outline-info" title="Editar">
+                <i class="ft-edit-2"></i>
+            </NavLink>
+            <button class="btn btn-sm @(Area.Active ? "btn-outline-warning" : "btn-outline-success")"
+                    title="@(Area.Active ? "Inativar" : "Ativar")"
+                    @onclick="() => OnToggleActive.InvokeAsync(Area)">
+                <i class="ft-power"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+@if (HasChildren && IsExpanded)
+{
+    <div class="area-tree-children">
+        @foreach (var child in Children)
+        {
+            <CadeiaAjuda.Web.Components.Shared.AreaTreeNode
+                Area="child"
+                AllAreas="AllAreas"
+                ExpandedIds="ExpandedIds"
+                OnToggleExpand="OnToggleExpand"
+                OnToggleActive="OnToggleActive"
+                Level="Level + 1" />
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public AreaViewModel Area { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public List<AreaViewModel> AllAreas { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public HashSet<Guid> ExpandedIds { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<Guid> OnToggleExpand { get; set; }
+
+    [Parameter]
+    public EventCallback<AreaViewModel> OnToggleActive { get; set; }
+
+    [Parameter]
+    public int Level { get; set; }
+
+    private IEnumerable<AreaViewModel> Children => AllAreas.Where(a => a.ParentId == Area.Id);
+    private bool HasChildren => AllAreas.Any(a => a.ParentId == Area.Id);
+    private int ChildCount => AllAreas.Count(a => a.ParentId == Area.Id);
+    private bool IsExpanded => ExpandedIds.Contains(Area.Id);
+}

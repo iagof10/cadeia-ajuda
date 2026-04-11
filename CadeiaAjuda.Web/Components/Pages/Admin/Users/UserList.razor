@@ -1,0 +1,155 @@
+@page "/admin/users"
+@inject UserApiClient Api
+
+<PageTitle>Usuários - Cadeia Ajuda</PageTitle>
+
+<section class="users-list-wrapper">
+    <div class="row mb-2 align-items-end">
+        <div class="col-12">
+            <NavLink href="/admin/users/new" class="btn btn-primary btn-icon mr-1" title="Adicionar usuário">
+                <i class="ft-plus"></i>
+            </NavLink>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible mb-2" role="alert">
+            <button type="button" class="close" @onclick="() => successMessage = null"><span>&times;</span></button>
+            <i class="la la-check-circle"></i> @successMessage
+        </div>
+    }
+
+    <div class="users-list-table">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>E-mail</th>
+                                    <th>Login</th>
+                                    <th>Telefone</th>
+                                    <th>Empresa</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (isLoading)
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center py-3">
+                                            <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+                                        </td>
+                                    </tr>
+                                }
+                                else if (!users.Any())
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center py-3 text-muted">Nenhum usuário encontrado.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var user in users)
+                                    {
+                                        <tr>
+                                            <td>@user.Name</td>
+                                            <td>@user.Email</td>
+                                            <td><code>@user.Login</code></td>
+                                            <td>@user.Phone</td>
+                                            <td>@user.TenantName</td>
+                                            <td>
+                                                @if (user.Active)
+                                                {
+                                                    <span class="badge badge-success">Ativo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-danger">Inativo</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn btn-sm btn-link p-0 text-secondary user-actions-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mais ações">
+                                                        <i class="ft-more-vertical"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <NavLink href="@($"/admin/users/edit/{user.Id}")" class="dropdown-item">
+                                                            <i class="ft-edit-2 mr-1"></i> Editar
+                                                        </NavLink>
+                                                        <button type="button" class="dropdown-item @(user.Active ? "text-warning" : "text-success")"
+                                                                @onclick="() => ToggleActive(user)">
+                                                            <i class="ft-power mr-1"></i> @(user.Active ? "Inativar" : "Ativar")
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+
+<style>
+    .users-list-table .table-responsive {
+        overflow: visible;
+    }
+
+    .user-actions-toggle {
+        box-shadow: none !important;
+        background: transparent !important;
+        border: 0 !important;
+        text-decoration: none !important;
+    }
+
+    .user-actions-toggle:hover,
+    .user-actions-toggle:focus,
+    .user-actions-toggle:active {
+        color: #404e67 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        text-decoration: none !important;
+    }
+
+    .user-actions-toggle i {
+        font-size: 1.1rem;
+    }
+</style>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private List<UserViewModel> users = [];
+    private bool isLoading = true;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsersAsync();
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        isLoading = true;
+        users = await Api.GetAllAsync();
+        isLoading = false;
+    }
+
+    private async Task ToggleActive(UserViewModel user)
+    {
+        var response = await Api.ToggleActiveAsync(user.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            user.Active = !user.Active;
+            successMessage = $"Usuário \"{user.Name}\" {(user.Active ? "ativado" : "inativado")} com sucesso.";
+        }
+    }
+}

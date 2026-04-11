@@ -1,0 +1,207 @@
+@page "/admin/tenants"
+@inject TenantApiClient Api
+
+<PageTitle>Empresas - Cadeia Ajuda</PageTitle>
+
+<!-- users list start -->
+<section class="users-list-wrapper">
+    <div class="row mb-2 align-items-end">
+        <div class="col-12">
+            <NavLink href="/admin/tenants/new" class="btn btn-primary btn-icon mr-1" title="Adicionar empresa">
+                <i class="ft-plus"></i>
+            </NavLink>
+            <button type="button" class="btn btn-outline-danger btn-icon mr-1" title="Exportar PDF">
+                <i class="ft-file"></i>
+            </button>
+            <button type="button" class="btn btn-outline-success btn-icon mr-2" title="Exportar CSV">
+                <i class="ft-download"></i>
+            </button>
+
+            <div class="d-inline-block align-bottom mr-1" style="min-width: 180px; vertical-align: bottom;">
+                <fieldset class="form-group mb-0">
+                    <label for="filter-status">Status</label>
+                    <select class="form-control" id="filter-status" @bind="filterStatusDraft">
+                        <option value="">Todos</option>
+                        <option value="true">Ativo</option>
+                        <option value="false">Inativo</option>
+                    </select>
+                </fieldset>
+            </div>
+
+            <div class="d-inline-block align-bottom mr-1" style="min-width: 320px; vertical-align: bottom;">
+                <fieldset class="form-group mb-0">
+                    <label for="filter-search">Pesquisar</label>
+                    <input type="text" class="form-control" id="filter-search" placeholder="Nome, CNPJ ou e-mail..." @bind="filterSearchDraft" />
+                </fieldset>
+            </div>
+
+            <button type="button" class="btn btn-info btn-icon" title="Pesquisar" @onclick="ApplyFilters">
+                <i class="ft-search"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="users-list-table tenant-list-table">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Nome Fantasia</th>
+                                    <th>CNPJ</th>
+                                    <th>E-mail</th>
+                                    <th>Telefone</th>
+                                    <th>Identificador</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (isLoading)
+                                {
+                                    <tr>
+                                        <td colspan="8" class="text-center py-3">
+                                            <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+                                        </td>
+                                    </tr>
+                                }
+                                else if (!FilteredTenants.Any())
+                                {
+                                    <tr>
+                                        <td colspan="8" class="text-center py-3 text-muted">Nenhuma empresa encontrada.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var tenant in FilteredTenants)
+                                    {
+                                        <tr>
+                                            <td>@tenant.Name</td>
+                                            <td>@tenant.TradeName</td>
+                                            <td>@tenant.Cnpj</td>
+                                            <td>@tenant.Email</td>
+                                            <td>@tenant.Phone</td>
+                                            <td><code>@tenant.Identifier</code></td>
+                                            <td>
+                                                @if (tenant.Active)
+                                                {
+                                                    <span class="badge badge-success">Ativo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-danger">Inativo</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn btn-sm btn-link p-0 text-secondary tenant-actions-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mais ações">
+                                                        <i class="ft-more-vertical"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <NavLink href="@($"/admin/tenants/edit/{tenant.Id}")" class="dropdown-item">
+                                                            <i class="ft-edit-2 mr-1"></i> Editar
+                                                        </NavLink>
+                                                        <button type="button" class="dropdown-item" title="Detalhes">
+                                                            <i class="ft-eye mr-1"></i> Detalhes
+                                                        </button>
+                                                        <button type="button" class="dropdown-item @(tenant.Active ? "text-warning" : "text-success")"
+                                                                @onclick="() => ToggleActive(tenant)">
+                                                            <i class="ft-power mr-1"></i> @(tenant.Active ? "Inativar" : "Ativar")
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+
+<style>
+    .tenant-list-table .table-responsive {
+        overflow: visible;
+    }
+
+    .tenant-actions-toggle {
+        box-shadow: none !important;
+        background: transparent !important;
+        border: 0 !important;
+        text-decoration: none !important;
+    }
+
+    .tenant-actions-toggle:hover,
+    .tenant-actions-toggle:focus,
+    .tenant-actions-toggle:active {
+        color: #404e67 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        text-decoration: none !important;
+    }
+
+    .tenant-actions-toggle i {
+        font-size: 1.1rem;
+    }
+</style>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- users list end -->
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success alert-dismissible mb-2" role="alert">
+        <button type="button" class="close" @onclick="() => successMessage = null"><span>&times;</span></button>
+        <i class="la la-check-circle"></i> @successMessage
+    </div>
+}
+
+@code {
+    private List<TenantViewModel> tenants = [];
+    private bool isLoading = true;
+    private string filterStatus = "";
+    private string filterSearch = "";
+    private string filterStatusDraft = "";
+    private string filterSearchDraft = "";
+    private string? successMessage;
+
+    private IEnumerable<TenantViewModel> FilteredTenants => tenants
+        .Where(t => string.IsNullOrEmpty(filterStatus) || t.Active.ToString().Equals(filterStatus, StringComparison.OrdinalIgnoreCase))
+        .Where(t => string.IsNullOrEmpty(filterSearch) ||
+                    t.Name.Contains(filterSearch, StringComparison.OrdinalIgnoreCase) ||
+                    t.Cnpj.Contains(filterSearch, StringComparison.OrdinalIgnoreCase) ||
+                    t.Email.Contains(filterSearch, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTenantsAsync();
+    }
+
+    private async Task LoadTenantsAsync()
+    {
+        isLoading = true;
+        tenants = await Api.GetAllAsync();
+        isLoading = false;
+    }
+
+    private void ApplyFilters()
+    {
+        filterStatus = filterStatusDraft;
+        filterSearch = filterSearchDraft;
+    }
+
+    private async Task ToggleActive(TenantViewModel tenant)
+    {
+        var response = await Api.ToggleActiveAsync(tenant.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            tenant.Active = !tenant.Active;
+            successMessage = $"Empresa \"{tenant.Name}\" {(tenant.Active ? "ativada" : "inativada")} com sucesso.";
+        }
+    }
+}

@@ -1,0 +1,148 @@
+@page "/admin/help-request-types"
+@inject HelpRequestTypeApiClient Api
+
+<PageTitle>Tipos de Solicitação - Cadeia Ajuda</PageTitle>
+
+<section class="hrt-list-wrapper">
+    <div class="row mb-2">
+        <div class="col-12">
+            <NavLink href="/admin/help-request-types/new" class="btn btn-primary btn-icon mr-1" title="Adicionar tipo de solicitação">
+                <i class="ft-plus"></i>
+            </NavLink>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible mb-2" role="alert">
+            <button type="button" class="close" @onclick="() => successMessage = null"><span>&times;</span></button>
+            <i class="la la-check-circle"></i> @successMessage
+        </div>
+    }
+
+    <div class="hrt-list-table">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Descrição</th>
+                                    <th>Setor</th>
+                                    <th>Empresa</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (isLoading)
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-3">
+                                            <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+                                        </td>
+                                    </tr>
+                                }
+                                else if (!items.Any())
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-3 text-muted">Nenhum tipo de solicitação encontrado.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var item in items)
+                                    {
+                                        <tr>
+                                            <td>@item.Name</td>
+                                            <td>@item.Description</td>
+                                            <td><span class="badge badge-info">@item.SectorName</span></td>
+                                            <td>@item.TenantName</td>
+                                            <td>
+                                                @if (item.Active)
+                                                {
+                                                    <span class="badge badge-success">Ativo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-danger">Inativo</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn btn-sm btn-link p-0 text-secondary hrt-actions-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mais ações">
+                                                        <i class="ft-more-vertical"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <NavLink href="@($"/admin/help-request-types/edit/{item.Id}")" class="dropdown-item">
+                                                            <i class="ft-edit-2 mr-1"></i> Editar
+                                                        </NavLink>
+                                                        <button type="button" class="dropdown-item @(item.Active ? "text-warning" : "text-success")"
+                                                                @onclick="() => ToggleActive(item)">
+                                                            <i class="ft-power mr-1"></i> @(item.Active ? "Inativar" : "Ativar")
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .hrt-list-table .table-responsive {
+        overflow: visible;
+    }
+
+    .hrt-actions-toggle {
+        box-shadow: none !important;
+        background: transparent !important;
+        border: 0 !important;
+        text-decoration: none !important;
+    }
+
+    .hrt-actions-toggle:hover,
+    .hrt-actions-toggle:focus,
+    .hrt-actions-toggle:active {
+        color: #404e67 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        text-decoration: none !important;
+    }
+
+    .hrt-actions-toggle i {
+        font-size: 1.1rem;
+    }
+</style>
+
+@code {
+    private List<HelpRequestTypeViewModel> items = [];
+    private bool isLoading = true;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        items = await Api.GetAllAsync();
+        isLoading = false;
+    }
+
+    private async Task ToggleActive(HelpRequestTypeViewModel item)
+    {
+        var response = await Api.ToggleActiveAsync(item.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            item.Active = !item.Active;
+            successMessage = $"Tipo de solicitação \"{item.Name}\" {(item.Active ? "ativado" : "inativado")} com sucesso.";
+        }
+    }
+}
