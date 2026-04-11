@@ -19,6 +19,12 @@ public class SectorService : ISectorService
         return sectors.Select(MapToDto);
     }
 
+    public async Task<IEnumerable<SectorDto>> GetByTenantIdAsync(Guid tenantId)
+    {
+        var sectors = await _repository.GetByTenantIdAsync(tenantId);
+        return sectors.Select(MapToDto);
+    }
+
     public async Task<SectorDto?> GetByIdAsync(Guid id)
     {
         var sector = await _repository.GetByIdWithIncludesAsync(id);

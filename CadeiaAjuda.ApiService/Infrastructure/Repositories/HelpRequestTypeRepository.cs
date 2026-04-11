@@ -15,6 +15,14 @@ public class HelpRequestTypeRepository : Repository<HelpRequestType>, IHelpReque
             .OrderBy(h => h.Name)
             .ToListAsync();
 
+    public async Task<IEnumerable<HelpRequestType>> GetByTenantIdAsync(Guid tenantId)
+        => await _dbSet
+            .Include(h => h.Tenant)
+            .Include(h => h.Sector)
+            .Where(h => h.TenantId == tenantId)
+            .OrderBy(h => h.Name)
+            .ToListAsync();
+
     public async Task<HelpRequestType?> GetByIdWithIncludesAsync(Guid id)
         => await _dbSet
             .Include(h => h.Tenant)

@@ -105,6 +105,9 @@ var users = app.MapGroup("/api/users");
 users.MapGet("/", async (IUserService service) =>
     Results.Ok(await service.GetAllAsync()));
 
+users.MapGet("/by-tenant/{tenantId:guid}", async (Guid tenantId, IUserService service) =>
+    Results.Ok(await service.GetByTenantIdAsync(tenantId)));
+
 users.MapGet("/{id:guid}", async (Guid id, IUserService service) =>
 {
     var user = await service.GetByIdAsync(id);
@@ -150,6 +153,9 @@ var sectors = app.MapGroup("/api/sectors");
 sectors.MapGet("/", async (ISectorService service) =>
     Results.Ok(await service.GetAllAsync()));
 
+sectors.MapGet("/by-tenant/{tenantId:guid}", async (Guid tenantId, ISectorService service) =>
+    Results.Ok(await service.GetByTenantIdAsync(tenantId)));
+
 sectors.MapGet("/{id:guid}", async (Guid id, ISectorService service) =>
 {
     var sector = await service.GetByIdAsync(id);
@@ -194,6 +200,9 @@ var helpRequestTypes = app.MapGroup("/api/help-request-types");
 
 helpRequestTypes.MapGet("/", async (IHelpRequestTypeService service) =>
     Results.Ok(await service.GetAllAsync()));
+
+helpRequestTypes.MapGet("/by-tenant/{tenantId:guid}", async (Guid tenantId, IHelpRequestTypeService service) =>
+    Results.Ok(await service.GetByTenantIdAsync(tenantId)));
 
 helpRequestTypes.MapGet("/{id:guid}", async (Guid id, IHelpRequestTypeService service) =>
 {
@@ -287,6 +296,9 @@ var areas = app.MapGroup("/api/areas");
 
 areas.MapGet("/", async (IAreaService service) =>
     Results.Ok(await service.GetAllAsync()));
+
+areas.MapGet("/by-tenant/{tenantId:guid}", async (Guid tenantId, IAreaService service) =>
+    Results.Ok(await service.GetByTenantIdAsync(tenantId)));
 
 areas.MapGet("/{id:guid}", async (Guid id, IAreaService service) =>
 {

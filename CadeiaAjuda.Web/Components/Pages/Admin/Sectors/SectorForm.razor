@@ -1,7 +1,7 @@
 @page "/admin/sectors/new"
 @page "/admin/sectors/edit/{Id:guid}"
 @inject SectorApiClient Api
-@inject TenantApiClient TenantApi
+@inject AuthStateService Auth
 @inject NavigationManager Navigation
 
 <PageTitle>@(isEdit ? "Editar Setor" : "Novo Setor") - Cadeia Ajuda</PageTitle>
@@ -27,19 +27,6 @@
                             <DataAnnotationsValidator />
 
                             <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Empresa <span class="text-danger">*</span></label>
-                                        <InputSelect @bind-Value="model.SelectedTenantId" class="form-control">
-                                            <option value="">— Selecione —</option>
-                                            @foreach (var tenant in tenants)
-                                            {
-                                                <option value="@tenant.Id">@tenant.Name</option>
-                                            }
-                                        </InputSelect>
-                                        <ValidationMessage For="() => model.SelectedTenantId" />
-                                    </div>
-                                </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Nome <span class="text-danger">*</span></label>
@@ -122,12 +109,8 @@
     private bool isSaving;
     private string? errorMessage;
 
-    private List<TenantViewModel> tenants = [];
-
     protected override async Task OnInitializedAsync()
     {
-        tenants = await TenantApi.GetAllAsync();
-
         if (isEdit && string.IsNullOrEmpty(model.Name))
         {
             var sector = await Api.GetByIdAsync(Id!.Value);
@@ -149,14 +132,16 @@
         isSaving = true;
         errorMessage = null;
 
-        if (!Guid.TryParse(model.SelectedTenantId, out var tenantId))
+        var currentUser = Auth.GetCurrentUser();
+        if (currentUser is null)
         {
-            errorMessage = "Selecione uma empresa.";
+            errorMessage = "Usu\u00e1rio n\u00e3o autenticado.";
             isSaving = false;
             return;
         }
 
-        model.TenantId = tenantId;
+        model.TenantId = currentUser.TenantId;
+        model.SelectedTenantId = currentUser.TenantId.ToString();
         model.Active = bool.TryParse(model.ActiveValue, out var active) ? active : true;
 
         HttpResponseMessage response;

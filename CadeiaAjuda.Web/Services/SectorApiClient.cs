@@ -16,6 +16,9 @@ public class SectorApiClient
     public async Task<List<SectorViewModel>> GetAllAsync()
         => await _httpClient.GetFromJsonAsync<List<SectorViewModel>>("/api/sectors") ?? [];
 
+    public async Task<List<SectorViewModel>> GetByTenantIdAsync(Guid tenantId)
+        => await _httpClient.GetFromJsonAsync<List<SectorViewModel>>($"/api/sectors/by-tenant/{tenantId}") ?? [];
+
     public async Task<SectorViewModel?> GetByIdAsync(Guid id)
         => await _httpClient.GetFromJsonAsync<SectorViewModel>($"/api/sectors/{id}");
 
@@ -48,7 +51,6 @@ public class SectorFormModel
     [Required(ErrorMessage = "Selecione uma cor.")]
     public string Color { get; set; } = "#1e9ff2";
 
-    [Required(ErrorMessage = "Selecione a empresa.")]
     public string SelectedTenantId { get; set; } = string.Empty;
 
     public Guid TenantId { get; set; }

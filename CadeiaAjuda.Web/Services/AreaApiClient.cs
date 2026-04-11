@@ -15,6 +15,9 @@ public class AreaApiClient
     public async Task<List<AreaViewModel>> GetAllAsync()
         => await _http.GetFromJsonAsync<List<AreaViewModel>>("/api/areas") ?? [];
 
+    public async Task<List<AreaViewModel>> GetByTenantIdAsync(Guid tenantId)
+        => await _http.GetFromJsonAsync<List<AreaViewModel>>($"/api/areas/by-tenant/{tenantId}") ?? [];
+
     public async Task<AreaViewModel?> GetByIdAsync(Guid id)
         => await _http.GetFromJsonAsync<AreaViewModel>($"/api/areas/{id}");
 

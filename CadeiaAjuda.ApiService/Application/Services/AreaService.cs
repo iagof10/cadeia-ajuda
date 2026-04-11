@@ -19,6 +19,12 @@ public class AreaService : IAreaService
         return areas.Select(MapToDto);
     }
 
+    public async Task<IEnumerable<AreaDto>> GetByTenantIdAsync(Guid tenantId)
+    {
+        var areas = await _repository.GetByTenantIdAsync(tenantId);
+        return areas.Select(MapToDto);
+    }
+
     public async Task<AreaDto?> GetByIdAsync(Guid id)
     {
         var area = await _repository.GetByIdWithIncludesAsync(id);

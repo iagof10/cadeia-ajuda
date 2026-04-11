@@ -5,6 +5,7 @@ namespace CadeiaAjuda.ApiService.Application.Services;
 public interface IAreaService
 {
     Task<IEnumerable<AreaDto>> GetAllAsync();
+    Task<IEnumerable<AreaDto>> GetByTenantIdAsync(Guid tenantId);
     Task<AreaDto?> GetByIdAsync(Guid id);
     Task<AreaDto> CreateAsync(AreaCreateDto dto);
     Task<AreaDto?> UpdateAsync(AreaUpdateDto dto);
