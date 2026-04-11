@@ -5,6 +5,7 @@ namespace CadeiaAjuda.ApiService.Application.Services;
 public interface IReasonService
 {
     Task<IEnumerable<ReasonDto>> GetAllAsync();
+    Task<IEnumerable<ReasonDto>> GetByTenantIdAsync(Guid tenantId);
     Task<ReasonDto?> GetByIdAsync(Guid id);
     Task<ReasonDto> CreateAsync(ReasonCreateDto dto);
     Task<ReasonDto?> UpdateAsync(ReasonUpdateDto dto);

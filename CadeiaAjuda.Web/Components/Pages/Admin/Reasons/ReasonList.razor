@@ -1,5 +1,6 @@
 @page "/admin/reasons"
 @inject ReasonApiClient Api
+@inject AuthStateService Auth
 
 <PageTitle>Motivos - Cadeia Ajuda</PageTitle>
 
@@ -30,7 +31,6 @@
                                 <tr>
                                     <th>Nome</th>
                                     <th>Descrição</th>
-                                    <th>Empresa</th>
                                     <th>Status</th>
                                     <th>Ações</th>
                                 </tr>
@@ -39,7 +39,7 @@
                                 @if (isLoading)
                                 {
                                     <tr>
-                                        <td colspan="5" class="text-center py-3">
+                                        <td colspan="4" class="text-center py-3">
                                             <i class="la la-spinner la-spin font-large-1"></i> Carregando...
                                         </td>
                                     </tr>
@@ -47,7 +47,7 @@
                                 else if (!reasons.Any())
                                 {
                                     <tr>
-                                        <td colspan="5" class="text-center py-3 text-muted">Nenhum motivo encontrado.</td>
+                                        <td colspan="4" class="text-center py-3 text-muted">Nenhum motivo encontrado.</td>
                                     </tr>
                                 }
                                 else
@@ -57,7 +57,6 @@
                                         <tr>
                                             <td>@reason.Name</td>
                                             <td>@reason.Description</td>
-                                            <td>@reason.TenantName</td>
                                             <td>
                                                 @if (reason.Active)
                                                 {
@@ -130,7 +129,9 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        reasons = await Api.GetAllAsync();
+        var currentUser = Auth.GetCurrentUser();
+        if (currentUser is not null)
+            reasons = await Api.GetByTenantIdAsync(currentUser.TenantId);
         isLoading = false;
     }
 

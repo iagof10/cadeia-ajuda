@@ -14,6 +14,13 @@ public class ReasonRepository : Repository<Reason>, IReasonRepository
             .OrderBy(r => r.Name)
             .ToListAsync();
 
+    public async Task<IEnumerable<Reason>> GetByTenantIdAsync(Guid tenantId)
+        => await _dbSet
+            .Include(r => r.Tenant)
+            .Where(r => r.TenantId == tenantId)
+            .OrderBy(r => r.Name)
+            .ToListAsync();
+
     public async Task<Reason?> GetByIdWithIncludesAsync(Guid id)
         => await _dbSet
             .Include(r => r.Tenant)

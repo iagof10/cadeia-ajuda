@@ -367,6 +367,9 @@ var reasons = app.MapGroup("/api/reasons");
 reasons.MapGet("/", async (IReasonService service) =>
     Results.Ok(await service.GetAllAsync()));
 
+reasons.MapGet("/by-tenant/{tenantId:guid}", async (Guid tenantId, IReasonService service) =>
+    Results.Ok(await service.GetByTenantIdAsync(tenantId)));
+
 reasons.MapGet("/{id:guid}", async (Guid id, IReasonService service) =>
 {
     var item = await service.GetByIdAsync(id);
