@@ -15,6 +15,9 @@ public class ReasonApiClient
     public async Task<List<ReasonViewModel>> GetAllAsync()
         => await _httpClient.GetFromJsonAsync<List<ReasonViewModel>>("/api/reasons") ?? [];
 
+    public async Task<List<ReasonViewModel>> GetByTenantIdAsync(Guid tenantId)
+        => await _httpClient.GetFromJsonAsync<List<ReasonViewModel>>($"/api/reasons/by-tenant/{tenantId}") ?? [];
+
     public async Task<ReasonViewModel?> GetByIdAsync(Guid id)
         => await _httpClient.GetFromJsonAsync<ReasonViewModel>($"/api/reasons/{id}");
 
@@ -46,7 +49,6 @@ public class ReasonFormModel
 
     public string Description { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Selecione a empresa.")]
     public string SelectedTenantId { get; set; } = string.Empty;
 
     public Guid TenantId { get; set; }
