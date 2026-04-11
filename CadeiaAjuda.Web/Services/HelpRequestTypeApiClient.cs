@@ -15,6 +15,9 @@ public class HelpRequestTypeApiClient
     public async Task<List<HelpRequestTypeViewModel>> GetAllAsync()
         => await _httpClient.GetFromJsonAsync<List<HelpRequestTypeViewModel>>("/api/help-request-types") ?? [];
 
+    public async Task<List<HelpRequestTypeViewModel>> GetByTenantIdAsync(Guid tenantId)
+        => await _httpClient.GetFromJsonAsync<List<HelpRequestTypeViewModel>>($"/api/help-request-types/by-tenant/{tenantId}") ?? [];
+
     public async Task<HelpRequestTypeViewModel?> GetByIdAsync(Guid id)
         => await _httpClient.GetFromJsonAsync<HelpRequestTypeViewModel>($"/api/help-request-types/{id}");
 
@@ -53,7 +56,6 @@ public class HelpRequestTypeFormModel
 
     public Guid SectorId { get; set; }
 
-    [Required(ErrorMessage = "Selecione a empresa.")]
     public string SelectedTenantId { get; set; } = string.Empty;
 
     public Guid TenantId { get; set; }

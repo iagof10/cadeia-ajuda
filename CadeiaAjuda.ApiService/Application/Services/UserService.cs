@@ -23,6 +23,12 @@ public class UserService : IUserService
         return users.Select(MapToDto);
     }
 
+    public async Task<IEnumerable<UserDto>> GetByTenantIdAsync(Guid tenantId)
+    {
+        var users = await _repository.GetByTenantIdAsync(tenantId);
+        return users.Select(MapToDto);
+    }
+
     public async Task<UserDto?> GetByIdAsync(Guid id)
     {
         var user = await _repository.GetByIdWithIncludesAsync(id);

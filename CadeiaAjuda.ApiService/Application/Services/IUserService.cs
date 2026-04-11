@@ -5,6 +5,7 @@ namespace CadeiaAjuda.ApiService.Application.Services;
 public interface IUserService
 {
     Task<IEnumerable<UserDto>> GetAllAsync();
+    Task<IEnumerable<UserDto>> GetByTenantIdAsync(Guid tenantId);
     Task<UserDto?> GetByIdAsync(Guid id);
     Task<UserDto> CreateAsync(UserCreateDto dto);
     Task<UserDto?> UpdateAsync(UserUpdateDto dto);

@@ -15,6 +15,9 @@ public class UserApiClient
     public async Task<List<UserViewModel>> GetAllAsync()
         => await _httpClient.GetFromJsonAsync<List<UserViewModel>>("/api/users") ?? [];
 
+    public async Task<List<UserViewModel>> GetByTenantIdAsync(Guid tenantId)
+        => await _httpClient.GetFromJsonAsync<List<UserViewModel>>($"/api/users/by-tenant/{tenantId}") ?? [];
+
     public async Task<UserViewModel?> GetByIdAsync(Guid id)
         => await _httpClient.GetFromJsonAsync<UserViewModel>($"/api/users/{id}");
 
@@ -57,7 +60,6 @@ public class UserFormModel
 
     public string? Password { get; set; }
 
-    [Required(ErrorMessage = "Selecione a empresa.")]
     public string SelectedTenantId { get; set; } = string.Empty;
 
     public Guid TenantId { get; set; }

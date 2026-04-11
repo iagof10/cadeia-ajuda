@@ -3,7 +3,7 @@
 
     // ---- State ----
     var areas = [];
-    var tenants = [];
+    var currentUser = null;
     var editingId = null;
     var deletingId = null;
     var expandedNodes = {};
@@ -23,7 +23,6 @@
     var modalAlert = document.getElementById('modalAlert');
     var fName = document.getElementById('fName');
     var fDesc = document.getElementById('fDesc');
-    var fTenant = document.getElementById('fTenant');
     var fParent = document.getElementById('fParent');
     var hierarchyPreview = document.getElementById('hierarchyPreview');
     var hierarchyPath = document.getElementById('hierarchyPath');
@@ -91,11 +90,11 @@
         renderTree();
     }
 
-    async function loadTenants() {
+    async function loadCurrentUser() {
         try {
-            tenants = await fetchJson('/bff/tenants');
+            currentUser = await fetchJson('/bff/me');
         } catch (e) {
-            tenants = [];
+            currentUser = null;
         }
     }
 
@@ -233,24 +232,12 @@
     function resetModal() {
         fName.value = '';
         fDesc.value = '';
-        fTenant.value = '';
         fParent.value = '';
         editingId = null;
         preselectedParentId = null;
         modalAlert.innerHTML = '';
         hierarchyPreview.style.display = 'none';
-        populateTenantSelect();
         populateParentSelect(null);
-    }
-
-    function populateTenantSelect() {
-        fTenant.innerHTML = '<option value="">— Selecione —</option>';
-        tenants.filter(function (t) { return t.active; }).forEach(function (t) {
-            var opt = document.createElement('option');
-            opt.value = t.id;
-            opt.textContent = t.name;
-            fTenant.appendChild(opt);
-        });
     }
 
     function populateParentSelect(excludeId) {
@@ -308,17 +295,11 @@
         resetModal();
         preselectedParentId = parentId || null;
 
-        // Auto-select tenant from parent
         if (parentId) {
-            var parent = areas.find(function (a) { return a.id === parentId; });
-            if (parent && parent.tenantId) {
-                // will set after tenant select is populated
-                setTimeout(function () {
-                    fTenant.value = parent.tenantId;
-                    fParent.value = parentId;
-                    updateHierarchyPreview();
-                }, 0);
-            }
+            setTimeout(function () {
+                fParent.value = parentId;
+                updateHierarchyPreview();
+            }, 0);
         }
 
         populateParentSelect(null);
@@ -339,7 +320,6 @@
         populateParentSelect(id);
 
         setTimeout(function () {
-            fTenant.value = area.tenantId || '';
             fParent.value = area.parentId || '';
             updateHierarchyPreview();
         }, 0);
@@ -368,9 +348,8 @@
             return;
         }
 
-        var tenantId = fTenant.value;
-        if (!tenantId) {
-            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Selecione uma empresa.</div>';
+        if (!currentUser || !currentUser.tenantId) {
+            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Usuário não autenticado.</div>';
             return;
         }
 
@@ -380,7 +359,7 @@
             name: name,
             description: fDesc.value.trim(),
             parentId: parentId,
-            tenantId: tenantId,
+            tenantId: currentUser.tenantId,
             active: true
         };
 
@@ -474,7 +453,8 @@
     // ---- Init ----
     (async function init() {
         try {
-            await Promise.all([loadAreas(), loadTenants()]);
+            await loadCurrentUser();
+            await loadAreas();
         } catch (e) {
             showAlert('Erro ao carregar dados iniciais. Recarregue a página.', 'danger');
         }

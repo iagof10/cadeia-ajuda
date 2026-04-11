@@ -1,5 +1,6 @@
 @page "/admin/help-request-types"
 @inject HelpRequestTypeApiClient Api
+@inject AuthStateService Auth
 
 <PageTitle>Tipos de Solicitação - Cadeia Ajuda</PageTitle>
 
@@ -30,9 +31,8 @@
                                 <tr>
                                     <th>Nome</th>
                                     <th>Descrição</th>
-                                    <th>Setor</th>
-                                    <th>Empresa</th>
-                                    <th>Status</th>
+                                     <th>Setor</th>
+                                     <th>Status</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -40,7 +40,7 @@
                                 @if (isLoading)
                                 {
                                     <tr>
-                                        <td colspan="6" class="text-center py-3">
+                                        <td colspan="5" class="text-center py-3">
                                             <i class="la la-spinner la-spin font-large-1"></i> Carregando...
                                         </td>
                                     </tr>
@@ -48,7 +48,7 @@
                                 else if (!items.Any())
                                 {
                                     <tr>
-                                        <td colspan="6" class="text-center py-3 text-muted">Nenhum tipo de solicitação encontrado.</td>
+                                        <td colspan="5" class="text-center py-3 text-muted">Nenhum tipo de solicitação encontrado.</td>
                                     </tr>
                                 }
                                 else
@@ -58,9 +58,8 @@
                                         <tr>
                                             <td>@item.Name</td>
                                             <td>@item.Description</td>
-                                            <td><span class="badge badge-info">@item.SectorName</span></td>
-                                            <td>@item.TenantName</td>
-                                            <td>
+                                             <td><span class="badge badge-info">@item.SectorName</span></td>
+                                             <td>
                                                 @if (item.Active)
                                                 {
                                                     <span class="badge badge-success">Ativo</span>
@@ -132,7 +131,9 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        items = await Api.GetAllAsync();
+        var currentUser = Auth.GetCurrentUser();
+        if (currentUser is not null)
+            items = await Api.GetByTenantIdAsync(currentUser.TenantId);
         isLoading = false;
     }
 

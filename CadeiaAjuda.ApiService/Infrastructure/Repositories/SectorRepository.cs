@@ -14,6 +14,13 @@ public class SectorRepository : Repository<Sector>, ISectorRepository
             .OrderBy(s => s.Name)
             .ToListAsync();
 
+    public async Task<IEnumerable<Sector>> GetByTenantIdAsync(Guid tenantId)
+        => await _dbSet
+            .Include(s => s.Tenant)
+            .Where(s => s.TenantId == tenantId)
+            .OrderBy(s => s.Name)
+            .ToListAsync();
+
     public async Task<Sector?> GetByIdWithIncludesAsync(Guid id)
         => await _dbSet
             .Include(s => s.Tenant)

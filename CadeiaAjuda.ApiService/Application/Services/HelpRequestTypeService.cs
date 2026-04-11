@@ -19,6 +19,12 @@ public class HelpRequestTypeService : IHelpRequestTypeService
         return items.Select(MapToDto);
     }
 
+    public async Task<IEnumerable<HelpRequestTypeDto>> GetByTenantIdAsync(Guid tenantId)
+    {
+        var items = await _repository.GetByTenantIdAsync(tenantId);
+        return items.Select(MapToDto);
+    }
+
     public async Task<HelpRequestTypeDto?> GetByIdAsync(Guid id)
     {
         var item = await _repository.GetByIdWithIncludesAsync(id);

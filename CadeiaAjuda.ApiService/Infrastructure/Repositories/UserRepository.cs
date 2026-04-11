@@ -14,6 +14,13 @@ public class UserRepository : Repository<User>, IUserRepository
             .OrderBy(u => u.Name)
             .ToListAsync();
 
+    public async Task<IEnumerable<User>> GetByTenantIdAsync(Guid tenantId)
+        => await _dbSet
+            .Include(u => u.Tenant)
+            .Where(u => u.TenantId == tenantId)
+            .OrderBy(u => u.Name)
+            .ToListAsync();
+
     public async Task<User?> GetByIdWithIncludesAsync(Guid id)
         => await _dbSet
             .Include(u => u.Tenant)

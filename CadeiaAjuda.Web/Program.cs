@@ -77,14 +77,32 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 // --- BFF proxy endpoints for JavaScript pages ---
+
+// /bff/me - returns current logged user info
+app.MapGet("/bff/me", (AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    return user is null ? Results.Unauthorized() : Results.Ok(user);
+}).DisableAntiforgery();
+
 var bffTenants = app.MapGroup("/bff/tenants").DisableAntiforgery();
 bffTenants.MapGet("/", async (TenantApiClient api) => Results.Ok(await api.GetAllAsync()));
 
 var bffSectors = app.MapGroup("/bff/sectors").DisableAntiforgery();
-bffSectors.MapGet("/", async (SectorApiClient api) => Results.Ok(await api.GetAllAsync()));
+bffSectors.MapGet("/", async (SectorApiClient api, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    return Results.Ok(await api.GetByTenantIdAsync(user.TenantId));
+});
 
 var bffUsers = app.MapGroup("/bff/users").DisableAntiforgery();
-bffUsers.MapGet("/", async (UserApiClient api) => Results.Ok(await api.GetAllAsync()));
+bffUsers.MapGet("/", async (UserApiClient api, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    return Results.Ok(await api.GetByTenantIdAsync(user.TenantId));
+});
 
 var bffEscalation = app.MapGroup("/bff/escalation-levels").DisableAntiforgery();
 bffEscalation.MapGet("/by-sector/{sectorId:guid}", async (Guid sectorId, EscalationLevelApiClient api) =>
@@ -119,8 +137,12 @@ bffEscalation.MapDelete("/{id:guid}", async (Guid id, EscalationLevelApiClient a
 // --- BFF: Areas ---
 var bffAreas = app.MapGroup("/bff/areas").DisableAntiforgery();
 
-bffAreas.MapGet("/", async (AreaApiClient api) =>
-    Results.Ok(await api.GetAllAsync()));
+bffAreas.MapGet("/", async (AreaApiClient api, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    return Results.Ok(await api.GetByTenantIdAsync(user.TenantId));
+});
 
 bffAreas.MapGet("/{id:guid}", async (Guid id, AreaApiClient api) =>
 {

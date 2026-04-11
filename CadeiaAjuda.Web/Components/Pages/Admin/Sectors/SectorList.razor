@@ -1,5 +1,6 @@
 @page "/admin/sectors"
 @inject SectorApiClient Api
+@inject AuthStateService Auth
 
 <PageTitle>Setores - Cadeia Ajuda</PageTitle>
 
@@ -29,9 +30,8 @@
                             <thead>
                                 <tr>
                                     <th>Nome</th>
-                                    <th>Cor</th>
-                                    <th>Empresa</th>
-                                    <th>Status</th>
+                                     <th>Cor</th>
+                                     <th>Status</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -39,7 +39,7 @@
                                 @if (isLoading)
                                 {
                                     <tr>
-                                        <td colspan="5" class="text-center py-3">
+                                        <td colspan="4" class="text-center py-3">
                                             <i class="la la-spinner la-spin font-large-1"></i> Carregando...
                                         </td>
                                     </tr>
@@ -47,7 +47,7 @@
                                 else if (!sectors.Any())
                                 {
                                     <tr>
-                                        <td colspan="5" class="text-center py-3 text-muted">Nenhum setor encontrado.</td>
+                                        <td colspan="4" class="text-center py-3 text-muted">Nenhum setor encontrado.</td>
                                     </tr>
                                 }
                                 else
@@ -58,10 +58,9 @@
                                             <td>@sector.Name</td>
                                             <td>
                                                 <span class="sector-color-badge" style="background-color: @sector.Color;" title="@sector.Color"></span>
-                                            </td>
-                                            <td>@sector.TenantName</td>
-                                            <td>
-                                                @if (sector.Active)
+                                             </td>
+                                             <td>
+                                                 @if (sector.Active)
                                                 {
                                                     <span class="badge badge-success">Ativo</span>
                                                 }
@@ -141,7 +140,9 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        sectors = await Api.GetAllAsync();
+        var currentUser = Auth.GetCurrentUser();
+        if (currentUser is not null)
+            sectors = await Api.GetByTenantIdAsync(currentUser.TenantId);
         isLoading = false;
     }
 
