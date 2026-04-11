@@ -48,10 +48,13 @@ builder.Services.AddHttpClient<EscalationLevelApiClient>(client =>
     client.BaseAddress = new("https+http://apiservice");
 });
 
+builder.Services.AddHttpClient<AreaApiClient>(client =>
+{
+    client.BaseAddress = new("https+http://apiservice");
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthStateService>();
-
-builder.Services.AddSingleton<AreaApiClient>();
 
 var app = builder.Build();
 
@@ -74,6 +77,9 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 // --- BFF proxy endpoints for JavaScript pages ---
+var bffTenants = app.MapGroup("/bff/tenants").DisableAntiforgery();
+bffTenants.MapGet("/", async (TenantApiClient api) => Results.Ok(await api.GetAllAsync()));
+
 var bffSectors = app.MapGroup("/bff/sectors").DisableAntiforgery();
 bffSectors.MapGet("/", async (SectorApiClient api) => Results.Ok(await api.GetAllAsync()));
 
@@ -108,6 +114,46 @@ bffEscalation.MapDelete("/{id:guid}", async (Guid id, EscalationLevelApiClient a
 {
     var response = await api.DeleteAsync(id);
     return response.IsSuccessStatusCode ? Results.Ok() : Results.NotFound();
+});
+
+// --- BFF: Areas ---
+var bffAreas = app.MapGroup("/bff/areas").DisableAntiforgery();
+
+bffAreas.MapGet("/", async (AreaApiClient api) =>
+    Results.Ok(await api.GetAllAsync()));
+
+bffAreas.MapGet("/{id:guid}", async (Guid id, AreaApiClient api) =>
+{
+    var item = await api.GetByIdAsync(id);
+    return item is null ? Results.NotFound() : Results.Ok(item);
+});
+
+bffAreas.MapPost("/", async (AreaFormModel model, AreaApiClient api) =>
+{
+    var response = await api.CreateAsync(model);
+    var body = await response.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
+});
+
+bffAreas.MapPut("/{id:guid}", async (Guid id, AreaFormModel model, AreaApiClient api) =>
+{
+    var response = await api.UpdateAsync(id, model);
+    var body = await response.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
+});
+
+bffAreas.MapPatch("/{id:guid}/toggle-active", async (Guid id, AreaApiClient api) =>
+{
+    var response = await api.ToggleActiveAsync(id);
+    return response.IsSuccessStatusCode ? Results.Ok() : Results.NotFound();
+});
+
+bffAreas.MapDelete("/{id:guid}", async (Guid id, AreaApiClient api) =>
+{
+    var response = await api.DeleteAsync(id);
+    if (response.IsSuccessStatusCode) return Results.Ok();
+    var body = await response.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
 });
 
 app.MapDefaultEndpoints();

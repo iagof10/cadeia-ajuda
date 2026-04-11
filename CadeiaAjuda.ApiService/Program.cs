@@ -21,6 +21,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ISectorRepository, SectorRepository>();
 builder.Services.AddScoped<IHelpRequestTypeRepository, HelpRequestTypeRepository>();
 builder.Services.AddScoped<IEscalationLevelRepository, EscalationLevelRepository>();
+builder.Services.AddScoped<IAreaRepository, AreaRepository>();
 
 // Services
 builder.Services.AddScoped<ITenantService, TenantService>();
@@ -28,6 +29,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ISectorService, SectorService>();
 builder.Services.AddScoped<IHelpRequestTypeService, HelpRequestTypeService>();
 builder.Services.AddScoped<IEscalationLevelService, EscalationLevelService>();
+builder.Services.AddScoped<IAreaService, AreaService>();
 
 var app = builder.Build();
 
@@ -275,6 +277,64 @@ escalationLevels.MapDelete("/{id:guid}", async (Guid id, IEscalationLevelService
 {
     var result = await service.DeleteAsync(id);
     return result ? Results.Ok() : Results.NotFound();
+});
+
+// --- Areas ---
+var areas = app.MapGroup("/api/areas");
+
+areas.MapGet("/", async (IAreaService service) =>
+    Results.Ok(await service.GetAllAsync()));
+
+areas.MapGet("/{id:guid}", async (Guid id, IAreaService service) =>
+{
+    var item = await service.GetByIdAsync(id);
+    return item is null ? Results.NotFound() : Results.Ok(item);
+});
+
+areas.MapPost("/", async (CadeiaAjuda.ApiService.Application.DTOs.AreaCreateDto dto, IAreaService service) =>
+{
+    try
+    {
+        var created = await service.CreateAsync(dto);
+        return Results.Created($"/api/areas/{created.Id}", created);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+areas.MapPut("/{id:guid}", async (Guid id, CadeiaAjuda.ApiService.Application.DTOs.AreaUpdateDto dto, IAreaService service) =>
+{
+    dto.Id = id;
+    try
+    {
+        var updated = await service.UpdateAsync(dto);
+        return updated is null ? Results.NotFound() : Results.Ok(updated);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+areas.MapPatch("/{id:guid}/toggle-active", async (Guid id, IAreaService service) =>
+{
+    var result = await service.ToggleActiveAsync(id);
+    return result ? Results.Ok() : Results.NotFound();
+});
+
+areas.MapDelete("/{id:guid}", async (Guid id, IAreaService service) =>
+{
+    try
+    {
+        var result = await service.DeleteAsync(id);
+        return result ? Results.Ok() : Results.NotFound();
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
 });
 
 // --- Auth ---

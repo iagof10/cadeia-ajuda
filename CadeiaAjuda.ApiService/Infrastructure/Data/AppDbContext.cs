@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<EscalationLevel> EscalationLevels => Set<EscalationLevel>();
     public DbSet<EscalationLevelResponsible> EscalationLevelResponsibles => Set<EscalationLevelResponsible>();
     public DbSet<TenantSettings> TenantSettings => Set<TenantSettings>();
+    public DbSet<Area> Areas => Set<Area>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

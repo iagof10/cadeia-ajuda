@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="Components\Pages\Admin\Locations\" />
+    <Folder Include="Components\Shared\" />
   </ItemGroup>
 
 </Project>
