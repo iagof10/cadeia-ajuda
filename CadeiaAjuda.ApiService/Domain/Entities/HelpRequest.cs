@@ -17,6 +17,9 @@ public class HelpRequest : TenantEntityBase
     public Guid RequestedByUserId { get; set; }
     public User RequestedByUser { get; set; } = null!;
 
+    public Guid? ClosedByUserId { get; set; }
+    public User? ClosedByUser { get; set; }
+
     public HelpRequestStatus Status { get; set; } = HelpRequestStatus.Open;
     public DateTime? ClosedAt { get; set; }
 }

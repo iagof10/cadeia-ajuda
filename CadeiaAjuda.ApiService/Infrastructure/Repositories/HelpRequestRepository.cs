@@ -15,6 +15,7 @@ public class HelpRequestRepository : Repository<HelpRequest>, IHelpRequestReposi
             .Include(h => h.HelpRequestType)
             .Include(h => h.Area)
             .Include(h => h.RequestedByUser)
+            .Include(h => h.ClosedByUser)
             .OrderByDescending(h => h.CreatedAt)
             .ToListAsync();
 
@@ -24,6 +25,7 @@ public class HelpRequestRepository : Repository<HelpRequest>, IHelpRequestReposi
             .Include(h => h.HelpRequestType)
             .Include(h => h.Area)
             .Include(h => h.RequestedByUser)
+            .Include(h => h.ClosedByUser)
             .Where(h => h.TenantId == tenantId)
             .OrderByDescending(h => h.CreatedAt)
             .ToListAsync();
@@ -35,6 +37,7 @@ public class HelpRequestRepository : Repository<HelpRequest>, IHelpRequestReposi
             .Include(h => h.HelpRequestType)
             .Include(h => h.Area)
             .Include(h => h.RequestedByUser)
+            .Include(h => h.ClosedByUser)
             .FirstOrDefaultAsync(h => h.Id == id);
 
     public async Task<int> CountByTenantAsync(Guid tenantId)

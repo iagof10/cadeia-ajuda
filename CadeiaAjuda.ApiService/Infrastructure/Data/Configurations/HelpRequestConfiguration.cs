@@ -21,5 +21,6 @@ public class HelpRequestConfiguration : IEntityTypeConfiguration<HelpRequest>
         builder.HasOne(h => h.HelpRequestType).WithMany().HasForeignKey(h => h.HelpRequestTypeId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(h => h.Area).WithMany().HasForeignKey(h => h.AreaId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(h => h.RequestedByUser).WithMany().HasForeignKey(h => h.RequestedByUserId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(h => h.ClosedByUser).WithMany().HasForeignKey(h => h.ClosedByUserId).OnDelete(DeleteBehavior.Restrict);
     }
 }

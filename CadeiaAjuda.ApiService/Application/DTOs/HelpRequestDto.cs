@@ -14,6 +14,8 @@ public class HelpRequestDto
     public string AreaName { get; set; } = string.Empty;
     public Guid RequestedByUserId { get; set; }
     public string RequestedByUserName { get; set; } = string.Empty;
+    public Guid? ClosedByUserId { get; set; }
+    public string ClosedByUserName { get; set; } = string.Empty;
     public int Status { get; set; }
     public string StatusName { get; set; } = string.Empty;
     public Guid TenantId { get; set; }
@@ -30,4 +32,9 @@ public class HelpRequestCreateDto
     public Guid AreaId { get; set; }
     public Guid RequestedByUserId { get; set; }
     public Guid TenantId { get; set; }
+}
+
+public class HelpRequestCloseDto
+{
+    public Guid ClosedByUserId { get; set; }
 }

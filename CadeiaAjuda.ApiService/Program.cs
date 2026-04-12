@@ -439,6 +439,19 @@ helpRequests.MapPost("/", async (CadeiaAjuda.ApiService.Application.DTOs.HelpReq
     }
 });
 
+helpRequests.MapPatch("/{id:guid}/close", async (Guid id, CadeiaAjuda.ApiService.Application.DTOs.HelpRequestCloseDto dto, IHelpRequestService service) =>
+{
+    try
+    {
+        var result = await service.CloseAsync(id, dto);
+        return result is null ? Results.NotFound() : Results.Ok(result);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
 app.MapDefaultEndpoints();
 
 app.Run();

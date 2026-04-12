@@ -94,9 +94,15 @@
                 </ul>
             </li>
             <li class="nav-item @(IsActive("/help-requests") ? "active" : "")">
-                <NavLink href="/help-requests" Match="NavLinkMatch.Prefix">
+                <NavLink href="/help-requests" Match="NavLinkMatch.All">
                     <i class="la la-life-ring"></i>
                     <span class="menu-title">Cadeia de Ajuda</span>
+                </NavLink>
+            </li>
+            <li class="nav-item @(IsActive("/help-requests/close") ? "active" : "")">
+                <NavLink href="/help-requests/close" Match="NavLinkMatch.All">
+                    <i class="la la-times-circle"></i>
+                    <span class="menu-title">Encerrar Chamado</span>
                 </NavLink>
             </li>
             <li class="nav-item @(IsActive("/admin/andon") ? "active" : "")">

@@ -22,6 +22,9 @@ public class HelpRequestApiClient
 
     public async Task<HttpResponseMessage> CreateAsync(HelpRequestCreateModel model)
         => await _http.PostAsJsonAsync("/api/help-requests", model);
+
+    public async Task<HttpResponseMessage> CloseAsync(Guid id, HelpRequestCloseModel model)
+        => await _http.PatchAsJsonAsync($"/api/help-requests/{id}/close", model);
 }
 
 public class HelpRequestViewModel
@@ -38,6 +41,8 @@ public class HelpRequestViewModel
     public string AreaName { get; set; } = string.Empty;
     public Guid RequestedByUserId { get; set; }
     public string RequestedByUserName { get; set; } = string.Empty;
+    public Guid? ClosedByUserId { get; set; }
+    public string ClosedByUserName { get; set; } = string.Empty;
     public int Status { get; set; }
     public string StatusName { get; set; } = string.Empty;
     public Guid TenantId { get; set; }
@@ -54,4 +59,15 @@ public class HelpRequestCreateModel
     public Guid AreaId { get; set; }
     public Guid RequestedByUserId { get; set; }
     public Guid TenantId { get; set; }
+}
+
+public class HelpRequestCloseModel
+{
+    public Guid ClosedByUserId { get; set; }
+}
+
+public class HelpRequestCloseWithAuthModel
+{
+    public string Login { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 }

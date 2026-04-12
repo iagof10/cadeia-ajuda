@@ -234,6 +234,40 @@ bffHelpRequests.MapPost("/", async (HelpRequestCreateModel model, HelpRequestApi
     return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
 });
 
+// Close help request using the logged-in user
+bffHelpRequests.MapPatch("/{id:guid}/close", async (Guid id, HelpRequestApiClient api, AuthStateService auth, IHubContext<HelpRequestHub> hub) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+
+    var response = await api.CloseAsync(id, new HelpRequestCloseModel { ClosedByUserId = user.Id });
+    var body = await response.Content.ReadAsStringAsync();
+    if (response.IsSuccessStatusCode)
+    {
+        await hub.Clients.Group(user.TenantId.ToString()).SendAsync("HelpRequestsChanged");
+    }
+    return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
+});
+
+// Close help request with login/password authentication
+bffHelpRequests.MapPatch("/{id:guid}/close-with-auth", async (Guid id, HelpRequestCloseWithAuthModel model, HelpRequestApiClient api, AuthApiClient authApi, IHubContext<HelpRequestHub> hub, AuthStateService auth) =>
+{
+    var loggedUser = auth.GetCurrentUser();
+    if (loggedUser is null) return Results.Unauthorized();
+
+    var authResult = await authApi.LoginAsync(loggedUser.TenantIdentifier, model.Login, model.Password);
+    if (!authResult.Success || authResult.User is null)
+        return Results.Json(new { error = "Usuário ou senha inválidos." }, statusCode: 401);
+
+    var response = await api.CloseAsync(id, new HelpRequestCloseModel { ClosedByUserId = authResult.User.Id });
+    var body = await response.Content.ReadAsStringAsync();
+    if (response.IsSuccessStatusCode)
+    {
+        await hub.Clients.Group(loggedUser.TenantId.ToString()).SendAsync("HelpRequestsChanged");
+    }
+    return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
+});
+
 app.MapDefaultEndpoints();
 
 app.Run();

@@ -55,6 +55,25 @@ public class HelpRequestService : IHelpRequestService
         return MapToDto(created!);
     }
 
+    public async Task<HelpRequestDto?> CloseAsync(Guid id, HelpRequestCloseDto dto)
+    {
+        var entity = await _repository.GetByIdWithIncludesAsync(id);
+        if (entity is null) return null;
+
+        if (entity.Status == HelpRequestStatus.Closed)
+            throw new InvalidOperationException("Este chamado já está encerrado.");
+
+        entity.Status = HelpRequestStatus.Closed;
+        entity.ClosedAt = DateTime.UtcNow;
+        entity.ClosedByUserId = dto.ClosedByUserId;
+        entity.UpdatedAt = DateTime.UtcNow;
+
+        await _repository.SaveChangesAsync();
+
+        var updated = await _repository.GetByIdWithIncludesAsync(id);
+        return MapToDto(updated!);
+    }
+
     private static string StatusName(HelpRequestStatus status) => status switch
     {
         HelpRequestStatus.Open => "Aberto",
@@ -79,6 +98,8 @@ public class HelpRequestService : IHelpRequestService
         AreaName = h.Area?.Name ?? string.Empty,
         RequestedByUserId = h.RequestedByUserId,
         RequestedByUserName = h.RequestedByUser?.Name ?? string.Empty,
+        ClosedByUserId = h.ClosedByUserId,
+        ClosedByUserName = h.ClosedByUser?.Name ?? string.Empty,
         Status = (int)h.Status,
         StatusName = StatusName(h.Status),
         TenantId = h.TenantId,

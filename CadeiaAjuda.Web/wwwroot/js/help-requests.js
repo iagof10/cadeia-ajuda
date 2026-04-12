@@ -146,6 +146,8 @@
     }
 
     // ---- List ----
+    var closingRequestId = null;
+
     function renderList() {
         listBody.innerHTML = '';
 
@@ -160,6 +162,11 @@
 
         requests.forEach(function (r) {
             var tr = document.createElement('tr');
+            var isClosed = r.status === 4 || r.status === 3;
+            var actionHtml = isClosed
+                ? '<span class="text-muted"><i class="la la-check-circle"></i> Encerrado</span>'
+                : '<button class="btn btn-sm btn-outline-danger btn-close-auth" data-id="' + r.id + '" data-code="' + escapeHtml(r.code) + '"><i class="la la-times-circle"></i> Encerrar</button>';
+
             tr.innerHTML =
                 '<td><span class="help-request-code">' + escapeHtml(r.code) + '</span></td>' +
                 '<td><span class="sector-dot" style="background-color:' + escapeHtml(r.sectorColor || '#999') + ';"></span>' + escapeHtml(r.sectorName) + '</td>' +
@@ -167,8 +174,21 @@
                 '<td>' + escapeHtml(r.areaName) + '</td>' +
                 '<td>' + escapeHtml(r.requestedByUserName) + '</td>' +
                 '<td><span class="badge ' + statusClass(r.status) + '" style="font-size:.8rem;padding:4px 10px;border-radius:4px;">' + escapeHtml(r.statusName) + '</span></td>' +
-                '<td>' + formatDate(r.createdAt) + '</td>';
+                '<td>' + formatDate(r.createdAt) + '</td>' +
+                '<td>' + actionHtml + '</td>';
             listBody.appendChild(tr);
+        });
+
+        // Bind close buttons to open the auth modal
+        listBody.querySelectorAll('.btn-close-auth').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                closingRequestId = btn.getAttribute('data-id');
+                document.getElementById('closeAuthCode').textContent = btn.getAttribute('data-code');
+                document.getElementById('closeAuthLogin').value = '';
+                document.getElementById('closeAuthPassword').value = '';
+                document.getElementById('closeAuthAlert').innerHTML = '';
+                $('#closeAuthModal').modal('show');
+            });
         });
     }
 
@@ -397,6 +417,49 @@
     btnNewRequest.addEventListener('click', showCreateView);
     btnBackToList.addEventListener('click', showListView);
     btnSubmit.addEventListener('click', handleSubmit);
+
+    // ---- Close with auth modal ----
+    var btnConfirmCloseAuth = document.getElementById('btnConfirmCloseAuth');
+
+    btnConfirmCloseAuth.addEventListener('click', async function () {
+        var login = document.getElementById('closeAuthLogin').value.trim();
+        var password = document.getElementById('closeAuthPassword').value;
+        var alertEl = document.getElementById('closeAuthAlert');
+        alertEl.innerHTML = '';
+
+        if (!login || !password) {
+            alertEl.innerHTML = '<div class="alert alert-warning mb-2"><i class="la la-warning"></i> Informe usuário e senha.</div>';
+            return;
+        }
+
+        if (!closingRequestId) return;
+
+        btnConfirmCloseAuth.disabled = true;
+        btnConfirmCloseAuth.innerHTML = '<i class="la la-spinner la-spin"></i> Encerrando...';
+
+        try {
+            var resp = await fetch('/bff/help-requests/' + closingRequestId + '/close-with-auth', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login: login, password: password })
+            });
+
+            if (resp.ok) {
+                $('#closeAuthModal').modal('hide');
+                await loadRequests();
+                showListAlert('Chamado encerrado com sucesso!', 'success');
+            } else {
+                var body = {};
+                try { body = await resp.json(); } catch (e) { }
+                alertEl.innerHTML = '<div class="alert alert-danger mb-2"><i class="la la-warning"></i> ' + escapeHtml(body.error || 'Usuário ou senha inválidos.') + '</div>';
+            }
+        } catch (e) {
+            alertEl.innerHTML = '<div class="alert alert-danger mb-2"><i class="la la-warning"></i> Erro de conexão.</div>';
+        }
+
+        btnConfirmCloseAuth.disabled = false;
+        btnConfirmCloseAuth.innerHTML = '<i class="la la-check"></i> Encerrar';
+    });
 
     // Allow clicking wizard tabs to go back
     wizardSteps.querySelectorAll('.nav-link').forEach(function (el) {
