@@ -12,6 +12,7 @@ var apiService = builder.AddProject<Projects.CadeiaAjuda_ApiService>("apiservice
     .WithHttpHealthCheck("/health");
 
 builder.AddProject<Projects.CadeiaAjuda_Web>("webfrontend")
+    .WithHttpEndpoint(port: 5012, targetPort: 5012, name: "external-http", isProxied: false)
     .WithExternalHttpEndpoints()
     .WithHttpHealthCheck("/health")
     .WithReference(apiService)

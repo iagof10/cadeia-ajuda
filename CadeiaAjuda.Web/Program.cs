@@ -1,8 +1,15 @@
 using CadeiaAjuda.Web;
 using CadeiaAjuda.Web.Components;
+using CadeiaAjuda.Web.Hubs;
 using CadeiaAjuda.Web.Services;
+using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5012);
+});
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
@@ -65,6 +72,7 @@ builder.Services.AddHttpClient<HelpRequestApiClient>(client =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthStateService>();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -75,7 +83,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
@@ -85,6 +93,8 @@ app.MapStaticAssets();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapHub<HelpRequestHub>("/hubs/help-requests");
 
 // --- BFF proxy endpoints for JavaScript pages ---
 
@@ -213,10 +223,14 @@ bffHelpRequests.MapGet("/{id:guid}", async (Guid id, HelpRequestApiClient api) =
     return item is null ? Results.NotFound() : Results.Ok(item);
 });
 
-bffHelpRequests.MapPost("/", async (HelpRequestCreateModel model, HelpRequestApiClient api) =>
+bffHelpRequests.MapPost("/", async (HelpRequestCreateModel model, HelpRequestApiClient api, IHubContext<HelpRequestHub> hub) =>
 {
     var response = await api.CreateAsync(model);
     var body = await response.Content.ReadAsStringAsync();
+    if (response.IsSuccessStatusCode)
+    {
+        await hub.Clients.Group(model.TenantId.ToString()).SendAsync("HelpRequestsChanged");
+    }
     return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
 });
 

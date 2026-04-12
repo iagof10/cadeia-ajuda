@@ -40,11 +40,13 @@ public class AuthStateService
         var json = JsonSerializer.SerializeToUtf8Bytes(user);
         var base64 = Convert.ToBase64String(json);
 
+        var isHttps = context.Request.IsHttps;
+
         context.Response.Cookies.Append(CookieName, base64, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
+            Secure = isHttps,
+            SameSite = isHttps ? SameSiteMode.Strict : SameSiteMode.Lax,
             IsEssential = true,
             MaxAge = TimeSpan.FromHours(8)
         });

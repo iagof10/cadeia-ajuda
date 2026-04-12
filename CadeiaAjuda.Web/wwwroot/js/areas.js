@@ -241,7 +241,7 @@
     }
 
     function populateParentSelect(excludeId) {
-        fParent.innerHTML = '<option value="">— Nenhuma (área raiz) —</option>';
+        fParent.innerHTML = '<option value="">Nenhuma (área raiz)</option>';
         var roots = getRoots();
         roots.forEach(function (root) {
             if (root.id === excludeId) return;
