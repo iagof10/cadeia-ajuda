@@ -20,23 +20,17 @@
     <link rel="stylesheet" type="text/css" href="app-assets/fonts/simple-line-icons/style.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <style>
-        /* ---- Wizard ---- */
-        .wizard-steps { display:flex; justify-content:center; gap:0; margin-bottom:1.5rem; position:relative; }
-        .wizard-step { display:flex; align-items:center; gap:.5rem; padding:.6rem 1.5rem; background:#f5f7fa; border:1px solid #e4e7ed; cursor:default; position:relative; transition:all .2s; }
-        .wizard-step:first-child { border-radius:8px 0 0 8px; }
-        .wizard-step:last-child { border-radius:0 8px 8px 0; }
-        .wizard-step .step-number { display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:#e4e7ed; color:#6b6f82; font-weight:700; font-size:.85rem; flex-shrink:0; transition:all .2s; }
-        .wizard-step .step-label { font-size:.85rem; font-weight:600; color:#6b6f82; transition:all .2s; }
-        .wizard-step.active { background:#fff; border-color:#1e9ff2; z-index:1; }
-        .wizard-step.active .step-number { background:linear-gradient(135deg,#1e9ff2 0%,#1565c0 100%); color:#fff; }
-        .wizard-step.active .step-label { color:#1e9ff2; }
-        .wizard-step.done { background:#e8f5e9; border-color:#4caf50; cursor:pointer; }
-        .wizard-step.done:hover { background:#c8e6c9; }
-        .wizard-step.done .step-number { background:#4caf50; color:#fff; }
-        .wizard-step.done .step-label { color:#4caf50; }
+        /* ---- Tab nav overrides ---- */
+        .wizard-tabs .nav-link { font-weight:600; color:#6b6f82; cursor:default; }
+        .wizard-tabs .nav-link.active { color:#1e9ff2; }
+        .wizard-tabs .nav-link.done { color:#4caf50; cursor:pointer; }
+        .wizard-tabs .nav-link.done:hover { color:#388e3c; }
+        .wizard-tabs .nav-link .step-number { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:#e4e7ed; color:#6b6f82; font-weight:700; font-size:.8rem; margin-right:.4rem; transition:all .2s; }
+        .wizard-tabs .nav-link.active .step-number { background:linear-gradient(135deg,#1e9ff2 0%,#1565c0 100%); color:#fff; }
+        .wizard-tabs .nav-link.done .step-number { background:#4caf50; color:#fff; }
 
-        .wizard-panel { display:none; }
-        .wizard-panel.active { display:block; }
+        .tab-pane { display:none; }
+        .tab-pane.active { display:block; }
 
         /* ---- Selection Cards ---- */
         .selection-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:.75rem; }
@@ -216,27 +210,32 @@
                     <div class="card">
                         <div class="card-body">
                             <!-- Steps indicator -->
-                            <div class="wizard-steps" id="wizardSteps">
-                                <div class="wizard-step active" data-step="0">
-                                    <span class="step-number">1</span>
-                                    <span class="step-label">Setor</span>
-                                </div>
-                                <div class="wizard-step" data-step="1">
-                                    <span class="step-number">2</span>
-                                    <span class="step-label">Tipo de Solicitação</span>
-                                </div>
-                                <div class="wizard-step" data-step="2">
-                                    <span class="step-number">3</span>
-                                    <span class="step-label">Recurso</span>
-                                </div>
-                                <div class="wizard-step" data-step="3">
-                                    <span class="step-number">4</span>
-                                    <span class="step-label">Confirmação</span>
-                                </div>
-                            </div>
+                            <ul class="nav nav-tabs nav-underline no-hover-bg wizard-tabs" id="wizardSteps">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-step="0" href="javascript:void(0)">
+                                        <span class="step-number">1</span> Setor
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-step="1" href="javascript:void(0)">
+                                        <span class="step-number">2</span> Tipo de Solicitação
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-step="2" href="javascript:void(0)">
+                                        <span class="step-number">3</span> Recurso
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-step="3" href="javascript:void(0)">
+                                        <span class="step-number">4</span> Confirmação
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content px-1 pt-1">
 
                             <!-- Panel 0: Setor -->
-                            <div class="wizard-panel active" id="panel0">
+                            <div class="tab-pane active" id="panel0">
                                 <h5 class="mb-3"><i class="la la-sitemap text-primary"></i> Selecione o Setor</h5>
                                 <p class="text-muted mb-3">Escolha para qual setor deseja enviar o chamado de ajuda.</p>
                                 <div id="sectorGrid" class="selection-grid"></div>
@@ -246,7 +245,7 @@
                             </div>
 
                             <!-- Panel 1: Tipo -->
-                            <div class="wizard-panel" id="panel1">
+                            <div class="tab-pane" id="panel1">
                                 <h5 class="mb-3"><i class="la la-question-circle text-primary"></i> Selecione o Tipo de Solicitação</h5>
                                 <p class="text-muted mb-3">Escolha o tipo de ajuda que você precisa.</p>
                                 <div id="typeList"></div>
@@ -255,8 +254,8 @@
                                 </div>
                             </div>
 
-                            <!-- Panel 2: Recurso (Área / Planta) -->
-                            <div class="wizard-panel" id="panel2">
+                            <!-- Panel 2: Recurso -->
+                            <div class="tab-pane" id="panel2">
                                 <h5 class="mb-3"><i class="la la-cubes text-primary"></i> Selecione o Recurso</h5>
                                 <p class="text-muted mb-3">Escolha em qual recurso (posto/equipamento) você está.</p>
                                 <div id="areaList"></div>
@@ -266,7 +265,7 @@
                             </div>
 
                             <!-- Panel 3: Confirmação -->
-                            <div class="wizard-panel" id="panel3">
+                            <div class="tab-pane" id="panel3">
                                 <h5 class="mb-3"><i class="la la-check-circle text-primary"></i> Confirme o Chamado</h5>
                                 <p class="text-muted mb-3">Revise as informações antes de abrir o chamado.</p>
                                 <div class="row">
@@ -290,6 +289,8 @@
                                     </div>
                                 </div>
                             </div>
+
+                            </div><!-- /tab-content -->
 
                             <!-- Navigation buttons -->
                             <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">

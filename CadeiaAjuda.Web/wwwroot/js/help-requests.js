@@ -196,8 +196,8 @@
     }
 
     function updateWizardUI() {
-        var steps = wizardSteps.querySelectorAll('.wizard-step');
-        steps.forEach(function (el, i) {
+        var tabs = wizardSteps.querySelectorAll('.nav-link');
+        tabs.forEach(function (el, i) {
             el.classList.remove('active', 'done');
             if (i < currentStep) el.classList.add('done');
             if (i === currentStep) el.classList.add('active');
@@ -398,8 +398,8 @@
     btnBackToList.addEventListener('click', showListView);
     btnSubmit.addEventListener('click', handleSubmit);
 
-    // Allow clicking wizard steps to go back
-    wizardSteps.querySelectorAll('.wizard-step').forEach(function (el) {
+    // Allow clicking wizard tabs to go back
+    wizardSteps.querySelectorAll('.nav-link').forEach(function (el) {
         el.addEventListener('click', function () {
             var step = parseInt(el.getAttribute('data-step'));
             if (step < currentStep) {
