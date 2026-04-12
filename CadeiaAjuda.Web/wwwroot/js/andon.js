@@ -51,16 +51,15 @@
         el.className = 'andon-card' + (r.status === 2 ? ' andon-status-escalated' : '') + ' ' + urgencyCls(r.createdAt);
         el.innerHTML =
             '<div class="andon-card-header" style="background-color:' + esc(r.sectorColor || '#666') + '">' +
-                '<span class="andon-code">' + esc(r.code) + '</span>' +
+                '<span class="andon-code">' + esc(r.sectorName) + '</span>' +
             '</div>' +
             '<div class="andon-card-body">' +
-                '<div class="andon-sector-name">' + esc(r.sectorName) + '</div>' +
                 '<div class="andon-info-row">' +
                     '<div class="andon-info-item"><span class="andon-info-label">Recurso</span><span class="andon-info-value">' + esc(r.areaName) + '</span></div>' +
                 '</div>' +
             '</div>' +
             '<div class="andon-card-footer">' +
-                '<span class="andon-time"><i class="la la-clock-o"></i> <span class="andon-time-value" data-created="' + esc(r.createdAt) + '">' + timeSince(r.createdAt) + '</span></span>' +
+                '<span class="andon-time"><span class="andon-time-value" data-created="' + esc(r.createdAt) + '">' + timeSince(r.createdAt) + '</span></span>' +
             '</div>';
         return el;
     }

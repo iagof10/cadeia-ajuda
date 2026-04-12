@@ -1,90 +1,336 @@
 @page "/admin/dashboard"
+@layout AdminLayout
 
 <PageTitle>Dashboard - Cadeia Ajuda</PageTitle>
 
-<div class="row">
-    <div class="col-xl-3 col-lg-6 col-12">
-        <div class="card pull-up">
-            <div class="card-content">
-                <div class="card-body">
-                    <div class="media d-flex">
-                        <div class="media-body text-left">
-                            <h3 class="info">0</h3>
-                            <h6>Empresas</h6>
-                        </div>
-                        <div>
-                            <i class="la la-building info font-large-2 float-right"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="content-header row">
+    <div class="content-header-left col-md-6 col-12 mb-2">
+        <h3 class="content-header-title mb-0">Dashboard</h3>
+        <p class="text-muted mt-1 mb-0">Visão geral do sistema de Cadeia de Ajuda</p>
     </div>
-    <div class="col-xl-3 col-lg-6 col-12">
-        <div class="card pull-up">
-            <div class="card-content">
-                <div class="card-body">
-                    <div class="media d-flex">
-                        <div class="media-body text-left">
-                            <h3 class="success">0</h3>
-                            <h6>Usu�rios</h6>
-                        </div>
-                        <div>
-                            <i class="la la-users success font-large-2 float-right"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-lg-6 col-12">
-        <div class="card pull-up">
-            <div class="card-content">
-                <div class="card-body">
-                    <div class="media d-flex">
-                        <div class="media-body text-left">
-                            <h3 class="warning">0</h3>
-                            <h6>Setores</h6>
-                        </div>
-                        <div>
-                            <i class="la la-sitemap warning font-large-2 float-right"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-lg-6 col-12">
-        <div class="card pull-up">
-            <div class="card-content">
-                <div class="card-body">
-                    <div class="media d-flex">
-                        <div class="media-body text-left">
-                            <h3 class="danger">0</h3>
-                            <h6>Solicita��es</h6>
-                        </div>
-                        <div>
-                            <i class="la la-question-circle danger font-large-2 float-right"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="content-header-right col-md-6 col-12 text-md-right">
+        <span class="text-muted" id="dashLastUpdate"></span>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="card-title">Bem-vindo ao Cadeia Ajuda</h4>
+<div id="dashLoading" class="text-center py-5">
+    <i class="la la-spinner la-spin font-large-2"></i>
+    <p class="text-muted mt-1">Carregando métricas...</p>
+</div>
+
+<div id="dashContent" style="display:none;">
+
+    <!-- KPIs Principais -->
+    <div class="row">
+        <div class="col-xl-3 col-lg-6 col-12">
+            <div class="card pull-up">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body text-left">
+                                <h3 class="warning" id="kpiOpen">0</h3>
+                                <h6>Chamados Abertos</h6>
+                            </div>
+                            <div><i class="la la-exclamation-circle warning font-large-2 float-right"></i></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card-content">
-                <div class="card-body">
-                    <p>Sistema de Cadeia de Ajuda / Andon Digital.</p>
-                    <p>Utilize o menu lateral para acessar os cadastros e configura��es do sistema.</p>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-12">
+            <div class="card pull-up">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body text-left">
+                                <h3 class="success" id="kpiClosedToday">0</h3>
+                                <h6>Encerrados Hoje</h6>
+                            </div>
+                            <div><i class="la la-check-circle success font-large-2 float-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-12">
+            <div class="card pull-up">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body text-left">
+                                <h3 class="danger" id="kpiEscalated">0</h3>
+                                <h6>Escalados</h6>
+                            </div>
+                            <div><i class="la la-arrow-circle-up danger font-large-2 float-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-12">
+            <div class="card pull-up">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body text-left">
+                                <h3 class="info" id="kpiAvgTime">—</h3>
+                                <h6>Tempo Médio Resolução</h6>
+                            </div>
+                            <div><i class="la la-clock-o info font-large-2 float-right"></i></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- KPIs Secundários -->
+    <div class="row">
+        <div class="col-xl-3 col-lg-6 col-12">
+            <div class="card pull-up">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body text-left">
+                                <h3 class="info" id="kpiTotal">0</h3>
+                                <h6>Total de Chamados</h6>
+                            </div>
+                            <div><i class="la la-list info font-large-2 float-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-12">
+            <div class="card pull-up">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body text-left">
+                                <h3 id="kpiMonthCompare">0</h3>
+                                <h6>Chamados Este Mês</h6>
+                                <small class="text-muted" id="kpiMonthTrend"></small>
+                            </div>
+                            <div><i class="la la-calendar font-large-2 float-right" id="kpiMonthIcon"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-12">
+            <div class="card pull-up">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body text-left">
+                                <h3 class="success" id="kpiUsers">0</h3>
+                                <h6>Usuários Ativos</h6>
+                            </div>
+                            <div><i class="la la-users success font-large-2 float-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-12">
+            <div class="card pull-up">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body text-left">
+                                <h3 class="danger" id="kpiOldest">—</h3>
+                                <h6>Chamado Mais Antigo</h6>
+                            </div>
+                            <div><i class="la la-hourglass-end danger font-large-2 float-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos de Período -->
+    <div class="row">
+        <div class="col-xl-8 col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0"><i class="la la-bar-chart"></i> Chamados por Período</h4>
+                    <div class="btn-group btn-group-sm" id="periodBtnGroup">
+                        <button class="btn btn-outline-primary active" data-period="week">7 Dias</button>
+                        <button class="btn btn-outline-primary" data-period="month">4 Semanas</button>
+                        <button class="btn btn-outline-primary" data-period="semester">6 Meses</button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <div id="periodChartArea" style="min-height:220px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title"><i class="la la-pie-chart"></i> Distribuição por Status</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <div id="statusChartArea" style="min-height:220px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ranking Setores + Tipos -->
+    <div class="row">
+        <div class="col-xl-6 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title"><i class="la la-trophy"></i> Ranking de Setores</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Setor</th>
+                                        <th class="text-center">Total</th>
+                                        <th class="text-center">Abertos</th>
+                                        <th class="text-center">Tempo Médio</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sectorRankBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title"><i class="la la-tags"></i> Tipos de Chamado</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body p-0">
+                        <div id="typeRankArea" class="p-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title"><i class="la la-user"></i> Top Solicitantes</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body p-0">
+                        <div id="requesterRankArea" class="p-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Horários de Pico + Comparação Mensal -->
+    <div class="row">
+        <div class="col-xl-8 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title"><i class="la la-clock-o"></i> Horários de Pico</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <div id="peakHoursArea" style="min-height:180px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title"><i class="la la-exchange"></i> Comparação Mensal</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <div id="monthCompareArea"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimos Chamados -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title"><i class="la la-history"></i> Últimos Chamados</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Setor</th>
+                                        <th>Tipo</th>
+                                        <th>Recurso</th>
+                                        <th>Solicitante</th>
+                                        <th>Status</th>
+                                        <th>Data</th>
+                                        <th>Tempo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<style>
+    .status-badge { display:inline-block; font-size:.8rem; padding:3px 10px; border-radius:4px; font-weight:600; }
+    .status-open { background:#fff3cd; color:#856404; }
+    .status-inprogress { background:#cce5ff; color:#004085; }
+    .status-escalated { background:#f8d7da; color:#721c24; }
+    .status-resolved { background:#d4edda; color:#155724; }
+    .status-closed { background:#e2e3e5; color:#383d41; }
+
+    .dash-bar-row { display:flex; align-items:center; margin-bottom:8px; }
+    .dash-bar-label { width:100px; font-weight:600; font-size:.82rem; flex-shrink:0; text-align:right; padding-right:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .dash-bar-track { flex:1; background:#f0f0f0; border-radius:6px; height:22px; overflow:hidden; }
+    .dash-bar-fill { height:100%; border-radius:6px; transition:width .5s ease; display:flex; align-items:center; padding-left:8px; font-size:.78rem; font-weight:700; color:#fff; min-width:24px; }
+
+    .rank-item { display:flex; align-items:center; padding:9px 14px; border-bottom:1px solid #f0f0f0; }
+    .rank-item:last-child { border-bottom:none; }
+    .rank-pos { width:22px; font-weight:700; color:#999; font-size:.85rem; flex-shrink:0; }
+    .rank-name { flex:1; font-weight:600; font-size:.9rem; }
+    .rank-count { font-weight:700; font-size:1rem; color:#1e9ff2; }
+
+    .sector-dot { display:inline-block; width:12px; height:12px; border-radius:50%; vertical-align:middle; margin-right:6px; border:2px solid rgba(0,0,0,.1); }
+
+    .compare-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f0f0f0; }
+    .compare-row:last-child { border-bottom:none; }
+    .compare-label { font-weight:600; color:#666; }
+    .compare-values { text-align:right; }
+    .compare-current { font-size:1.1rem; font-weight:700; }
+    .compare-prev { font-size:.85rem; color:#999; }
+    .trend-up { color:#f44336; }
+    .trend-down { color:#4caf50; }
+    .trend-neutral { color:#999; }
+
+    .hour-bar-wrap { display:flex; align-items:flex-end; gap:3px; height:140px; }
+    .hour-bar-col { flex:1; display:flex; flex-direction:column; align-items:center; }
+    .hour-bar { width:100%; border-radius:3px 3px 0 0; background:#1e9ff2; transition:height .4s ease; min-height:2px; }
+    .hour-bar-label { font-size:.65rem; color:#999; margin-top:3px; }
+</style>
+
+<script src="js/dashboard.js"></script>

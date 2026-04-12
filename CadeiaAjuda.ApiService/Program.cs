@@ -34,6 +34,7 @@ builder.Services.AddScoped<IEscalationLevelService, EscalationLevelService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IReasonService, ReasonService>();
 builder.Services.AddScoped<IHelpRequestService, HelpRequestService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 var app = builder.Build();
 
@@ -451,6 +452,10 @@ helpRequests.MapPatch("/{id:guid}/close", async (Guid id, CadeiaAjuda.ApiService
         return Results.BadRequest(new { error = ex.Message });
     }
 });
+
+// --- Dashboard ---
+app.MapGet("/api/dashboard/{tenantId:guid}", async (Guid tenantId, IDashboardService service) =>
+    Results.Ok(await service.GetDashboardAsync(tenantId)));
 
 app.MapDefaultEndpoints();
 

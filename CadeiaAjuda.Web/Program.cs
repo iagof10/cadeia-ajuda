@@ -70,6 +70,11 @@ builder.Services.AddHttpClient<HelpRequestApiClient>(client =>
     client.BaseAddress = new("https+http://apiservice");
 });
 
+builder.Services.AddHttpClient<DashboardApiClient>(client =>
+{
+    client.BaseAddress = new("https+http://apiservice");
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthStateService>();
 builder.Services.AddSignalR();
@@ -267,6 +272,15 @@ bffHelpRequests.MapPatch("/{id:guid}/close-with-auth", async (Guid id, HelpReque
     }
     return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
 });
+
+// --- BFF: Dashboard ---
+app.MapGet("/bff/dashboard", async (DashboardApiClient api, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    var data = await api.GetDashboardAsync(user.TenantId);
+    return data is null ? Results.Problem("Erro ao carregar dashboard") : Results.Ok(data);
+}).DisableAntiforgery();
 
 app.MapDefaultEndpoints();
 
