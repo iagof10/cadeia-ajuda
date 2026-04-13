@@ -38,6 +38,7 @@ builder.Services.AddScoped<IReasonService, ReasonService>();
 builder.Services.AddScoped<IHelpRequestService, HelpRequestService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IUserSessionService, UserSessionService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 var app = builder.Build();
 
@@ -55,6 +56,7 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
+    await PermissionSeeder.SeedPermissionsAsync(db);
     //await DataSeeder.SeedAsync(db);
 }
 
@@ -492,6 +494,61 @@ sessions.MapPost("/invalidate-all/{userId:guid}", async (Guid userId, IUserSessi
 // --- Dashboard ---
 app.MapGet("/api/dashboard/{tenantId:guid}", async (Guid tenantId, IDashboardService service) =>
     Results.Ok(await service.GetDashboardAsync(tenantId)));
+
+// --- Roles & Permissions ---
+var rolesGroup = app.MapGroup("/api/roles");
+
+rolesGroup.MapGet("/by-tenant/{tenantId:guid}", async (Guid tenantId, IRoleService service) =>
+    Results.Ok(await service.GetByTenantIdAsync(tenantId)));
+
+rolesGroup.MapGet("/{id:guid}", async (Guid id, IRoleService service) =>
+{
+    var item = await service.GetByIdAsync(id);
+    return item is null ? Results.NotFound() : Results.Ok(item);
+});
+
+rolesGroup.MapPost("/", async (RoleCreateDto dto, IRoleService service) =>
+{
+    try
+    {
+        var created = await service.CreateAsync(dto);
+        return Results.Created($"/api/roles/{created.Id}", created);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+rolesGroup.MapPut("/{id:guid}", async (Guid id, RoleUpdateDto dto, IRoleService service) =>
+{
+    dto.Id = id;
+    try
+    {
+        var updated = await service.UpdateAsync(dto);
+        return updated is null ? Results.NotFound() : Results.Ok(updated);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+rolesGroup.MapDelete("/{id:guid}", async (Guid id, IRoleService service) =>
+{
+    try
+    {
+        var result = await service.DeleteAsync(id);
+        return result ? Results.Ok() : Results.NotFound();
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+app.MapGet("/api/permissions", async (IRoleService service) =>
+    Results.Ok(await service.GetAllPermissionsAsync()));
 
 app.MapDefaultEndpoints();
 

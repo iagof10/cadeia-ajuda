@@ -12,6 +12,9 @@ public class UserDto
     public string TenantIdentifier { get; set; } = string.Empty;
     public bool Active { get; set; }
     public DateTime CreatedAt { get; set; }
+    public Guid? RoleId { get; set; }
+    public string RoleName { get; set; } = string.Empty;
+    public List<string> Permissions { get; set; } = [];
 }
 
 public class UserCreateDto
@@ -22,6 +25,7 @@ public class UserCreateDto
     public string Login { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public Guid TenantId { get; set; }
+    public Guid? RoleId { get; set; }
 }
 
 public class UserUpdateDto
@@ -34,6 +38,7 @@ public class UserUpdateDto
     public string? Password { get; set; }
     public Guid TenantId { get; set; }
     public bool Active { get; set; }
+    public Guid? RoleId { get; set; }
 }
 
 public class LoginDto

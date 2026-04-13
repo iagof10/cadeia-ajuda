@@ -32,12 +32,12 @@
                 <p class="text-muted">Informe o identificador para acessar o sistema</p>
             </div>
 
-            <EditForm Model="model" OnValidSubmit="GoToLogin" FormName="tenantIdentifierForm">
+            <form method="post" action="/continue-to-login">
                 <div class="auth-field">
                     <label>Identificador da empresa</label>
                     <div class="auth-input-group">
                         <i class="la la-building"></i>
-                        <InputText @bind-Value="model.Identifier" class="form-control" placeholder="ex: minha-empresa" />
+                        <input type="text" name="Identifier" class="form-control" placeholder="ex: minha-empresa" />
                     </div>
                 </div>
 
@@ -45,7 +45,7 @@
                     <span>Continuar</span>
                     <i class="ft-arrow-right"></i>
                 </button>
-            </EditForm>
+            </form>
         </div>
     </div>
 </div>

@@ -1,0 +1,195 @@
+@page "/admin/roles"
+@inject AuthStateService Auth
+
+<PageTitle>Perfis - Cadeia Ajuda</PageTitle>
+
+<section>
+    <div class="row mb-2">
+        <div class="col-12">
+            <NavLink href="/admin/roles/new" class="btn btn-primary btn-icon mr-1" title="Adicionar perfil">
+                <i class="ft-plus"></i>
+            </NavLink>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible mb-2" role="alert">
+            <button type="button" class="close" @onclick="() => successMessage = null"><span>&times;</span></button>
+            <i class="la la-check-circle"></i> @successMessage
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-content">
+            <div class="card-body">
+                <div class="table-responsive" style="overflow:visible;">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Descrição</th>
+                                <th>Permissões</th>
+                                <th>Usuários</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (isLoading)
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center py-3">
+                                        <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+                                    </td>
+                                </tr>
+                            }
+                            else if (!roles.Any())
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center py-3 text-muted">Nenhum perfil encontrado.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var role in roles)
+                                {
+                                    <tr>
+                                        <td><strong>@role.Name</strong></td>
+                                        <td>@role.Description</td>
+                                        <td>
+                                            <span class="badge badge-info">@role.Permissions.Count permissão(ões)</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-secondary">@(userCounts.GetValueOrDefault(role.Id, 0))</span>
+                                        </td>
+                                        <td>
+                                            @if (role.Active)
+                                            {
+                                                <span class="badge badge-success">Ativo</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-danger">Inativo</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-sm btn-link p-0 text-secondary actions-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mais ações">
+                                                    <i class="ft-more-vertical"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right">
+                                                    <NavLink href="@($"/admin/roles/edit/{role.Id}")" class="dropdown-item">
+                                                        <i class="ft-edit-2 mr-1"></i> Editar
+                                                    </NavLink>
+                                                    <button type="button" class="dropdown-item text-danger"
+                                                            @onclick="() => DeleteRole(role)">
+                                                        <i class="ft-trash-2 mr-1"></i> Excluir
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger alert-dismissible mt-2" role="alert">
+        <button type="button" class="close" @onclick="() => errorMessage = null"><span>&times;</span></button>
+        <i class="la la-exclamation-circle"></i> @errorMessage
+    </div>
+}
+
+<style>
+    .actions-toggle {
+        box-shadow: none !important;
+        background: transparent !important;
+        border: 0 !important;
+        text-decoration: none !important;
+    }
+
+    .actions-toggle:hover,
+    .actions-toggle:focus,
+    .actions-toggle:active {
+        color: #404e67 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        text-decoration: none !important;
+    }
+
+    .actions-toggle i { font-size: 1.1rem; }
+</style>
+
+<script>
+    // Fetch user counts per role via BFF
+    (async function () {
+        try {
+            var resp = await fetch('/bff/users');
+            if (!resp.ok) return;
+            var users = await resp.json();
+            // Dispatch event with user data so Blazor can pick it up
+            window.__roleUserCounts = {};
+            users.forEach(function (u) {
+                if (u.roleId) {
+                    window.__roleUserCounts[u.roleId] = (window.__roleUserCounts[u.roleId] || 0) + 1;
+                }
+            });
+        } catch (e) { }
+    })();
+</script>
+
+@code {
+    private List<RoleViewModel> roles = [];
+    private Dictionary<Guid, int> userCounts = new();
+    private bool isLoading = true;
+    private string? successMessage;
+    private string? errorMessage;
+
+    [Inject] RoleApiClient RoleApi { get; set; } = default!;
+    [Inject] UserApiClient UserApi { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        var currentUser = Auth.GetCurrentUser();
+        if (currentUser is not null)
+        {
+            roles = await RoleApi.GetByTenantIdAsync(currentUser.TenantId);
+
+            // Count users per role
+            var users = await UserApi.GetByTenantIdAsync(currentUser.TenantId);
+            userCounts = users
+                .Where(u => u.RoleId.HasValue)
+                .GroupBy(u => u.RoleId!.Value)
+                .ToDictionary(g => g.Key, g => g.Count());
+        }
+        isLoading = false;
+    }
+
+    private async Task DeleteRole(RoleViewModel role)
+    {
+        errorMessage = null;
+        var response = await RoleApi.DeleteAsync(role.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            roles.Remove(role);
+            successMessage = $"Perfil \"{role.Name}\" excluído com sucesso.";
+        }
+        else
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            if (body.Contains("vinculados"))
+                errorMessage = "Este perfil possui usuários vinculados. Remova os vínculos antes de excluir.";
+            else
+                errorMessage = "Erro ao excluir o perfil.";
+        }
+    }
+}

@@ -1,6 +1,7 @@
 @page "/admin/users/new"
 @page "/admin/users/edit/{Id:guid}"
 @inject UserApiClient Api
+@inject RoleApiClient RoleApi
 @inject AuthStateService Auth
 @inject NavigationManager Navigation
 
@@ -71,6 +72,19 @@
                             </div>
 
                             <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Perfil</label>
+                                        <InputSelect @bind-Value="model.SelectedRoleId" class="form-control">
+                                            <option value="">Sem perfil (acesso total)</option>
+                                            @foreach (var role in availableRoles)
+                                            {
+                                                <option value="@role.Id">@role.Name</option>
+                                            }
+                                        </InputSelect>
+                                        <small class="text-muted">Define as permissões de acesso do usuário</small>
+                                    </div>
+                                </div>
                                 @if (isEdit)
                                 {
                                     <div class="col-md-4">
@@ -114,9 +128,17 @@
     private bool isEdit => Id.HasValue;
     private bool isSaving;
     private string? errorMessage;
+    private List<RoleViewModel> availableRoles = [];
 
     protected override async Task OnInitializedAsync()
     {
+        var currentUser = Auth.GetCurrentUser();
+        if (currentUser is not null)
+        {
+            availableRoles = await RoleApi.GetByTenantIdAsync(currentUser.TenantId);
+            availableRoles = availableRoles.Where(r => r.Active).ToList();
+        }
+
         if (isEdit && string.IsNullOrEmpty(model.Name))
         {
             var user = await Api.GetByIdAsync(Id!.Value);
@@ -129,7 +151,8 @@
                     Phone = user.Phone,
                     Login = user.Login,
                     SelectedTenantId = user.TenantId.ToString(),
-                    ActiveValue = user.Active.ToString().ToLower()
+                    ActiveValue = user.Active.ToString().ToLower(),
+                    SelectedRoleId = user.RoleId?.ToString() ?? ""
                 };
             }
         }
@@ -158,6 +181,7 @@
         model.TenantId = currentUser.TenantId;
         model.SelectedTenantId = currentUser.TenantId.ToString();
         model.Active = bool.TryParse(model.ActiveValue, out var active) ? active : true;
+        model.RoleId = Guid.TryParse(model.SelectedRoleId, out var roleId) ? roleId : null;
 
         HttpResponseMessage response;
 

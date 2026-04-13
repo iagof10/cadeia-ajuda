@@ -42,6 +42,8 @@ public class UserViewModel
     public string TenantName { get; set; } = string.Empty;
     public bool Active { get; set; }
     public DateTime CreatedAt { get; set; }
+    public Guid? RoleId { get; set; }
+    public string RoleName { get; set; } = string.Empty;
 }
 
 public class UserFormModel
@@ -67,4 +69,7 @@ public class UserFormModel
     public string ActiveValue { get; set; } = "true";
 
     public bool Active { get; set; } = true;
+
+    public string? SelectedRoleId { get; set; }
+    public Guid? RoleId { get; set; }
 }

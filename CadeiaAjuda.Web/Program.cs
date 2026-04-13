@@ -80,6 +80,11 @@ builder.Services.AddHttpClient<SessionApiClient>(client =>
     client.BaseAddress = new("https+http://apiservice");
 });
 
+builder.Services.AddHttpClient<RoleApiClient>(client =>
+{
+    client.BaseAddress = new("https+http://apiservice");
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthStateService>();
 builder.Services.AddSignalR();
@@ -141,10 +146,38 @@ app.Use(async (context, next) =>
             context.Response.Redirect("/");
             return;
         }
+
+        // Permission check per route
+        var requiredPermission = GetRequiredPermission(path);
+        if (requiredPermission is not null
+            && user.Permissions.Count > 0
+            && !user.Permissions.Contains(requiredPermission))
+        {
+            context.Response.Redirect("/admin/dashboard?error=forbidden");
+            return;
+        }
     }
 
     await next();
 });
+
+static string? GetRequiredPermission(string path)
+{
+    if (path.StartsWith("/admin/dashboard", StringComparison.OrdinalIgnoreCase)) return "dashboard.view";
+    if (path.StartsWith("/admin/help-request-types", StringComparison.OrdinalIgnoreCase)) return "help_request_types.view";
+    if (path.StartsWith("/admin/reasons", StringComparison.OrdinalIgnoreCase)) return "reasons.view";
+    if (path.StartsWith("/admin/sectors", StringComparison.OrdinalIgnoreCase)) return "sectors.view";
+    if (path.StartsWith("/admin/plants", StringComparison.OrdinalIgnoreCase)) return "areas.view";
+    if (path.StartsWith("/admin/areas", StringComparison.OrdinalIgnoreCase)) return "areas.view";
+    if (path.StartsWith("/admin/users", StringComparison.OrdinalIgnoreCase)) return "users.view";
+    if (path.StartsWith("/admin/roles", StringComparison.OrdinalIgnoreCase)) return "roles.view";
+    if (path.StartsWith("/admin/andon", StringComparison.OrdinalIgnoreCase)) return "andon.view";
+    if (path.StartsWith("/admin/reports", StringComparison.OrdinalIgnoreCase)) return "reports.view";
+    if (path.StartsWith("/admin/escalation", StringComparison.OrdinalIgnoreCase)) return "escalation.view";
+    if (path.StartsWith("/help-requests/close", StringComparison.OrdinalIgnoreCase)) return "help_requests.close";
+    if (path.StartsWith("/help-requests", StringComparison.OrdinalIgnoreCase)) return "help_requests.view";
+    return null;
+}
 
 // --- Session validation middleware for BFF endpoints ---
 app.Use(async (context, next) =>
@@ -188,6 +221,15 @@ app.Use(async (context, next) =>
 // --- BFF proxy endpoints for JavaScript pages ---
 
 // --- Server-side Auth endpoints (run in HTTP context, cookies work) ---
+
+app.MapPost("/continue-to-login", (HttpContext httpContext) =>
+{
+    var identifier = httpContext.Request.Form["Identifier"].ToString();
+    if (string.IsNullOrWhiteSpace(identifier))
+        return Results.Redirect("/");
+
+    return Results.Redirect($"/login/{identifier.Trim()}");
+}).DisableAntiforgery();
 
 app.MapPost("/auth/do-login", async (HttpContext httpContext, AuthApiClient authApi, SessionApiClient sessionApi, AuthStateService auth) =>
 {
@@ -463,6 +505,53 @@ app.MapGet("/bff/dashboard", async (DashboardApiClient api, AuthStateService aut
     var data = await api.GetDashboardAsync(user.TenantId);
     return data is null ? Results.Problem("Erro ao carregar dashboard") : Results.Ok(data);
 }).DisableAntiforgery();
+
+// --- BFF: Roles & Permissions ---
+var bffRoles = app.MapGroup("/bff/roles").DisableAntiforgery();
+
+bffRoles.MapGet("/", async (RoleApiClient api, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    return Results.Ok(await api.GetByTenantIdAsync(user.TenantId));
+});
+
+bffRoles.MapGet("/{id:guid}", async (Guid id, RoleApiClient api) =>
+{
+    var item = await api.GetByIdAsync(id);
+    return item is null ? Results.NotFound() : Results.Ok(item);
+});
+
+bffRoles.MapPost("/", async (RoleSaveModel model, RoleApiClient api, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    model.TenantId = user.TenantId;
+    var response = await api.CreateAsync(model);
+    var body = await response.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
+});
+
+bffRoles.MapPut("/{id:guid}", async (Guid id, RoleSaveModel model, RoleApiClient api, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    model.TenantId = user.TenantId;
+    var response = await api.UpdateAsync(id, model);
+    var body = await response.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
+});
+
+bffRoles.MapDelete("/{id:guid}", async (Guid id, RoleApiClient api) =>
+{
+    var response = await api.DeleteAsync(id);
+    if (response.IsSuccessStatusCode) return Results.Ok();
+    var body = await response.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
+});
+
+app.MapGet("/bff/permissions", async (RoleApiClient api) =>
+    Results.Ok(await api.GetAllPermissionsAsync())).DisableAntiforgery();
 
 app.MapDefaultEndpoints();
 

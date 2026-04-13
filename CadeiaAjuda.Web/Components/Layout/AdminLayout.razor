@@ -39,8 +39,6 @@
                             <span class="user-initials-badge">@userInitials</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="javascript:void(0)"><i class="ft-user"></i> Perfil</a>
-                            <div class="dropdown-divider"></div>
                             <a class="dropdown-item text-danger" href="/auth/logout"><i class="ft-power"></i> Sair</a>
                         </div>
                     </li>
@@ -55,74 +53,147 @@
 <div class="main-menu menu-fixed menu-light menu-accordion menu-shadow" data-scroll-to-active="true">
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
-            <li class="nav-item @(IsActive("/admin/dashboard") ? "active" : "")">
-                <NavLink href="/admin/dashboard">
-                    <i class="la la-home"></i>
-                    <span class="menu-title">Dashboard</span>
-                </NavLink>
-            </li>
-            <li class="nav-item @(IsActive("/admin/help-request-types") || IsActive("/admin/reasons") || IsActive("/admin/sectors") || IsActive("/admin/plants") ? "active" : "")">
-                <a href="javascript:void(0)">
-                    <i class="la la-clipboard"></i>
-                    <span class="menu-title">Cadastro</span>
-                </a>
-                <ul class="menu-content">
-                    <li class="@(IsActive("/admin/help-request-types") ? "active" : "")">
-                        <NavLink class="menu-item" href="/admin/help-request-types" Match="NavLinkMatch.Prefix">
-                            <i class="la la-question-circle"></i>
-                            <span>Tipo de Ajuda</span>
-                        </NavLink>
-                    </li>
-                    <li class="@(IsActive("/admin/reasons") ? "active" : "")">
-                        <NavLink class="menu-item" href="/admin/reasons" Match="NavLinkMatch.Prefix">
-                            <i class="la la-list"></i>
-                            <span>Motivo</span>
-                        </NavLink>
-                    </li>
-                    <li class="@(IsActive("/admin/sectors") ? "active" : "")">
-                        <NavLink class="menu-item" href="/admin/sectors" Match="NavLinkMatch.Prefix">
-                            <i class="la la-sitemap"></i>
-                            <span>Setor</span>
-                        </NavLink>
-                    </li>
-                    <li class="@(IsActive("/admin/plants") ? "active" : "")">
-                        <NavLink class="menu-item" href="/admin/plants" Match="NavLinkMatch.Prefix">
-                            <i class="la la-map"></i>
-                            <span>Planta</span>
-                        </NavLink>
-                    </li>
-                </ul>
-            </li>
-            <li class="nav-item @(IsActive("/help-requests") ? "active" : "")">
-                <NavLink href="/help-requests" Match="NavLinkMatch.All">
-                    <i class="la la-life-ring"></i>
-                    <span class="menu-title">Cadeia de Ajuda</span>
-                </NavLink>
-            </li>
-            <li class="nav-item @(IsActive("/help-requests/close") ? "active" : "")">
-                <NavLink href="/help-requests/close" Match="NavLinkMatch.All">
-                    <i class="la la-times-circle"></i>
-                    <span class="menu-title">Encerrar Chamado</span>
-                </NavLink>
-            </li>
-            <li class="nav-item @(IsActive("/admin/andon") ? "active" : "")">
-                <NavLink href="/admin/andon" Match="NavLinkMatch.Prefix">
-                    <i class="la la-bell"></i>
-                    <span class="menu-title">Andon</span>
-                </NavLink>
-            </li>
-            <li class="nav-item @(IsActive("/admin/users") ? "active" : "")">
-                <NavLink href="/admin/users" Match="NavLinkMatch.Prefix">
-                    <i class="la la-user"></i>
-                    <span class="menu-title">Usuário</span>
-                </NavLink>
-            </li>
-            <li class="nav-item @(IsActive("/admin/reports") ? "active" : "")">
-                <NavLink href="/admin/reports" Match="NavLinkMatch.Prefix">
-                    <i class="la la-bar-chart"></i>
-                    <span class="menu-title">Relatório</span>
-                </NavLink>
-            </li>
+            @if (HasPermission("dashboard.view"))
+            {
+                <li class="nav-item @(IsActive("/admin/dashboard") ? "active" : "")">
+                    <NavLink href="/admin/dashboard">
+                        <i class="la la-home"></i>
+                        <span class="menu-title">Dashboard</span>
+                    </NavLink>
+                </li>
+            }
+            @if (HasAnyPermission("help_request_types.view", "reasons.view", "sectors.view", "areas.view", "escalation.view"))
+            {
+                <li class="nav-item @(IsActive("/admin/help-request-types") || IsActive("/admin/reasons") || IsActive("/admin/sectors") || IsActive("/admin/plants") || IsActive("/admin/escalation") ? "active" : "")">
+                    <a href="javascript:void(0)">
+                        <i class="la la-clipboard"></i>
+                        <span class="menu-title">Cadastro</span>
+                    </a>
+                    <ul class="menu-content">
+                        @if (HasPermission("help_request_types.view"))
+                        {
+                            <li class="@(IsActive("/admin/help-request-types") ? "active" : "")">
+                                <NavLink class="menu-item" href="/admin/help-request-types" Match="NavLinkMatch.Prefix">
+                                    <i class="la la-question-circle"></i>
+                                    <span>Tipo de Ajuda</span>
+                                </NavLink>
+                            </li>
+                        }
+                        @if (HasPermission("reasons.view"))
+                        {
+                            <li class="@(IsActive("/admin/reasons") ? "active" : "")">
+                                <NavLink class="menu-item" href="/admin/reasons" Match="NavLinkMatch.Prefix">
+                                    <i class="la la-list"></i>
+                                    <span>Motivo</span>
+                                </NavLink>
+                            </li>
+                        }
+                        @if (HasPermission("sectors.view"))
+                        {
+                            <li class="@(IsActive("/admin/sectors") ? "active" : "")">
+                                <NavLink class="menu-item" href="/admin/sectors" Match="NavLinkMatch.Prefix">
+                                    <i class="la la-sitemap"></i>
+                                    <span>Setor</span>
+                                </NavLink>
+                            </li>
+                        }
+                        @if (HasPermission("areas.view"))
+                        {
+                            <li class="@(IsActive("/admin/plants") ? "active" : "")">
+                                <NavLink class="menu-item" href="/admin/plants" Match="NavLinkMatch.Prefix">
+                                    <i class="la la-map"></i>
+                                    <span>Planta</span>
+                                </NavLink>
+                            </li>
+                        }
+                        @if (HasPermission("escalation.view"))
+                        {
+                            <li class="@(IsActive("/admin/escalation") ? "active" : "")">
+                                <NavLink class="menu-item" href="/admin/escalation-levels" Match="NavLinkMatch.Prefix">
+                                    <i class="la la-level-up"></i>
+                                    <span>Escalação</span>
+                                </NavLink>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            }
+            @if (HasAnyPermission("help_requests.view", "help_requests.close"))
+            {
+                <li class="nav-item @(IsActive("/help-requests") ? "active" : "")">
+                    <a href="javascript:void(0)">
+                        <i class="la la-life-ring"></i>
+                        <span class="menu-title">Chamado</span>
+                    </a>
+                    <ul class="menu-content">
+                        @if (HasPermission("help_requests.view"))
+                        {
+                            <li class="@((IsActive("/help-requests") && !IsActive("/help-requests/close")) ? "active" : "")">
+                                <NavLink class="menu-item" href="/help-requests" Match="NavLinkMatch.All">
+                                    <i class="la la-life-ring"></i>
+                                    <span>Cadeia de Ajuda</span>
+                                </NavLink>
+                            </li>
+                        }
+                        @if (HasPermission("help_requests.close"))
+                        {
+                            <li class="@(IsActive("/help-requests/close") ? "active" : "")">
+                                <NavLink class="menu-item" href="/help-requests/close" Match="NavLinkMatch.All">
+                                    <i class="la la-times-circle"></i>
+                                    <span>Encerrar Cadeia de Ajuda</span>
+                                </NavLink>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            }
+            @if (HasPermission("andon.view"))
+            {
+                <li class="nav-item @(IsActive("/admin/andon") ? "active" : "")">
+                    <NavLink href="/admin/andon" Match="NavLinkMatch.Prefix">
+                        <i class="la la-bell"></i>
+                        <span class="menu-title">Andon</span>
+                    </NavLink>
+                </li>
+            }
+            @if (HasAnyPermission("users.view", "roles.view"))
+            {
+                <li class="nav-item @(IsActive("/admin/users") || IsActive("/admin/roles") ? "active" : "")">
+                    <a href="javascript:void(0)">
+                        <i class="la la-user"></i>
+                        <span class="menu-title">Usuário</span>
+                    </a>
+                    <ul class="menu-content">
+                        @if (HasPermission("users.view"))
+                        {
+                            <li class="@(IsActive("/admin/users") ? "active" : "")">
+                                <NavLink class="menu-item" href="/admin/users" Match="NavLinkMatch.Prefix">
+                                    <i class="la la-user"></i>
+                                    <span>Usuário</span>
+                                </NavLink>
+                            </li>
+                        }
+                        @if (HasPermission("roles.view"))
+                        {
+                            <li class="@(IsActive("/admin/roles") ? "active" : "")">
+                                <NavLink class="menu-item" href="/admin/roles" Match="NavLinkMatch.Prefix">
+                                    <i class="la la-shield"></i>
+                                    <span>Perfil</span>
+                                </NavLink>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            }
+            @if (HasPermission("reports.view"))
+            {
+                <li class="nav-item @(IsActive("/admin/reports") ? "active" : "")">
+                    <NavLink href="/admin/reports" Match="NavLinkMatch.Prefix">
+                        <i class="la la-bar-chart"></i>
+                        <span class="menu-title">Relatório</span>
+                    </NavLink>
+                </li>
+            }
         </ul>
     </div>
 </div>
@@ -176,6 +247,7 @@ private string currentUrl = string.Empty;
 private string currentUserName = "";
 private string userInitials = "";
 private string tenantIdentifier = "";
+private List<string> permissions = [];
 
 protected override void OnInitialized()
 {
@@ -188,7 +260,21 @@ protected override void OnInitialized()
         currentUserName = user.Name;
         tenantIdentifier = user.TenantIdentifier;
         userInitials = GetInitials(user.Name);
+        permissions = user.Permissions ?? [];
     }
+}
+
+private bool HasPermission(string key)
+{
+    // No permissions assigned = full access (user without role)
+    if (permissions.Count == 0) return true;
+    return permissions.Contains(key);
+}
+
+private bool HasAnyPermission(params string[] keys)
+{
+    if (permissions.Count == 0) return true;
+    return keys.Any(k => permissions.Contains(k));
 }
 
 private static string GetInitials(string name)

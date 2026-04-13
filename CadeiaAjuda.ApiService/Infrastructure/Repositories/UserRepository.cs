@@ -11,12 +11,14 @@ public class UserRepository : Repository<User>, IUserRepository
     public async Task<IEnumerable<User>> GetAllWithIncludesAsync()
         => await _dbSet
             .Include(u => u.Tenant)
+            .Include(u => u.Role)
             .OrderBy(u => u.Name)
             .ToListAsync();
 
     public async Task<IEnumerable<User>> GetByTenantIdAsync(Guid tenantId)
         => await _dbSet
             .Include(u => u.Tenant)
+            .Include(u => u.Role)
             .Where(u => u.TenantId == tenantId)
             .OrderBy(u => u.Name)
             .ToListAsync();
@@ -24,11 +26,17 @@ public class UserRepository : Repository<User>, IUserRepository
     public async Task<User?> GetByIdWithIncludesAsync(Guid id)
         => await _dbSet
             .Include(u => u.Tenant)
+            .Include(u => u.Role)
+                .ThenInclude(r => r!.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
             .FirstOrDefaultAsync(u => u.Id == id);
 
     public async Task<User?> GetByLoginAsync(Guid tenantId, string login)
         => await _dbSet
             .Include(u => u.Tenant)
+            .Include(u => u.Role)
+                .ThenInclude(r => r!.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
             .FirstOrDefaultAsync(u => u.TenantId == tenantId && u.Login == login && u.Active);
 
     public async Task<bool> ExistsByLoginAsync(Guid tenantId, string login, Guid? excludeId = null)

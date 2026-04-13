@@ -21,6 +21,8 @@ public class AppDbContext : DbContext
     public DbSet<Reason> Reasons => Set<Reason>();
     public DbSet<HelpRequest> HelpRequests => Set<HelpRequest>();
     public DbSet<UserSession> UserSessions => Set<UserSession>();
+    public DbSet<Permission> Permissions => Set<Permission>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

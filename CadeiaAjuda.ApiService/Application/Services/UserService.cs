@@ -50,7 +50,8 @@ public class UserService : IUserService
             Phone = dto.Phone,
             Login = dto.Login,
             PasswordHash = HashPassword(dto.Password),
-            TenantId = dto.TenantId
+            TenantId = dto.TenantId,
+            RoleId = dto.RoleId
         };
 
         await _repository.AddAsync(user);
@@ -77,6 +78,7 @@ public class UserService : IUserService
         user.Login = dto.Login;
         user.TenantId = dto.TenantId;
         user.Active = dto.Active;
+        user.RoleId = dto.RoleId;
 
         if (!string.IsNullOrWhiteSpace(dto.Password))
         {
@@ -155,6 +157,11 @@ public class UserService : IUserService
         TenantName = user.Tenant?.Name ?? string.Empty,
         TenantIdentifier = user.Tenant?.Identifier ?? string.Empty,
         Active = user.Active,
-        CreatedAt = user.CreatedAt
+        CreatedAt = user.CreatedAt,
+        RoleId = user.RoleId,
+        RoleName = user.Role?.Name ?? string.Empty,
+        Permissions = user.Role?.RolePermissions
+            .Select(rp => rp.Permission.Key)
+            .ToList() ?? []
     };
 }
