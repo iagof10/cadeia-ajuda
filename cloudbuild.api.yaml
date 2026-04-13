@@ -36,5 +36,5 @@ options:
 substitutions:
   _SERVICE: cadeia-ajuda
   _REGION: us-central1
-  _REPOSITORY: cloud-run
+  _REPOSITORY: cloud-run-source-deploy
   _IMAGE: cadeia-ajuda-api
