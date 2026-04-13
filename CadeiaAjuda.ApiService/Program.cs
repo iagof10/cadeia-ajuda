@@ -445,6 +445,10 @@ app.MapGet("/api/dashboard/{tenantId:guid}", async (Guid tenantId, IDashboardSer
 
 app.MapDefaultEndpoints();
 
-app.Run();
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+var url = $"http://0.0.0.0:{port}";
+app.Run(url);
+
+//app.Run();
 
 record CreateSessionRequest(Guid UserId, Guid TenantId, string? IpAddress, string? UserAgent);

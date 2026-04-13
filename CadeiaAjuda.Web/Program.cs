@@ -6,6 +6,11 @@ using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5012);
+});
+
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 
