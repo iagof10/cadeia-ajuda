@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<Area> Areas => Set<Area>();
     public DbSet<Reason> Reasons => Set<Reason>();
     public DbSet<HelpRequest> HelpRequests => Set<HelpRequest>();
+    public DbSet<UserSession> UserSessions => Set<UserSession>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

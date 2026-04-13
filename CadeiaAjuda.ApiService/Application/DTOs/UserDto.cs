@@ -42,3 +42,11 @@ public class LoginDto
     public string Login { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 }
+
+public class SessionCreateDto
+{
+    public Guid UserId { get; set; }
+    public Guid TenantId { get; set; }
+    public string? IpAddress { get; set; }
+    public string? UserAgent { get; set; }
+}

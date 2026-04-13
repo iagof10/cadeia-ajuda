@@ -75,6 +75,11 @@ builder.Services.AddHttpClient<DashboardApiClient>(client =>
     client.BaseAddress = new("https+http://apiservice");
 });
 
+builder.Services.AddHttpClient<SessionApiClient>(client =>
+{
+    client.BaseAddress = new("https+http://apiservice");
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthStateService>();
 builder.Services.AddSignalR();
@@ -101,7 +106,184 @@ app.MapRazorComponents<App>()
 
 app.MapHub<HelpRequestHub>("/hubs/help-requests");
 
+// --- Auth guard: redirect to login if not authenticated ---
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value ?? "";
+
+    // Protected routes
+    if (path.StartsWith("/admin", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/help-requests", StringComparison.OrdinalIgnoreCase))
+    {
+        var auth = context.RequestServices.GetRequiredService<AuthStateService>();
+        var user = auth.GetCurrentUser();
+
+        if (user is null)
+        {
+            context.Response.Redirect("/");
+            return;
+        }
+
+        var sessionApi = context.RequestServices.GetRequiredService<SessionApiClient>();
+        var token = auth.GetSessionToken();
+
+        if (string.IsNullOrEmpty(token))
+        {
+            auth.Clear();
+            context.Response.Redirect("/");
+            return;
+        }
+
+        var session = await sessionApi.ValidateSessionAsync(token);
+        if (session is null || !session.IsActive)
+        {
+            auth.Clear();
+            context.Response.Redirect("/");
+            return;
+        }
+    }
+
+    await next();
+});
+
+// --- Session validation middleware for BFF endpoints ---
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value ?? "";
+
+    // Only validate BFF endpoints (skip login, static assets, hubs, pages)
+    if (path.StartsWith("/bff/", StringComparison.OrdinalIgnoreCase)
+        && !path.StartsWith("/bff/auth/", StringComparison.OrdinalIgnoreCase))
+    {
+        var auth = context.RequestServices.GetRequiredService<AuthStateService>();
+        var sessionApi = context.RequestServices.GetRequiredService<SessionApiClient>();
+
+        var token = auth.GetSessionToken();
+        if (string.IsNullOrEmpty(token))
+        {
+            context.Response.StatusCode = 401;
+            await context.Response.WriteAsJsonAsync(new { error = "Sessão não encontrada. Faça login novamente." });
+            return;
+        }
+
+        var session = await sessionApi.ValidateSessionAsync(token);
+        if (session is null || !session.IsActive)
+        {
+            auth.Clear();
+            context.Response.StatusCode = 401;
+            await context.Response.WriteAsJsonAsync(new { error = "Sessão expirada ou encerrada em outro dispositivo." });
+            return;
+        }
+
+        // Update last activity (fire and forget - don't block the request)
+        _ = Task.Run(async () =>
+        {
+            try { await sessionApi.UpdateActivityAsync(token); } catch { }
+        });
+    }
+
+    await next();
+});
+
 // --- BFF proxy endpoints for JavaScript pages ---
+
+// --- Server-side Auth endpoints (run in HTTP context, cookies work) ---
+
+app.MapPost("/auth/do-login", async (HttpContext httpContext, AuthApiClient authApi, SessionApiClient sessionApi, AuthStateService auth) =>
+{
+    var form = httpContext.Request.Form;
+    var tenantIdentifier = form["TenantIdentifier"].ToString();
+    var login = form["Login"].ToString();
+    var password = form["Password"].ToString();
+
+    if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password))
+        return Results.Redirect($"/login/{tenantIdentifier}?error=empty");
+
+    var result = await authApi.LoginAsync(tenantIdentifier, login, password);
+    if (!result.Success || result.User is null)
+        return Results.Redirect($"/login/{tenantIdentifier}?error=invalid");
+
+    // Create session (invalidates ALL previous active sessions for this user)
+    var ip = httpContext.Connection.RemoteIpAddress?.ToString();
+    var ua = httpContext.Request.Headers.UserAgent.ToString();
+    var session = await sessionApi.CreateSessionAsync(result.User.Id, result.User.TenantId, ip, ua);
+
+    // Set cookies (HttpContext available here)
+    auth.SetCurrentUser(result.User);
+    if (session is not null)
+    {
+        auth.SetSessionToken(session.SessionToken);
+    }
+
+    return Results.Redirect("/admin/dashboard");
+}).DisableAntiforgery();
+
+app.MapGet("/auth/logout", async (AuthStateService auth, SessionApiClient sessionApi) =>
+{
+    var user = auth.GetCurrentUser();
+    var token = auth.GetSessionToken();
+
+    if (!string.IsNullOrEmpty(token))
+    {
+        try { await sessionApi.InvalidateSessionAsync(token); } catch { }
+    }
+
+    auth.Clear();
+
+    var identifier = user?.TenantIdentifier ?? "";
+    return Results.Redirect($"/login/{identifier}");
+}).DisableAntiforgery();
+
+// --- BFF: Auth ---
+var bffAuth = app.MapGroup("/bff/auth").DisableAntiforgery();
+
+bffAuth.MapPost("/login", async (HttpContext httpContext, AuthApiClient authApi, SessionApiClient sessionApi, AuthStateService auth) =>
+{
+    var dto = await httpContext.Request.ReadFromJsonAsync<BffLoginModel>();
+    if (dto is null) return Results.BadRequest();
+
+    var result = await authApi.LoginAsync(dto.TenantIdentifier, dto.Login, dto.Password);
+    if (!result.Success || result.User is null)
+        return Results.Json(new { error = "Login ou senha inválidos." }, statusCode: 401);
+
+    // Create session (invalidates any previous active session for this user)
+    var ip = httpContext.Connection.RemoteIpAddress?.ToString();
+    var ua = httpContext.Request.Headers.UserAgent.ToString();
+    var session = await sessionApi.CreateSessionAsync(result.User.Id, result.User.TenantId, ip, ua);
+
+    if (session is null)
+        return Results.Json(new { error = "Erro ao criar sessão." }, statusCode: 500);
+
+    // Set cookies
+    auth.SetCurrentUser(result.User);
+    auth.SetSessionToken(session.SessionToken);
+
+    return Results.Ok(new { user = result.User, sessionToken = session.SessionToken, loginAt = session.LoginAt });
+});
+
+bffAuth.MapPost("/logout", async (AuthStateService auth, SessionApiClient sessionApi) =>
+{
+    var token = auth.GetSessionToken();
+    if (!string.IsNullOrEmpty(token))
+    {
+        await sessionApi.InvalidateSessionAsync(token);
+    }
+    auth.Clear();
+    return Results.Ok();
+});
+
+bffAuth.MapGet("/session", async (AuthStateService auth, SessionApiClient sessionApi) =>
+{
+    var token = auth.GetSessionToken();
+    if (string.IsNullOrEmpty(token))
+        return Results.Json(new { valid = false });
+
+    var session = await sessionApi.ValidateSessionAsync(token);
+    if (session is null || !session.IsActive)
+        return Results.Json(new { valid = false });
+
+    return Results.Ok(new { valid = true, loginAt = session.LoginAt, lastActivity = session.LastActivityAt });
+});
 
 // /bff/me - returns current logged user info
 app.MapGet("/bff/me", (AuthStateService auth) =>
@@ -285,3 +467,5 @@ app.MapGet("/bff/dashboard", async (DashboardApiClient api, AuthStateService aut
 app.MapDefaultEndpoints();
 
 app.Run();
+
+record BffLoginModel(string TenantIdentifier, string Login, string Password);

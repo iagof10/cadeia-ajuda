@@ -6,6 +6,7 @@ namespace CadeiaAjuda.Web.Services;
 public class AuthStateService
 {
     private const string CookieName = "CadeiaAjuda.Auth";
+    private const string SessionCookieName = "CadeiaAjuda.Session";
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public AuthStateService(IHttpContextAccessor httpContextAccessor)
@@ -52,9 +53,36 @@ public class AuthStateService
         });
     }
 
+    public string? GetSessionToken()
+    {
+        var context = _httpContextAccessor.HttpContext;
+        if (context is null) return null;
+
+        context.Request.Cookies.TryGetValue(SessionCookieName, out var token);
+        return token;
+    }
+
+    public void SetSessionToken(string sessionToken)
+    {
+        var context = _httpContextAccessor.HttpContext;
+        if (context is null) return;
+
+        var isHttps = context.Request.IsHttps;
+
+        context.Response.Cookies.Append(SessionCookieName, sessionToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = isHttps,
+            SameSite = isHttps ? SameSiteMode.Strict : SameSiteMode.Lax,
+            IsEssential = true,
+            MaxAge = TimeSpan.FromHours(8)
+        });
+    }
+
     public void Clear()
     {
         var context = _httpContextAccessor.HttpContext;
         context?.Response.Cookies.Delete(CookieName);
+        context?.Response.Cookies.Delete(SessionCookieName);
     }
 }

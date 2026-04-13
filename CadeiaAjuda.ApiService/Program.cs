@@ -1,3 +1,4 @@
+using CadeiaAjuda.ApiService.Application.DTOs;
 using CadeiaAjuda.ApiService.Application.Services;
 using CadeiaAjuda.ApiService.Infrastructure.Data;
 using CadeiaAjuda.ApiService.Infrastructure.Repositories;
@@ -24,6 +25,7 @@ builder.Services.AddScoped<IEscalationLevelRepository, EscalationLevelRepository
 builder.Services.AddScoped<IAreaRepository, AreaRepository>();
 builder.Services.AddScoped<IReasonRepository, ReasonRepository>();
 builder.Services.AddScoped<IHelpRequestRepository, HelpRequestRepository>();
+builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
 
 // Services
 builder.Services.AddScoped<ITenantService, TenantService>();
@@ -35,6 +37,7 @@ builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IReasonService, ReasonService>();
 builder.Services.AddScoped<IHelpRequestService, HelpRequestService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IUserSessionService, UserSessionService>();
 
 var app = builder.Build();
 
@@ -451,6 +454,39 @@ helpRequests.MapPatch("/{id:guid}/close", async (Guid id, CadeiaAjuda.ApiService
     {
         return Results.BadRequest(new { error = ex.Message });
     }
+});
+
+// --- Sessions ---
+var sessions = app.MapGroup("/api/sessions");
+
+sessions.MapPost("/", async (SessionCreateDto dto, IUserSessionService service) =>
+{
+    var session = await service.CreateSessionAsync(dto.UserId, dto.TenantId, dto.IpAddress, dto.UserAgent);
+    return Results.Ok(session);
+});
+
+sessions.MapGet("/validate/{token}", async (string token, IUserSessionService service) =>
+{
+    var session = await service.ValidateSessionAsync(token);
+    return session is null ? Results.Unauthorized() : Results.Ok(session);
+});
+
+sessions.MapPatch("/activity/{token}", async (string token, IUserSessionService service) =>
+{
+    await service.UpdateActivityAsync(token);
+    return Results.Ok();
+});
+
+sessions.MapPost("/invalidate/{token}", async (string token, IUserSessionService service) =>
+{
+    await service.InvalidateSessionAsync(token);
+    return Results.Ok();
+});
+
+sessions.MapPost("/invalidate-all/{userId:guid}", async (Guid userId, IUserSessionService service) =>
+{
+    await service.InvalidateAllUserSessionsAsync(userId);
+    return Results.Ok();
 });
 
 // --- Dashboard ---

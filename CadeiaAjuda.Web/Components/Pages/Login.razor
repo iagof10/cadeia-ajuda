@@ -1,8 +1,5 @@
 @page "/login/{Identifier}"
 @layout LoginLayout
-@inject AuthApiClient AuthApi
-@inject AuthStateService AuthState
-@inject NavigationManager Navigation
 
 <PageTitle>Login - Cadeia Ajuda</PageTitle>
 
@@ -34,14 +31,14 @@
                 <p class="text-muted">Faça login para acessar sua conta</p>
             </div>
 
-            <EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="loginForm">
-                <DataAnnotationsValidator />
+            <form method="post" action="/auth/do-login" id="loginForm">
+                <input type="hidden" name="TenantIdentifier" value="@Identifier" />
 
                 <div class="auth-field">
                     <label>Login</label>
                     <div class="auth-input-group">
                         <i class="la la-user"></i>
-                        <InputText @bind-Value="loginModel.Login" class="form-control" placeholder="Seu login de acesso" />
+                        <input type="text" name="Login" class="form-control" placeholder="Seu login de acesso" required />
                     </div>
                 </div>
 
@@ -49,29 +46,22 @@
                     <label>Senha</label>
                     <div class="auth-input-group">
                         <i class="la la-lock"></i>
-                        <InputText @bind-Value="loginModel.Password" type="password" class="form-control" placeholder="Sua senha" />
+                        <input type="password" name="Password" class="form-control" placeholder="Sua senha" required />
                     </div>
                 </div>
 
-                @if (!string.IsNullOrEmpty(errorMessage))
+                @if (!string.IsNullOrEmpty(ErrorMessage))
                 {
                     <div class="auth-error">
-                        <i class="la la-exclamation-circle"></i> @errorMessage
+                        <i class="la la-exclamation-circle"></i> @ErrorMessage
                     </div>
                 }
 
-                <button type="submit" class="btn-auth-submit" disabled="@isLoading">
-                    @if (isLoading)
-                    {
-                        <i class="la la-spinner la-spin"></i>
-                    }
-                    else
-                    {
-                        <span>Entrar</span>
-                        <i class="ft-arrow-right"></i>
-                    }
+                <button type="submit" class="btn-auth-submit">
+                    <span>Entrar</span>
+                    <i class="ft-arrow-right"></i>
                 </button>
-            </EditForm>
+            </form>
 
             <div class="auth-footer">
                 <a href="/">
@@ -348,42 +338,13 @@
     [Parameter]
     public string Identifier { get; set; } = string.Empty;
 
-    [SupplyParameterFromForm]
-    private LoginModel loginModel { get; set; } = new();
+    [SupplyParameterFromQuery(Name = "error")]
+    public string? Error { get; set; }
 
-    private string? errorMessage;
-    private bool isLoading;
-
-    private async Task HandleLogin()
+    private string? ErrorMessage => Error switch
     {
-        isLoading = true;
-        errorMessage = null;
-
-        if (string.IsNullOrWhiteSpace(loginModel.Login) || string.IsNullOrWhiteSpace(loginModel.Password))
-        {
-            errorMessage = "Preencha o login e a senha.";
-            isLoading = false;
-            return;
-        }
-
-        var result = await AuthApi.LoginAsync(Identifier, loginModel.Login, loginModel.Password);
-
-        if (result.Success && result.User is not null)
-        {
-            AuthState.SetCurrentUser(result.User);
-            Navigation.NavigateTo("/admin/dashboard", forceLoad: true);
-        }
-        else
-        {
-            errorMessage = "Login ou senha inválidos.";
-        }
-
-        isLoading = false;
-    }
-
-    private sealed class LoginModel
-    {
-        public string Login { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
+        "invalid" => "Login ou senha inválidos.",
+        "empty" => "Preencha o login e a senha.",
+        _ => null
+    };
 }
