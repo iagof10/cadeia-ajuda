@@ -558,3 +558,4 @@ app.MapDefaultEndpoints();
 app.Run();
 
 record BffLoginModel(string TenantIdentifier, string Login, string Password);
+
