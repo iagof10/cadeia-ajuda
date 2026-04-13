@@ -23,6 +23,7 @@ builder.Services.AddScoped<IHelpRequestTypeRepository, HelpRequestTypeRepository
 builder.Services.AddScoped<IEscalationLevelRepository, EscalationLevelRepository>();
 builder.Services.AddScoped<IAreaRepository, AreaRepository>();
 builder.Services.AddScoped<IReasonRepository, ReasonRepository>();
+builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
 
 // Services
 builder.Services.AddScoped<ITenantService, TenantService>();
@@ -32,6 +33,8 @@ builder.Services.AddScoped<IHelpRequestTypeService, HelpRequestTypeService>();
 builder.Services.AddScoped<IEscalationLevelService, EscalationLevelService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IReasonService, ReasonService>();
+builder.Services.AddScoped<IUserSessionService, UserSessionService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 var app = builder.Build();
 
@@ -361,6 +364,33 @@ app.MapPost("/api/auth/login", async (CadeiaAjuda.ApiService.Application.DTOs.Lo
         : Results.Ok(user);
 });
 
+// --- Sessions ---
+var sessions = app.MapGroup("/api/sessions");
+
+sessions.MapPost("/", async (CreateSessionRequest req, IUserSessionService service) =>
+{
+    var session = await service.CreateSessionAsync(req.UserId, req.TenantId, req.IpAddress, req.UserAgent);
+    return Results.Ok(session);
+});
+
+sessions.MapGet("/validate/{sessionToken}", async (string sessionToken, IUserSessionService service) =>
+{
+    var session = await service.ValidateSessionAsync(sessionToken);
+    return session is null ? Results.NotFound() : Results.Ok(session);
+});
+
+sessions.MapPost("/invalidate/{sessionToken}", async (string sessionToken, IUserSessionService service) =>
+{
+    await service.InvalidateSessionAsync(sessionToken);
+    return Results.Ok();
+});
+
+sessions.MapPatch("/activity/{sessionToken}", async (string sessionToken, IUserSessionService service) =>
+{
+    await service.UpdateActivityAsync(sessionToken);
+    return Results.Ok();
+});
+
 // --- Reasons ---
 var reasons = app.MapGroup("/api/reasons");
 
@@ -406,6 +436,15 @@ reasons.MapPatch("/{id:guid}/toggle-active", async (Guid id, IReasonService serv
     return result ? Results.Ok() : Results.NotFound();
 });
 
+// --- Dashboard ---
+app.MapGet("/api/dashboard/{tenantId:guid}", async (Guid tenantId, IDashboardService service) =>
+{
+    var data = await service.GetDashboardAsync(tenantId);
+    return Results.Ok(data);
+});
+
 app.MapDefaultEndpoints();
 
 app.Run();
+
+record CreateSessionRequest(Guid UserId, Guid TenantId, string? IpAddress, string? UserAgent);
