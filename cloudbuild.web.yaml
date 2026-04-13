@@ -3,7 +3,7 @@ steps:
     args:
       - build
       - -f
-      - CadeiaAjuda.ApiService/Dockerfile
+      - CadeiaAjuda.Web/Dockerfile
       - -t
       - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$COMMIT_SHA
       - .
@@ -26,6 +26,8 @@ steps:
       - --platform
       - managed
       - --allow-unauthenticated
+      - --set-env-vars
+      - ApiBaseUrl=${_API_BASE_URL}
 
 images:
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$COMMIT_SHA
@@ -34,7 +36,8 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _SERVICE: cadeia-ajuda-api
+  _SERVICE: cadeia-ajuda-web
   _REGION: us-central1
   _REPOSITORY: cloud-run-source-deploy
-  _IMAGE: cadeia-ajuda-api
+  _IMAGE: cadeia-ajuda-web
+  _API_BASE_URL: https://cadeia-ajuda-api-REPLACE_ME.a.run.app
