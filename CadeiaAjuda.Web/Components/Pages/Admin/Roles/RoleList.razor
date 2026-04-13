@@ -1,4 +1,4 @@
-@page "/admin/roles"
+@page "/user/roles"
 @inject AuthStateService Auth
 
 <PageTitle>Perfis - Cadeia Ajuda</PageTitle>
@@ -6,7 +6,7 @@
 <section>
     <div class="row mb-2">
         <div class="col-12">
-            <NavLink href="/admin/roles/new" class="btn btn-primary btn-icon mr-1" title="Adicionar perfil">
+            <NavLink href="/user/roles/new" class="btn btn-primary btn-icon mr-1" title="Adicionar perfil">
                 <i class="ft-plus"></i>
             </NavLink>
         </div>
@@ -79,7 +79,7 @@
                                                     <i class="ft-more-vertical"></i>
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-right">
-                                                    <NavLink href="@($"/admin/roles/edit/{role.Id}")" class="dropdown-item">
+                                                    <NavLink href="@($"/user/roles/edit/{role.Id}")" class="dropdown-item">
                                                         <i class="ft-edit-2 mr-1"></i> Editar
                                                     </NavLink>
                                                     <button type="button" class="dropdown-item text-danger"

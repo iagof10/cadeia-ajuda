@@ -1,5 +1,5 @@
-@page "/admin/users/new"
-@page "/admin/users/edit/{Id:guid}"
+@page "/user/users/new"
+@page "/user/users/edit/{Id:guid}"
 @inject UserApiClient Api
 @inject RoleApiClient RoleApi
 @inject AuthStateService Auth
@@ -100,7 +100,7 @@
                             </div>
 
                             <div class="form-actions text-right mt-2">
-                                <NavLink href="/admin/users" class="btn btn-light mr-1">
+                                <NavLink href="/user/users" class="btn btn-light mr-1">
                                     <i class="ft-x"></i> Cancelar
                                 </NavLink>
                                 <button type="submit" class="btn btn-primary" disabled="@isSaving">
@@ -196,7 +196,7 @@
 
         if (response.IsSuccessStatusCode)
         {
-            Navigation.NavigateTo("/admin/users");
+            Navigation.NavigateTo("/user/users");
         }
         else
         {

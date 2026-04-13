@@ -1,4 +1,4 @@
-@page "/admin/reasons"
+@page "/register/reasons"
 @inject ReasonApiClient Api
 
 <PageTitle>Motivos - Cadeia Ajuda</PageTitle>
@@ -6,7 +6,7 @@
 <section class="reasons-list-wrapper">
     <div class="row mb-2">
         <div class="col-12">
-            <NavLink href="/admin/reasons/new" class="btn btn-primary btn-icon mr-1" title="Adicionar motivo">
+            <NavLink href="/register/reasons/new" class="btn btn-primary btn-icon mr-1" title="Adicionar motivo">
                 <i class="ft-plus"></i>
             </NavLink>
         </div>
@@ -74,7 +74,7 @@
                                                         <i class="ft-more-vertical"></i>
                                                     </button>
                                                     <div class="dropdown-menu dropdown-menu-right">
-                                                        <NavLink href="@($"/admin/reasons/edit/{reason.Id}")" class="dropdown-item">
+                                                        <NavLink href="@($"/register/reasons/edit/{reason.Id}")" class="dropdown-item">
                                                             <i class="ft-edit-2 mr-1"></i> Editar
                                                         </NavLink>
                                                         <button type="button" class="dropdown-item @(reason.Active ? "text-warning" : "text-success")"

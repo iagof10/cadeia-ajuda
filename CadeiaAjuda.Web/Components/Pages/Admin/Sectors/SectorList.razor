@@ -1,4 +1,4 @@
-@page "/admin/sectors"
+@page "/register/sectors"
 @inject SectorApiClient Api
 @inject AuthStateService Auth
 
@@ -7,7 +7,7 @@
 <section class="sectors-list-wrapper">
     <div class="row mb-2">
         <div class="col-12">
-            <NavLink href="/admin/sectors/new" class="btn btn-primary btn-icon mr-1" title="Adicionar setor">
+            <NavLink href="/register/sectors/new" class="btn btn-primary btn-icon mr-1" title="Adicionar setor">
                 <i class="ft-plus"></i>
             </NavLink>
         </div>
@@ -75,7 +75,7 @@
                                                         <i class="ft-more-vertical"></i>
                                                     </button>
                                                     <div class="dropdown-menu dropdown-menu-right">
-                                                        <NavLink href="@($"/admin/sectors/edit/{sector.Id}")" class="dropdown-item">
+                                                        <NavLink href="@($"/register/sectors/edit/{sector.Id}")" class="dropdown-item">
                                                             <i class="ft-edit-2 mr-1"></i> Editar
                                                         </NavLink>
                                                         <button type="button" class="dropdown-item @(sector.Active ? "text-warning" : "text-success")"

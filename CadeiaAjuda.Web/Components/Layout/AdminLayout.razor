@@ -12,7 +12,7 @@
                     <a class="nav-link nav-menu-main menu-toggle hidden-xs" href="javascript:void(0)"><i class="ft-menu font-large-1"></i></a>
                 </li>
                 <li class="nav-item">
-                    <NavLink class="navbar-brand" href="/admin/dashboard">
+                    <NavLink class="navbar-brand" href="/dashboard">
                         <img class="brand-logo" alt="Cadeia Ajuda logo" src="app-assets/images/logo/AssistChain-logo.png">
                     </NavLink>
                 </li>
@@ -54,8 +54,8 @@
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
             @if (HasPermission("dashboard.view"))
             {
-                <li class="nav-item @(IsActive("/admin/dashboard") ? "active" : "")">
-                    <NavLink href="/admin/dashboard">
+                <li class="nav-item @(IsActive("/dashboard") ? "active" : "")">
+                    <NavLink href="/dashboard">
                         <i class="la la-home"></i>
                         <span class="menu-title">Dashboard</span>
                     </NavLink>
@@ -63,7 +63,7 @@
             }
             @if (HasAnyPermission("help_request_types.view", "reasons.view", "sectors.view", "areas.view", "escalation.view"))
             {
-                <li class="nav-item @(IsActive("/admin/help-request-types") || IsActive("/admin/reasons") || IsActive("/admin/sectors") || IsActive("/admin/plants") || IsActive("/admin/escalation") ? "active" : "")">
+                <li class="nav-item @(IsActive("/register/help-request-types") || IsActive("/register/reasons") || IsActive("/register/sectors") || IsActive("/register/plants") || IsActive("/register/escalation") ? "active" : "")">
                     <a href="javascript:void(0)">
                         <i class="la la-clipboard"></i>
                         <span class="menu-title">Cadastro</span>
@@ -71,8 +71,8 @@
                     <ul class="menu-content">
                         @if (HasPermission("help_request_types.view"))
                         {
-                            <li class="@(IsActive("/admin/help-request-types") ? "active" : "")">
-                                <NavLink class="menu-item" href="/admin/help-request-types" Match="NavLinkMatch.Prefix">
+                            <li class="@(IsActive("/register/help-request-types") ? "active" : "")">
+                                <NavLink class="menu-item" href="/register/help-request-types" Match="NavLinkMatch.Prefix">
                                     <i class="la la-question-circle"></i>
                                     <span>Tipo de Ajuda</span>
                                 </NavLink>
@@ -80,8 +80,8 @@
                         }
                         @if (HasPermission("reasons.view"))
                         {
-                            <li class="@(IsActive("/admin/reasons") ? "active" : "")">
-                                <NavLink class="menu-item" href="/admin/reasons" Match="NavLinkMatch.Prefix">
+                            <li class="@(IsActive("/register/reasons") ? "active" : "")">
+                                <NavLink class="menu-item" href="/register/reasons" Match="NavLinkMatch.Prefix">
                                     <i class="la la-list"></i>
                                     <span>Motivo</span>
                                 </NavLink>
@@ -89,8 +89,8 @@
                         }
                         @if (HasPermission("sectors.view"))
                         {
-                            <li class="@(IsActive("/admin/sectors") ? "active" : "")">
-                                <NavLink class="menu-item" href="/admin/sectors" Match="NavLinkMatch.Prefix">
+                            <li class="@(IsActive("/register/sectors") ? "active" : "")">
+                                <NavLink class="menu-item" href="/register/sectors" Match="NavLinkMatch.Prefix">
                                     <i class="la la-sitemap"></i>
                                     <span>Setor</span>
                                 </NavLink>
@@ -98,8 +98,8 @@
                         }
                         @if (HasPermission("areas.view"))
                         {
-                            <li class="@(IsActive("/admin/plants") ? "active" : "")">
-                                <NavLink class="menu-item" href="/admin/plants" Match="NavLinkMatch.Prefix">
+                            <li class="@(IsActive("/register/plants") ? "active" : "")">
+                                <NavLink class="menu-item" href="/register/plants" Match="NavLinkMatch.Prefix">
                                     <i class="la la-map"></i>
                                     <span>Planta</span>
                                 </NavLink>
@@ -107,8 +107,8 @@
                         }
                         @if (HasPermission("escalation.view"))
                         {
-                            <li class="@(IsActive("/admin/escalation") ? "active" : "")">
-                                <NavLink class="menu-item" href="/admin/escalation-levels" Match="NavLinkMatch.Prefix">
+                            <li class="@(IsActive("/register/escalation") ? "active" : "")">
+                                <NavLink class="menu-item" href="/register/escalation-levels" Match="NavLinkMatch.Prefix">
                                     <i class="la la-level-up"></i>
                                     <span>Escalação</span>
                                 </NavLink>
@@ -148,8 +148,8 @@
             }
             @if (HasPermission("andon.view"))
             {
-                <li class="nav-item @(IsActive("/admin/andon") ? "active" : "")">
-                    <NavLink href="/admin/andon" Match="NavLinkMatch.Prefix">
+                <li class="nav-item @(IsActive("/andon") ? "active" : "")">
+                    <NavLink href="/andon" Match="NavLinkMatch.Prefix">
                         <i class="la la-bell"></i>
                         <span class="menu-title">Andon</span>
                     </NavLink>
@@ -157,7 +157,7 @@
             }
             @if (HasAnyPermission("users.view", "roles.view"))
             {
-                <li class="nav-item @(IsActive("/admin/users") || IsActive("/admin/roles") ? "active" : "")">
+                <li class="nav-item @(IsActive("/user/users") || IsActive("/user/roles") ? "active" : "")">
                     <a href="javascript:void(0)">
                         <i class="la la-user"></i>
                         <span class="menu-title">Usuário</span>
@@ -165,8 +165,8 @@
                     <ul class="menu-content">
                         @if (HasPermission("users.view"))
                         {
-                            <li class="@(IsActive("/admin/users") ? "active" : "")">
-                                <NavLink class="menu-item" href="/admin/users" Match="NavLinkMatch.Prefix">
+                            <li class="@(IsActive("/user/users") ? "active" : "")">
+                                <NavLink class="menu-item" href="/user/users" Match="NavLinkMatch.Prefix">
                                     <i class="la la-user"></i>
                                     <span>Usuário</span>
                                 </NavLink>
@@ -174,8 +174,8 @@
                         }
                         @if (HasPermission("roles.view"))
                         {
-                            <li class="@(IsActive("/admin/roles") ? "active" : "")">
-                                <NavLink class="menu-item" href="/admin/roles" Match="NavLinkMatch.Prefix">
+                            <li class="@(IsActive("/user/roles") ? "active" : "")">
+                                <NavLink class="menu-item" href="/user/roles" Match="NavLinkMatch.Prefix">
                                     <i class="la la-shield"></i>
                                     <span>Perfil</span>
                                 </NavLink>
@@ -186,8 +186,8 @@
             }
             @if (HasPermission("reports.view"))
             {
-                <li class="nav-item @(IsActive("/admin/reports") ? "active" : "")">
-                    <NavLink href="/admin/reports" Match="NavLinkMatch.Prefix">
+                <li class="nav-item @(IsActive("/reports") ? "active" : "")">
+                    <NavLink href="/reports" Match="NavLinkMatch.Prefix">
                         <i class="la la-bar-chart"></i>
                         <span class="menu-title">Relatório</span>
                     </NavLink>

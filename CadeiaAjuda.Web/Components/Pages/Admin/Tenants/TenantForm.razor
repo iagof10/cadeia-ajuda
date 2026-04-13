@@ -1,5 +1,5 @@
-@page "/admin/tenants/new"
-@page "/admin/tenants/edit/{Id:guid}"
+@page "/tenants/new"
+@page "/tenants/edit/{Id:guid}"
 @inject TenantApiClient Api
 @inject NavigationManager Navigation
 
@@ -84,7 +84,7 @@
                             </div>
 
                             <div class="form-actions text-right mt-2">
-                                <NavLink href="/admin/tenants" class="btn btn-light mr-1">
+                                <NavLink href="/tenants" class="btn btn-light mr-1">
                                     <i class="ft-x"></i> Cancelar
                                 </NavLink>
                                 <button type="submit" class="btn btn-primary" disabled="@isSaving">
@@ -155,7 +155,7 @@
 
         if (response.IsSuccessStatusCode)
         {
-            Navigation.NavigateTo("/admin/tenants");
+            Navigation.NavigateTo("/tenants");
         }
         else
         {
