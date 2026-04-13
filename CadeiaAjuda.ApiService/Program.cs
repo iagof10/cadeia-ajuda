@@ -1,4 +1,3 @@
-using CadeiaAjuda.ApiService.Application.DTOs;
 using CadeiaAjuda.ApiService.Application.Services;
 using CadeiaAjuda.ApiService.Infrastructure.Data;
 using CadeiaAjuda.ApiService.Infrastructure.Repositories;
@@ -24,8 +23,6 @@ builder.Services.AddScoped<IHelpRequestTypeRepository, HelpRequestTypeRepository
 builder.Services.AddScoped<IEscalationLevelRepository, EscalationLevelRepository>();
 builder.Services.AddScoped<IAreaRepository, AreaRepository>();
 builder.Services.AddScoped<IReasonRepository, ReasonRepository>();
-builder.Services.AddScoped<IHelpRequestRepository, HelpRequestRepository>();
-builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
 
 // Services
 builder.Services.AddScoped<ITenantService, TenantService>();
@@ -35,10 +32,6 @@ builder.Services.AddScoped<IHelpRequestTypeService, HelpRequestTypeService>();
 builder.Services.AddScoped<IEscalationLevelService, EscalationLevelService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IReasonService, ReasonService>();
-builder.Services.AddScoped<IHelpRequestService, HelpRequestService>();
-builder.Services.AddScoped<IDashboardService, DashboardService>();
-builder.Services.AddScoped<IUserSessionService, UserSessionService>();
-builder.Services.AddScoped<IRoleService, RoleService>();
 
 var app = builder.Build();
 
@@ -56,7 +49,6 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
-    await PermissionSeeder.SeedPermissionsAsync(db);
     //await DataSeeder.SeedAsync(db);
 }
 
@@ -375,9 +367,6 @@ var reasons = app.MapGroup("/api/reasons");
 reasons.MapGet("/", async (IReasonService service) =>
     Results.Ok(await service.GetAllAsync()));
 
-reasons.MapGet("/by-tenant/{tenantId:guid}", async (Guid tenantId, IReasonService service) =>
-    Results.Ok(await service.GetByTenantIdAsync(tenantId)));
-
 reasons.MapGet("/{id:guid}", async (Guid id, IReasonService service) =>
 {
     var item = await service.GetByIdAsync(id);
@@ -416,139 +405,6 @@ reasons.MapPatch("/{id:guid}/toggle-active", async (Guid id, IReasonService serv
     var result = await service.ToggleActiveAsync(id);
     return result ? Results.Ok() : Results.NotFound();
 });
-
-// --- HelpRequests ---
-var helpRequests = app.MapGroup("/api/help-requests");
-
-helpRequests.MapGet("/", async (IHelpRequestService service) =>
-    Results.Ok(await service.GetAllAsync()));
-
-helpRequests.MapGet("/by-tenant/{tenantId:guid}", async (Guid tenantId, IHelpRequestService service) =>
-    Results.Ok(await service.GetByTenantIdAsync(tenantId)));
-
-helpRequests.MapGet("/{id:guid}", async (Guid id, IHelpRequestService service) =>
-{
-    var item = await service.GetByIdAsync(id);
-    return item is null ? Results.NotFound() : Results.Ok(item);
-});
-
-helpRequests.MapPost("/", async (CadeiaAjuda.ApiService.Application.DTOs.HelpRequestCreateDto dto, IHelpRequestService service) =>
-{
-    try
-    {
-        var created = await service.CreateAsync(dto);
-        return Results.Created($"/api/help-requests/{created.Id}", created);
-    }
-    catch (InvalidOperationException ex)
-    {
-        return Results.BadRequest(new { error = ex.Message });
-    }
-});
-
-helpRequests.MapPatch("/{id:guid}/close", async (Guid id, CadeiaAjuda.ApiService.Application.DTOs.HelpRequestCloseDto dto, IHelpRequestService service) =>
-{
-    try
-    {
-        var result = await service.CloseAsync(id, dto);
-        return result is null ? Results.NotFound() : Results.Ok(result);
-    }
-    catch (InvalidOperationException ex)
-    {
-        return Results.BadRequest(new { error = ex.Message });
-    }
-});
-
-// --- Sessions ---
-var sessions = app.MapGroup("/api/sessions");
-
-sessions.MapPost("/", async (SessionCreateDto dto, IUserSessionService service) =>
-{
-    var session = await service.CreateSessionAsync(dto.UserId, dto.TenantId, dto.IpAddress, dto.UserAgent);
-    return Results.Ok(session);
-});
-
-sessions.MapGet("/validate/{token}", async (string token, IUserSessionService service) =>
-{
-    var session = await service.ValidateSessionAsync(token);
-    return session is null ? Results.Unauthorized() : Results.Ok(session);
-});
-
-sessions.MapPatch("/activity/{token}", async (string token, IUserSessionService service) =>
-{
-    await service.UpdateActivityAsync(token);
-    return Results.Ok();
-});
-
-sessions.MapPost("/invalidate/{token}", async (string token, IUserSessionService service) =>
-{
-    await service.InvalidateSessionAsync(token);
-    return Results.Ok();
-});
-
-sessions.MapPost("/invalidate-all/{userId:guid}", async (Guid userId, IUserSessionService service) =>
-{
-    await service.InvalidateAllUserSessionsAsync(userId);
-    return Results.Ok();
-});
-
-// --- Dashboard ---
-app.MapGet("/api/dashboard/{tenantId:guid}", async (Guid tenantId, IDashboardService service) =>
-    Results.Ok(await service.GetDashboardAsync(tenantId)));
-
-// --- Roles & Permissions ---
-var rolesGroup = app.MapGroup("/api/roles");
-
-rolesGroup.MapGet("/by-tenant/{tenantId:guid}", async (Guid tenantId, IRoleService service) =>
-    Results.Ok(await service.GetByTenantIdAsync(tenantId)));
-
-rolesGroup.MapGet("/{id:guid}", async (Guid id, IRoleService service) =>
-{
-    var item = await service.GetByIdAsync(id);
-    return item is null ? Results.NotFound() : Results.Ok(item);
-});
-
-rolesGroup.MapPost("/", async (RoleCreateDto dto, IRoleService service) =>
-{
-    try
-    {
-        var created = await service.CreateAsync(dto);
-        return Results.Created($"/api/roles/{created.Id}", created);
-    }
-    catch (InvalidOperationException ex)
-    {
-        return Results.BadRequest(new { error = ex.Message });
-    }
-});
-
-rolesGroup.MapPut("/{id:guid}", async (Guid id, RoleUpdateDto dto, IRoleService service) =>
-{
-    dto.Id = id;
-    try
-    {
-        var updated = await service.UpdateAsync(dto);
-        return updated is null ? Results.NotFound() : Results.Ok(updated);
-    }
-    catch (InvalidOperationException ex)
-    {
-        return Results.BadRequest(new { error = ex.Message });
-    }
-});
-
-rolesGroup.MapDelete("/{id:guid}", async (Guid id, IRoleService service) =>
-{
-    try
-    {
-        var result = await service.DeleteAsync(id);
-        return result ? Results.Ok() : Results.NotFound();
-    }
-    catch (InvalidOperationException ex)
-    {
-        return Results.BadRequest(new { error = ex.Message });
-    }
-});
-
-app.MapGet("/api/permissions", async (IRoleService service) =>
-    Results.Ok(await service.GetAllPermissionsAsync()));
 
 app.MapDefaultEndpoints();
 

@@ -65,7 +65,7 @@
                                 }
                             </EditForm>
 
-                            <div @key="permissionsRenderKey">
+                            <div>
                                 <hr />
 
                                 <h5 class="mb-3"><i class="la la-shield"></i> Permissões</h5>
@@ -96,7 +96,10 @@
                                                 @groupKey
                                                 <span class="badge badge-light ml-1">@groupSelectedCount / @groupPerms.Count</span>
                                             </h6>
-                                            <button type="button" class="btn btn-sm btn-link p-0" @onclick="() => ToggleGroupAll(groupKey)" @onclick:stopPropagation="true">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-link p-0"
+                                                    @onclick="() => ToggleGroupAll(groupKey)"
+                                                    @onclick:stopPropagation="true">
                                                 @if (allGroupSelected)
                                                 {
                                                     <span class="text-muted">Desmarcar grupo</span>
@@ -115,18 +118,15 @@
                                                     {
                                                         var pk = perm.Key;
                                                         var selected = selectedPermissions.Contains(pk);
+
                                                         <div class="col-md-4 col-sm-6 col-12 mb-1">
                                                             <div class="perm-item @(selected ? "perm-selected" : "")"
                                                                  @onclick="() => TogglePermission(pk)">
                                                                 <span class="perm-check">
-                                                                    @if (selected)
-                                                                    {
-                                                                        <i class="la la-check-square text-primary"></i>
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <i class="la la-square-o text-muted"></i>
-                                                                    }
+                                                                    <input type="checkbox"
+                                                                           checked="@selected"
+                                                                           @onclick:stopPropagation="true"
+                                                                           @onchange="@(e => OnPermissionCheckboxChanged(pk, e))" />
                                                                 </span>
                                                                 <span>
                                                                     <span class="perm-label">@perm.Name</span>
@@ -181,14 +181,14 @@
         user-select: none;
     }
 
-    .perm-item:hover {
-        background: #f0f4ff;
-    }
+        .perm-item:hover {
+            background: #f0f4ff;
+        }
 
-    .perm-item.perm-selected {
-        background: #e8f4fd;
-        border-color: #1e9ff2;
-    }
+        .perm-item.perm-selected {
+            background: #e8f4fd;
+            border-color: #1e9ff2;
+        }
 
     .perm-check {
         font-size: 1.3rem;
@@ -220,8 +220,7 @@
     private List<PermissionViewModel> allPermissions = [];
     private Dictionary<string, List<PermissionViewModel>> permissionGroups = new();
     private HashSet<string> selectedPermissions = new();
-    private HashSet<string> expandedGroups = new();
-    private int permissionsRenderKey;
+    private Dictionary<string, bool> groupExpanded = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -233,7 +232,7 @@
             .OrderBy(g => g.Min(p => p.SortOrder))
             .ToDictionary(g => g.Key, g => g.OrderBy(p => p.SortOrder).ToList());
 
-        expandedGroups = new HashSet<string>(permissionGroups.Keys);
+        groupExpanded = permissionGroups.Keys.ToDictionary(k => k, _ => true);
 
         if (isEdit)
         {
@@ -247,7 +246,6 @@
             }
         }
 
-        RefreshPermissionsUI();
         isLoading = false;
     }
 
@@ -305,39 +303,51 @@
     {
         if (!selectedPermissions.Remove(key))
             selectedPermissions.Add(key);
-        RefreshPermissionsUI();
+    }
+
+    private void OnPermissionCheckboxChanged(string key, ChangeEventArgs e)
+    {
+        bool isSelected = false;
+
+        if (e.Value is bool boolValue)
+            isSelected = boolValue;
+        else if (e.Value is string stringValue)
+            isSelected = stringValue == "true" || stringValue == "on";
+
+        if (isSelected)
+            selectedPermissions.Add(key);
+        else
+            selectedPermissions.Remove(key);
     }
 
     private void SelectAll()
     {
-        foreach (var p in allPermissions)
-            selectedPermissions.Add(p.Key);
-        RefreshPermissionsUI();
+        selectedPermissions = allPermissions
+            .Select(p => p.Key)
+            .ToHashSet();
     }
 
     private void DeselectAll()
     {
-        selectedPermissions.Clear();
-        RefreshPermissionsUI();
+        selectedPermissions = [];
     }
 
     private void ToggleGroup(string groupName)
     {
-        if (expandedGroups.Contains(groupName))
-            expandedGroups.Remove(groupName);
-        else
-            expandedGroups.Add(groupName);
-        RefreshPermissionsUI();
+        var current = IsGroupExpanded(groupName);
+        groupExpanded[groupName] = !current;
     }
 
     private bool IsGroupExpanded(string groupName)
-        => expandedGroups.Contains(groupName);
+        => groupExpanded.TryGetValue(groupName, out var expanded) && expanded;
 
     private void ToggleGroupAll(string groupName)
     {
-        if (!permissionGroups.TryGetValue(groupName, out var perms)) return;
+        if (!permissionGroups.TryGetValue(groupName, out var perms))
+            return;
 
         var allSelected = perms.All(p => selectedPermissions.Contains(p.Key));
+
         foreach (var p in perms)
         {
             if (allSelected)
@@ -345,14 +355,6 @@
             else
                 selectedPermissions.Add(p.Key);
         }
-
-        RefreshPermissionsUI();
-    }
-
-    private void RefreshPermissionsUI()
-    {
-        permissionsRenderKey++;
-        StateHasChanged();
     }
 
     private sealed class RoleFormModel

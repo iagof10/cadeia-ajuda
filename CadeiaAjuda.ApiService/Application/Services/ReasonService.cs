@@ -19,12 +19,6 @@ public class ReasonService : IReasonService
         return reasons.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<ReasonDto>> GetByTenantIdAsync(Guid tenantId)
-    {
-        var reasons = await _repository.GetByTenantIdAsync(tenantId);
-        return reasons.Select(MapToDto);
-    }
-
     public async Task<ReasonDto?> GetByIdAsync(Guid id)
     {
         var reason = await _repository.GetByIdWithIncludesAsync(id);
