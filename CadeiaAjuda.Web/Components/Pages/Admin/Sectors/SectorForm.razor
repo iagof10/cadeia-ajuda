@@ -1,5 +1,5 @@
-@page "/admin/sectors/new"
-@page "/admin/sectors/edit/{Id:guid}"
+@page "/register/sectors/new"
+@page "/register/sectors/edit/{Id:guid}"
 @inject SectorApiClient Api
 @inject AuthStateService Auth
 @inject NavigationManager Navigation
@@ -59,7 +59,7 @@
                             </div>
 
                             <div class="form-actions text-right mt-2">
-                                <NavLink href="/admin/sectors" class="btn btn-light mr-1">
+                                <NavLink href="/register/sectors" class="btn btn-light mr-1">
                                     <i class="ft-x"></i> Cancelar
                                 </NavLink>
                                 <button type="submit" class="btn btn-primary" disabled="@isSaving">
@@ -157,7 +157,7 @@
 
         if (response.IsSuccessStatusCode)
         {
-            Navigation.NavigateTo("/admin/sectors");
+            Navigation.NavigateTo("/register/sectors");
         }
         else
         {

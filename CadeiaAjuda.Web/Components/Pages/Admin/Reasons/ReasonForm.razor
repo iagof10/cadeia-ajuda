@@ -1,5 +1,5 @@
-@page "/admin/reasons/new"
-@page "/admin/reasons/edit/{Id:guid}"
+@page "/register/reasons/new"
+@page "/register/reasons/edit/{Id:guid}"
 @inject ReasonApiClient Api
 @inject TenantApiClient TenantApi
 @inject NavigationManager Navigation
@@ -70,7 +70,7 @@
                             </div>
 
                             <div class="form-actions text-right mt-2">
-                                <NavLink href="/admin/reasons" class="btn btn-light mr-1">
+                                <NavLink href="/register/reasons" class="btn btn-light mr-1">
                                     <i class="ft-x"></i> Cancelar
                                 </NavLink>
                                 <button type="submit" class="btn btn-primary" disabled="@isSaving">
@@ -149,7 +149,7 @@
 
         if (response.IsSuccessStatusCode)
         {
-            Navigation.NavigateTo("/admin/reasons");
+            Navigation.NavigateTo("/register/reasons");
         }
         else
         {

@@ -1,4 +1,4 @@
-@page "/admin/tenants"
+@page "/tenants"
 @inject TenantApiClient Api
 
 <PageTitle>Empresas - Cadeia Ajuda</PageTitle>
@@ -7,7 +7,7 @@
 <section class="users-list-wrapper">
     <div class="row mb-2 align-items-end">
         <div class="col-12">
-            <NavLink href="/admin/tenants/new" class="btn btn-primary btn-icon mr-1" title="Adicionar empresa">
+            <NavLink href="/tenants/new" class="btn btn-primary btn-icon mr-1" title="Adicionar empresa">
                 <i class="ft-plus"></i>
             </NavLink>
             <button type="button" class="btn btn-outline-danger btn-icon mr-1" title="Exportar PDF">
@@ -101,7 +101,7 @@
                                                         <i class="ft-more-vertical"></i>
                                                     </button>
                                                     <div class="dropdown-menu dropdown-menu-right">
-                                                        <NavLink href="@($"/admin/tenants/edit/{tenant.Id}")" class="dropdown-item">
+                                                        <NavLink href="@($"/tenants/edit/{tenant.Id}")" class="dropdown-item">
                                                             <i class="ft-edit-2 mr-1"></i> Editar
                                                         </NavLink>
                                                         <button type="button" class="dropdown-item" title="Detalhes">

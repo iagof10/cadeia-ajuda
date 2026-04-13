@@ -1,4 +1,4 @@
-@page "/admin/help-request-types"
+@page "/register/help-request-types"
 @inject HelpRequestTypeApiClient Api
 @inject AuthStateService Auth
 
@@ -7,7 +7,7 @@
 <section class="hrt-list-wrapper">
     <div class="row mb-2">
         <div class="col-12">
-            <NavLink href="/admin/help-request-types/new" class="btn btn-primary btn-icon mr-1" title="Adicionar tipo de solicitação">
+            <NavLink href="/register/help-request-types/new" class="btn btn-primary btn-icon mr-1" title="Adicionar tipo de solicitação">
                 <i class="ft-plus"></i>
             </NavLink>
         </div>
@@ -75,7 +75,7 @@
                                                         <i class="ft-more-vertical"></i>
                                                     </button>
                                                     <div class="dropdown-menu dropdown-menu-right">
-                                                        <NavLink href="@($"/admin/help-request-types/edit/{item.Id}")" class="dropdown-item">
+                                                        <NavLink href="@($"/register/help-request-types/edit/{item.Id}")" class="dropdown-item">
                                                             <i class="ft-edit-2 mr-1"></i> Editar
                                                         </NavLink>
                                                         <button type="button" class="dropdown-item @(item.Active ? "text-warning" : "text-success")"

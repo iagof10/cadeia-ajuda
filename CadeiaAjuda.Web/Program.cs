@@ -112,7 +112,12 @@ app.Use(async (context, next) =>
     var path = context.Request.Path.Value ?? "";
 
     // Protected routes
-    if (path.StartsWith("/admin", StringComparison.OrdinalIgnoreCase)
+    if (path.StartsWith("/dashboard", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/register", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/user", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/andon", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/reports", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/tenants", StringComparison.OrdinalIgnoreCase)
         || path.StartsWith("/help-requests", StringComparison.OrdinalIgnoreCase))
     {
         var auth = context.RequestServices.GetRequiredService<AuthStateService>();
@@ -148,7 +153,7 @@ app.Use(async (context, next) =>
             && user.Permissions.Count > 0
             && !user.Permissions.Contains(requiredPermission))
         {
-            context.Response.Redirect("/admin/dashboard?error=forbidden");
+            context.Response.Redirect("/dashboard?error=forbidden");
             return;
         }
     }
@@ -158,17 +163,17 @@ app.Use(async (context, next) =>
 
 static string? GetRequiredPermission(string path)
 {
-    if (path.StartsWith("/admin/dashboard", StringComparison.OrdinalIgnoreCase)) return "dashboard.view";
-    if (path.StartsWith("/admin/help-request-types", StringComparison.OrdinalIgnoreCase)) return "help_request_types.view";
-    if (path.StartsWith("/admin/reasons", StringComparison.OrdinalIgnoreCase)) return "reasons.view";
-    if (path.StartsWith("/admin/sectors", StringComparison.OrdinalIgnoreCase)) return "sectors.view";
-    if (path.StartsWith("/admin/plants", StringComparison.OrdinalIgnoreCase)) return "areas.view";
-    if (path.StartsWith("/admin/areas", StringComparison.OrdinalIgnoreCase)) return "areas.view";
-    if (path.StartsWith("/admin/users", StringComparison.OrdinalIgnoreCase)) return "users.view";
-    if (path.StartsWith("/admin/roles", StringComparison.OrdinalIgnoreCase)) return "roles.view";
-    if (path.StartsWith("/admin/andon", StringComparison.OrdinalIgnoreCase)) return "andon.view";
-    if (path.StartsWith("/admin/reports", StringComparison.OrdinalIgnoreCase)) return "reports.view";
-    if (path.StartsWith("/admin/escalation", StringComparison.OrdinalIgnoreCase)) return "escalation.view";
+    if (path.StartsWith("/dashboard", StringComparison.OrdinalIgnoreCase)) return "dashboard.view";
+    if (path.StartsWith("/register/help-request-types", StringComparison.OrdinalIgnoreCase)) return "help_request_types.view";
+    if (path.StartsWith("/register/reasons", StringComparison.OrdinalIgnoreCase)) return "reasons.view";
+    if (path.StartsWith("/register/sectors", StringComparison.OrdinalIgnoreCase)) return "sectors.view";
+    if (path.StartsWith("/register/plants", StringComparison.OrdinalIgnoreCase)) return "areas.view";
+    if (path.StartsWith("/register/areas", StringComparison.OrdinalIgnoreCase)) return "areas.view";
+    if (path.StartsWith("/user/users", StringComparison.OrdinalIgnoreCase)) return "users.view";
+    if (path.StartsWith("/user/roles", StringComparison.OrdinalIgnoreCase)) return "roles.view";
+    if (path.StartsWith("/andon", StringComparison.OrdinalIgnoreCase)) return "andon.view";
+    if (path.StartsWith("/reports", StringComparison.OrdinalIgnoreCase)) return "reports.view";
+    if (path.StartsWith("/register/escalation", StringComparison.OrdinalIgnoreCase)) return "escalation.view";
     if (path.StartsWith("/help-requests/close", StringComparison.OrdinalIgnoreCase)) return "help_requests.close";
     if (path.StartsWith("/help-requests", StringComparison.OrdinalIgnoreCase)) return "help_requests.view";
     return null;
@@ -252,7 +257,7 @@ app.MapPost("/auth/do-login", async (HttpContext httpContext, AuthApiClient auth
         auth.SetSessionToken(session.SessionToken);
     }
 
-    return Results.Redirect("/admin/dashboard");
+    return Results.Redirect("/dashboard");
 }).DisableAntiforgery();
 
 app.MapGet("/auth/logout", async (AuthStateService auth, SessionApiClient sessionApi) =>

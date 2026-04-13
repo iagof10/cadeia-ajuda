@@ -1,5 +1,5 @@
-@page "/admin/help-request-types/new"
-@page "/admin/help-request-types/edit/{Id:guid}"
+@page "/register/help-request-types/new"
+@page "/register/help-request-types/edit/{Id:guid}"
 @inject HelpRequestTypeApiClient Api
 @inject AuthStateService Auth
 @inject SectorApiClient SectorApi
@@ -72,7 +72,7 @@
                             </div>
 
                             <div class="form-actions text-right mt-2">
-                                <NavLink href="/admin/help-request-types" class="btn btn-light mr-1">
+                                <NavLink href="/register/help-request-types" class="btn btn-light mr-1">
                                     <i class="ft-x"></i> Cancelar
                                 </NavLink>
                                 <button type="submit" class="btn btn-primary" disabled="@isSaving">
@@ -164,7 +164,7 @@
 
         if (response.IsSuccessStatusCode)
         {
-            Navigation.NavigateTo("/admin/help-request-types");
+            Navigation.NavigateTo("/register/help-request-types");
         }
         else
         {

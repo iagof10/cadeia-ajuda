@@ -1,5 +1,5 @@
-@page "/admin/roles/new"
-@page "/admin/roles/edit/{Id:guid}"
+@page "/user/roles/new"
+@page "/user/roles/edit/{Id:guid}"
 @inject RoleApiClient RoleApi
 @inject AuthStateService Auth
 @inject NavigationManager Navigation
@@ -145,7 +145,7 @@
                             <hr />
 
                             <div class="form-actions text-right">
-                                <NavLink href="/admin/roles" class="btn btn-secondary mr-1">
+                                <NavLink href="/user/roles" class="btn btn-secondary mr-1">
                                     <i class="ft-x"></i> Cancelar
                                 </NavLink>
                                 <button type="button" class="btn btn-primary" disabled="@isSaving" @onclick="HandleSubmit">
@@ -286,7 +286,7 @@
 
         if (response.IsSuccessStatusCode)
         {
-            Navigation.NavigateTo("/admin/roles", forceLoad: true);
+            Navigation.NavigateTo("/user/roles", forceLoad: true);
         }
         else
         {
