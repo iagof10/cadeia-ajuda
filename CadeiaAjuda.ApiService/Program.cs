@@ -41,13 +41,13 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();
 
-app.MapOpenApi();
-app.UseSwaggerUI(options =>
+if (app.Environment.IsDevelopment())
 {
-    options.SwaggerEndpoint("/openapi/v1.json", "CadeiaAjuda API");
-});
+    app.MapOpenApi();
+}
 
-// Apply pending migrations on startup
+// Apply pending migrations on startup (development only)
+if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -445,10 +445,6 @@ app.MapGet("/api/dashboard/{tenantId:guid}", async (Guid tenantId, IDashboardSer
 
 app.MapDefaultEndpoints();
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-var url = $"http://0.0.0.0:{port}";
-app.Run(url);
-
-//app.Run();
+app.Run();
 
 record CreateSessionRequest(Guid UserId, Guid TenantId, string? IpAddress, string? UserAgent);
