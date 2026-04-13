@@ -553,4 +553,5 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
+
 record CreateSessionRequest(Guid UserId, Guid TenantId, string? IpAddress, string? UserAgent);
