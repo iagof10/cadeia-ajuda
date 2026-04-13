@@ -7,8 +7,7 @@
     <div class="auth-left">
         <div class="auth-left-content">
             <div class="auth-brand">
-                <img src="app-assets/images/logo/logo.png" alt="logo" />
-                <span>Cadeia Ajuda</span>
+                <img src="app-assets/images/logo/AssistChain-logo-2.png" alt="AssistChain" class="brand-logo-full" />
             </div>
             <h1>Gerencie suas operações com agilidade</h1>
             <p>Plataforma completa para gestão de cadeia de ajuda, chamados e escalonamento em tempo real.</p>
@@ -24,8 +23,7 @@
         <div class="auth-form-wrapper">
             <div class="auth-form-header">
                 <div class="auth-mobile-brand d-lg-none">
-                    <img src="app-assets/images/logo/logo.png" alt="logo" />
-                    <span>Cadeia Ajuda</span>
+                    <img src="app-assets/images/logo/AssistChain-logo.png" alt="AssistChain" class="brand-logo-mobile" />
                 </div>
                 <h2>Bem-vindo de volta!</h2>
                 <p class="text-muted">Faça login para acessar sua conta</p>
@@ -82,7 +80,7 @@
     /* ===== LEFT PANEL ===== */
     .auth-left {
         flex: 0 0 50%;
-        background: linear-gradient(135deg, #1e9ff2 0%, #1565c0 100%);
+        background: linear-gradient(135deg, #ff9700 0%, #f57c00 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -105,16 +103,17 @@
         margin-bottom: 2.5rem;
     }
 
-    .auth-left-content .auth-brand img {
-        width: 36px;
-        height: 36px;
-        filter: brightness(10);
+    .auth-left-content .auth-brand .brand-logo-full {
+        width: 220px;
+        max-width: 100%;
+        height: auto;
+        filter: none;
     }
 
-    .auth-left-content .auth-brand span {
-        font-size: 1.25rem;
-        font-weight: 700;
-        letter-spacing: 0.5px;
+    .auth-mobile-brand .brand-logo-mobile {
+        width: 180px;
+        max-width: 100%;
+        height: auto;
     }
 
     .auth-left-content h1 {
@@ -188,7 +187,7 @@
     .auth-mobile-brand span {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #1e9ff2;
+        color: #f57c00;
     }
 
     .auth-form-header h2 {
@@ -241,8 +240,8 @@
     }
 
     .auth-input-group .form-control:focus {
-        border-color: #1e9ff2;
-        box-shadow: 0 0 0 3px rgba(30, 159, 242, 0.12);
+        border-color: #f57c00;
+        box-shadow: 0 0 0 3px rgba(245, 124, 0, 0.15);
     }
 
     .auth-input-group .form-control::placeholder {
@@ -266,7 +265,7 @@
         height: 48px;
         border: none;
         border-radius: 10px;
-        background: linear-gradient(135deg, #1e9ff2 0%, #1565c0 100%);
+        background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
         color: #fff;
         font-size: 1rem;
         font-weight: 600;
@@ -309,7 +308,7 @@
     }
 
     .auth-footer a:hover {
-        color: #1e9ff2;
+        color: #f57c00;
     }
 
     /* ===== RESPONSIVE ===== */
