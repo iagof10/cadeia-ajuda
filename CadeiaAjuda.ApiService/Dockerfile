@@ -1,0 +1,22 @@
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+WORKDIR /app
+EXPOSE 8080
+
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+# Copiar csprojs primeiro (cache de restore)
+COPY CadeiaAjuda.ServiceDefaults/CadeiaAjuda.ServiceDefaults.csproj CadeiaAjuda.ServiceDefaults/
+COPY CadeiaAjuda.ApiService/CadeiaAjuda.ApiService.csproj CadeiaAjuda.ApiService/
+RUN dotnet restore CadeiaAjuda.ApiService/CadeiaAjuda.ApiService.csproj
+
+# Copiar código e publicar
+COPY CadeiaAjuda.ServiceDefaults/ CadeiaAjuda.ServiceDefaults/
+COPY CadeiaAjuda.ApiService/ CadeiaAjuda.ApiService/
+RUN dotnet publish CadeiaAjuda.ApiService/CadeiaAjuda.ApiService.csproj -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+ENV ASPNETCORE_URLS=http://+:8080
+ENTRYPOINT ["dotnet", "CadeiaAjuda.ApiService.dll"]
