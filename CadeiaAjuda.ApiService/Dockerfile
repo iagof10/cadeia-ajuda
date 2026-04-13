@@ -5,12 +5,10 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Copiar csprojs primeiro (cache de restore)
 COPY CadeiaAjuda.ServiceDefaults/CadeiaAjuda.ServiceDefaults.csproj CadeiaAjuda.ServiceDefaults/
 COPY CadeiaAjuda.ApiService/CadeiaAjuda.ApiService.csproj CadeiaAjuda.ApiService/
 RUN dotnet restore CadeiaAjuda.ApiService/CadeiaAjuda.ApiService.csproj
 
-# Copiar código e publicar
 COPY CadeiaAjuda.ServiceDefaults/ CadeiaAjuda.ServiceDefaults/
 COPY CadeiaAjuda.ApiService/ CadeiaAjuda.ApiService/
 RUN dotnet publish CadeiaAjuda.ApiService/CadeiaAjuda.ApiService.csproj -c Release -o /app/publish
