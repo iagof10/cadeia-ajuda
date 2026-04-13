@@ -1,4 +1,4 @@
-@inherits LayoutComponentBase
+Ôªø@inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject AuthStateService AuthState
 @implements IDisposable
@@ -13,8 +13,7 @@
                 </li>
                 <li class="nav-item">
                     <NavLink class="navbar-brand" href="/admin/dashboard">
-                        <img class="brand-logo" alt="Cadeia Ajuda logo" src="app-assets/images/logo/logo.png">
-                        <h3 class="brand-text">Cadeia Ajuda</h3>
+                        <img class="brand-logo" alt="Cadeia Ajuda logo" src="app-assets/images/logo/AssistChain-logo.png">
                     </NavLink>
                 </li>
                 <li class="nav-item d-md-none">
@@ -111,7 +110,7 @@
                             <li class="@(IsActive("/admin/escalation") ? "active" : "")">
                                 <NavLink class="menu-item" href="/admin/escalation-levels" Match="NavLinkMatch.Prefix">
                                     <i class="la la-level-up"></i>
-                                    <span>EscalaÁ„o</span>
+                                    <span>Escala√ß√£o</span>
                                 </NavLink>
                             </li>
                         }
@@ -161,7 +160,7 @@
                 <li class="nav-item @(IsActive("/admin/users") || IsActive("/admin/roles") ? "active" : "")">
                     <a href="javascript:void(0)">
                         <i class="la la-user"></i>
-                        <span class="menu-title">Usu·rio</span>
+                        <span class="menu-title">Usu√°rio</span>
                     </a>
                     <ul class="menu-content">
                         @if (HasPermission("users.view"))
@@ -169,7 +168,7 @@
                             <li class="@(IsActive("/admin/users") ? "active" : "")">
                                 <NavLink class="menu-item" href="/admin/users" Match="NavLinkMatch.Prefix">
                                     <i class="la la-user"></i>
-                                    <span>Usu·rio</span>
+                                    <span>Usu√°rio</span>
                                 </NavLink>
                             </li>
                         }
@@ -190,7 +189,7 @@
                 <li class="nav-item @(IsActive("/admin/reports") ? "active" : "")">
                     <NavLink href="/admin/reports" Match="NavLinkMatch.Prefix">
                         <i class="la la-bar-chart"></i>
-                        <span class="menu-title">RelatÛrio</span>
+                        <span class="menu-title">Relat√≥rio</span>
                     </NavLink>
                 </li>
             }
@@ -225,6 +224,19 @@
 <!-- END: Footer-->
 
 <style>
+    .navbar-header {
+        width: 240px;
+    }
+
+    .navbar-header .navbar-brand .brand-logo {
+        height: 50px !important;
+        width: auto !important;
+        max-width: none !important;
+        object-fit: contain;
+        display: block;
+        transform: translateY(-6px);
+    }
+
     .user-initials-badge {
         display: inline-flex;
         align-items: center;
@@ -232,7 +244,7 @@
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #1e9ff2 0%, #1565c0 100%);
+        background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
         color: #fff;
         font-size: 0.8rem;
         font-weight: 700;
@@ -306,3 +318,14 @@ private static string GetInitials(string name)
         Navigation.LocationChanged -= OnLocationChanged;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
