@@ -6,15 +6,6 @@ using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Escutar em todas as interfaces apenas em desenvolvimento local (acesso via rede)
-if (builder.Environment.IsDevelopment())
-{
-    builder.WebHost.ConfigureKestrel(options =>
-    {
-        options.ListenAnyIP(5012);
-    });
-}
-
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 
