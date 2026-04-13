@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/.git
+**/.vs
+**/Debug/
+**/Release/
+**/*.user
+**/*.dbmdl
+**/*.jfm
+**/appsettings.Development.json
+**/devcert.pfx
+CadeiaAjuda.AppHost/
+CadeiaAjuda.Web/HtmlReferences/
