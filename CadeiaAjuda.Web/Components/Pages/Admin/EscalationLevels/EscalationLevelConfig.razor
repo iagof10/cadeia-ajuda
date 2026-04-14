@@ -1,366 +1,238 @@
 @page "/register/escalation-levels"
-@attribute [LayoutAttribute(typeof(EmptyLayout))]
+@layout AdminLayout
 
-<!DOCTYPE html>
-<html lang="pt-BR" data-textdirection="ltr">
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
-    <title>Configuração de Escalonamento - Cadeia Ajuda</title>
-    <base href="/" />
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i%7CQuicksand:300,400,500,700" rel="stylesheet" />
-    <link rel="stylesheet" type="text/css" href="app-assets/vendors/css/vendors.min.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/css/bootstrap.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/css/bootstrap-extended.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/css/colors.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/css/components.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/css/core/menu/menu-types/vertical-compact-menu.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/css/core/colors/palette-gradient.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/fonts/simple-line-icons/style.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <style>
-        .escalation-flow { display:flex; align-items:center; flex-wrap:wrap; gap:.5rem; }
-        .escalation-flow-step { display:flex; align-items:center; gap:.5rem; background:#f5f7fa; border:1px solid #e4e7ed; border-radius:8px; padding:.5rem 1rem; }
-        .escalation-flow-badge { display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#1e9ff2 0%,#1565c0 100%); color:#fff; font-weight:700; font-size:.9rem; flex-shrink:0; }
-        .escalation-flow-info { font-size:.85rem; }
-        .escalation-flow-arrow { font-size:1.2rem; color:#1e9ff2; }
-        .esc-actions-toggle { box-shadow:none!important; background:transparent!important; border:0!important; text-decoration:none!important; }
-        .esc-actions-toggle:hover,.esc-actions-toggle:focus,.esc-actions-toggle:active { color:#404e67!important; }
-        .esc-actions-toggle i { font-size:1.1rem; }
+<PageTitle>ConfiguraÃ§Ã£o de Escalonamento - Cadeia Ajuda</PageTitle>
 
-        /* Sector list styles */
-        .sector-list-item { cursor:pointer; padding:.65rem 1rem; border-bottom:1px solid #f0f0f0; transition:background .15s; display:flex; align-items:center; gap:.5rem; }
-        .sector-list-item:last-child { border-bottom:none; }
-        .sector-list-item:hover { background:#f5f7fa; }
-        .sector-list-item.active { background:#e8f4fd; border-left:3px solid #1e9ff2; font-weight:600; }
-        .sector-list-item .sector-color-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; border:1px solid rgba(0,0,0,.1); }
-        .sector-list-item .sector-name { flex:1; font-size:.9rem; }
-        .sector-list-item .sector-count { font-size:.75rem; color:#999; }
-        .sector-panel { position:sticky; top:80px; }
-        .right-panel { min-height: 400px; }
+<style>
+    .escalation-flow { display:flex; align-items:center; flex-wrap:wrap; gap:.5rem; }
+    .escalation-flow-step { display:flex; align-items:center; gap:.5rem; background:#f5f7fa; border:1px solid #e4e7ed; border-radius:8px; padding:.5rem 1rem; }
+    .escalation-flow-badge { display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#1e9ff2 0%,#1565c0 100%); color:#fff; font-weight:700; font-size:.9rem; flex-shrink:0; }
+    .escalation-flow-info { font-size:.85rem; }
+    .escalation-flow-arrow { font-size:1.2rem; color:#1e9ff2; }
+    .esc-actions-toggle { box-shadow:none!important; background:transparent!important; border:0!important; text-decoration:none!important; }
+    .esc-actions-toggle:hover,.esc-actions-toggle:focus,.esc-actions-toggle:active { color:#404e67!important; }
+    .esc-actions-toggle i { font-size:1.1rem; }
 
-        /* Modal styles */
-        .modal-section { background:#f8f9fa; border-radius:8px; padding:1rem 1.25rem; margin-bottom:1rem; }
-        .modal-section-title { font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:#1e9ff2; margin-bottom:.75rem; display:flex; align-items:center; gap:.4rem; }
-        .modal-section-title i { font-size:1rem; }
-        #levelModal .modal-header { border-bottom:none; padding-bottom:0; }
-        #levelModal .modal-footer { border-top:none; padding-top:0; }
-        #levelModal .modal-title { font-weight:700; }
-        #levelModal .form-control { border-radius:6px; border:1px solid #e0e5ec; transition:border-color .2s,box-shadow .2s; }
-        #levelModal .form-control:focus { border-color:#1e9ff2; box-shadow:0 0 0 3px rgba(30,159,242,.12); }
-        #levelModal label { font-size:.85rem; font-weight:600; color:#555; margin-bottom:.3rem; }
+    /* Sector list styles */
+    .sector-list-item { cursor:pointer; padding:.65rem 1rem; border-bottom:1px solid #f0f0f0; transition:background .15s; display:flex; align-items:center; gap:.5rem; }
+    .sector-list-item:last-child { border-bottom:none; }
+    .sector-list-item:hover { background:#f5f7fa; }
+    .sector-list-item.active { background:#e8f4fd; border-left:3px solid #1e9ff2; font-weight:600; }
+    .sector-list-item .sector-color-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; border:1px solid rgba(0,0,0,.1); }
+    .sector-list-item .sector-name { flex:1; font-size:.9rem; }
+    .sector-list-item .sector-count { font-size:.75rem; color:#999; }
+    .sector-panel { position:sticky; top:80px; }
+    .right-panel { min-height: 400px; }
 
-        /* Responsibles as cards */
-        .resp-card { display:flex; align-items:center; gap:.75rem; background:#fff; border:1px solid #e8ecf1; border-radius:8px; padding:.6rem .85rem; margin-bottom:.5rem; transition:border-color .2s,box-shadow .2s; }
-        .resp-card:hover { border-color:#c8d6e5; box-shadow:0 2px 8px rgba(0,0,0,.04); }
-        .resp-card.is-primary { border-left:3px solid #28a745; }
-        .resp-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.85rem; flex-shrink:0; text-transform:uppercase; }
-        .resp-info { flex:1; min-width:0; }
-        .resp-info .resp-name { font-weight:600; font-size:.9rem; color:#333; }
-        .resp-info .resp-role-tag { font-size:.7rem; display:inline-block; padding:1px 8px; border-radius:10px; margin-left:.35rem; }
-        .resp-actions { display:flex; align-items:center; gap:.35rem; flex-shrink:0; }
-        .resp-actions button { border:none; background:none; cursor:pointer; padding:4px 6px; border-radius:4px; transition:background .15s; font-size:.85rem; }
-        .resp-actions .btn-star { color:#ccc; }
-        .resp-actions .btn-star:hover { color:#f0ad4e; background:rgba(240,173,78,.1); }
-        .resp-actions .btn-star.active { color:#f0ad4e; }
-        .resp-actions .btn-trash { color:#ccc; }
-        .resp-actions .btn-trash:hover { color:#dc3545; background:rgba(220,53,69,.08); }
+    /* Modal styles */
+    .modal-section { background:#f8f9fa; border-radius:8px; padding:1rem 1.25rem; margin-bottom:1rem; }
+    .modal-section-title { font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:#1e9ff2; margin-bottom:.75rem; display:flex; align-items:center; gap:.4rem; }
+    .modal-section-title i { font-size:1rem; }
+    #levelModal .modal-header { border-bottom:none; padding-bottom:0; }
+    #levelModal .modal-footer { border-top:none; padding-top:0; }
+    #levelModal .modal-title { font-weight:700; }
+    #levelModal .form-control { border-radius:6px; border:1px solid #e0e5ec; transition:border-color .2s,box-shadow .2s; }
+    #levelModal .form-control:focus { border-color:#1e9ff2; box-shadow:0 0 0 3px rgba(30,159,242,.12); }
+    #levelModal label { font-size:.85rem; font-weight:600; color:#555; margin-bottom:.3rem; }
 
-        .resp-add-bar { display:flex; gap:.5rem; align-items:center; }
-        .resp-add-bar select { flex:1; }
-        .resp-add-bar .btn { flex-shrink:0; border-radius:6px; }
-        .resp-empty { text-align:center; padding:1.5rem; color:#aaa; font-size:.85rem; }
-        .resp-empty i { display:block; font-size:1.5rem; margin-bottom:.3rem; color:#d0d5dd; }
-    </style>
-</head>
-<body class="vertical-layout vertical-compact-menu 2-columns fixed-navbar" data-open="click" data-menu="vertical-compact-menu" data-col="2-columns">
+    /* Responsibles as cards */
+    .resp-card { display:flex; align-items:center; gap:.75rem; background:#fff; border:1px solid #e8ecf1; border-radius:8px; padding:.6rem .85rem; margin-bottom:.5rem; transition:border-color .2s,box-shadow .2s; }
+    .resp-card:hover { border-color:#c8d6e5; box-shadow:0 2px 8px rgba(0,0,0,.04); }
+    .resp-card.is-primary { border-left:3px solid #28a745; }
+    .resp-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.85rem; flex-shrink:0; text-transform:uppercase; }
+    .resp-info { flex:1; min-width:0; }
+    .resp-info .resp-name { font-weight:600; font-size:.9rem; color:#333; }
+    .resp-info .resp-role-tag { font-size:.7rem; display:inline-block; padding:1px 8px; border-radius:10px; margin-left:.35rem; }
+    .resp-actions { display:flex; align-items:center; gap:.35rem; flex-shrink:0; }
+    .resp-actions button { border:none; background:none; cursor:pointer; padding:4px 6px; border-radius:4px; transition:background .15s; font-size:.85rem; }
+    .resp-actions .btn-star { color:#ccc; }
+    .resp-actions .btn-star:hover { color:#f0ad4e; background:rgba(240,173,78,.1); }
+    .resp-actions .btn-star.active { color:#f0ad4e; }
+    .resp-actions .btn-trash { color:#ccc; }
+    .resp-actions .btn-trash:hover { color:#dc3545; background:rgba(220,53,69,.08); }
 
-    <!-- Navbar -->
-    <nav class="header-navbar navbar-expand-md navbar navbar-with-menu navbar-without-dd-arrow fixed-top navbar-light navbar-shadow navbar-brand-center">
-        <div class="navbar-wrapper">
-            <div class="navbar-header">
-                <ul class="nav navbar-nav flex-row">
-                    <li class="nav-item mobile-menu d-md-none mr-auto">
-                        <a class="nav-link nav-menu-main menu-toggle hidden-xs" href="javascript:void(0)"><i class="ft-menu font-large-1"></i></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="navbar-brand" href="/dashboard">
-                            <img class="brand-logo" alt="Cadeia Ajuda logo" src="app-assets/images/logo/logo.png">
-                            <h3 class="brand-text">Cadeia Ajuda</h3>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div class="navbar-container content">
-                <div class="collapse navbar-collapse" id="navbar-mobile">
-                    <ul class="nav navbar-nav mr-auto float-left">
-                        <li class="nav-item d-none d-md-block">
-                            <a class="nav-link nav-menu-main menu-toggle hidden-xs" href="javascript:void(0)"><i class="ft-menu"></i></a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
+    .resp-add-bar { display:flex; gap:.5rem; align-items:center; }
+    .resp-add-bar select { flex:1; }
+    .resp-add-bar .btn { flex-shrink:0; border-radius:6px; }
+    .resp-empty { text-align:center; padding:1.5rem; color:#aaa; font-size:.85rem; }
+    .resp-empty i { display:block; font-size:1.5rem; margin-bottom:.3rem; color:#d0d5dd; }
+</style>
 
-    <!-- Sidebar -->
-    <div class="main-menu menu-fixed menu-light menu-accordion menu-shadow" data-scroll-to-active="true">
-        <div class="main-menu-content">
-            <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
-                <li class="nav-item"><a href="/dashboard"><i class="la la-home"></i><span class="menu-title">Dashboard</span></a></li>
-                <li class="nav-item"><a href="/tenants"><i class="la la-building"></i><span class="menu-title">Empresas</span></a></li>
-                <li class="nav-item">
-                    <a href="javascript:void(0)"><i class="la la-users"></i><span class="menu-title">Usuários</span></a>
-                    <ul class="menu-content">
-                        <li><a class="menu-item" href="/user/users"><i class="la la-user"></i><span>Usuários</span></a></li>
-                        <li><a class="menu-item" href="/user/roles"><i class="la la-shield"></i><span>Perfis</span></a></li>
-                    </ul>
-                </li>
-                <li class="nav-item active">
-                    <a href="javascript:void(0)"><i class="la la-sitemap"></i><span class="menu-title">Setores</span></a>
-                    <ul class="menu-content">
-                        <li><a class="menu-item" href="/register/sectors"><i class="la la-sitemap"></i><span>Setores</span></a></li>
-                        <li class="active"><a class="menu-item" href="/register/escalation-levels"><i class="la la-level-up"></i><span>Escalonamento</span></a></li>
-                    </ul>
-                </li>
-                <li class="nav-item"><a href="/areas"><i class="la la-cubes"></i><span class="menu-title">Áreas</span></a></li>
-                <li class="nav-item"><a href="/locations"><i class="la la-map-marker"></i><span class="menu-title">Localizações</span></a></li>
-                <li class="nav-item">
-                    <a href="javascript:void(0)"><i class="la la-cog"></i><span class="menu-title">Configurações</span></a>
-                    <ul class="menu-content">
-                        <li><a class="menu-item" href="/register/help-request-types"><i class="la la-question-circle"></i><span>Tipos de Solicitação</span></a></li>
-                        <li><a class="menu-item" href="/priorities"><i class="la la-flag"></i><span>Prioridades</span></a></li>
-                        <li><a class="menu-item" href="/settings"><i class="la la-sliders"></i><span>Geral</span></a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
+<div class="row mb-2">
+    <div class="col-12">
+        <h4 class="content-header-title mb-0">ConfiguraÃ§Ã£o de Escalonamento</h4>
+        <p class="text-muted mt-1 mb-0">Configure os nÃ­veis de escalonamento e responsÃ¡veis por setor.</p>
     </div>
+</div>
 
-    <!-- Content -->
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
-            <div class="content-header row"></div>
-            <div class="content-body">
+<div id="alertArea"></div>
 
-                <div class="row mb-2">
-                    <div class="col-12">
-                        <h4 class="content-header-title mb-0">Configuração de Escalonamento</h4>
-                        <p class="text-muted mt-1 mb-0">Configure os níveis de escalonamento e responsáveis por setor.</p>
-                    </div>
+<div class="row">
+    <!-- LEFT: Sector list -->
+    <div class="col-md-3">
+        <div class="card sector-panel">
+            <div class="card-header py-1">
+                <h6 class="card-title mb-0"><i class="la la-sitemap"></i> Setores</h6>
+            </div>
+            <div class="card-body p-0">
+                <div id="sectorListLoading" class="text-center py-3">
+                    <i class="la la-spinner la-spin"></i> Carregando...
                 </div>
-
-                <!-- Alert area -->
-                <div id="alertArea"></div>
-
-                <!-- ===== TWO-COLUMN LAYOUT ===== -->
-                <div class="row">
-
-                    <!-- LEFT: Sector list -->
-                    <div class="col-md-3">
-                        <div class="card sector-panel">
-                            <div class="card-header py-1">
-                                <h6 class="card-title mb-0"><i class="la la-sitemap"></i> Setores</h6>
-                            </div>
-                            <div class="card-body p-0">
-                                <div id="sectorListLoading" class="text-center py-3">
-                                    <i class="la la-spinner la-spin"></i> Carregando...
-                                </div>
-                                <div id="sectorList"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- RIGHT: Configuration panel -->
-                    <div class="col-md-9 right-panel">
-
-                        <!-- Placeholder when no sector selected -->
-                        <div id="noSectorSelected">
-                            <div class="card">
-                                <div class="card-body text-center text-muted py-5">
-                                    <i class="la la-hand-o-left font-large-2 d-block mb-1"></i>
-                                    Selecione um setor na lista ao lado para configurar o escalonamento.
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Config area (hidden until sector selected) -->
-                        <div id="configArea" style="display:none;">
-
-                            <!-- Selected sector header -->
-                            <div class="card mb-2">
-                                <div class="card-body py-2 d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <span class="sector-color-dot d-inline-block mr-1" id="selectedSectorDot" style="width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.1);vertical-align:middle;"></span>
-                                        <strong id="selectedSectorName" class="font-medium-1"></strong>
-                                    </div>
-                                    <button class="btn btn-primary btn-sm" id="btnAddLevel">
-                                        <i class="ft-plus"></i> Novo Nível
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Loading -->
-                            <div id="loadingArea" class="text-center py-3" style="display:none;">
-                                <i class="la la-spinner la-spin font-large-1"></i> Carregando...
-                            </div>
-
-                            <!-- Empty state -->
-                            <div id="emptyState" style="display:none;">
-                                <div class="card">
-                                    <div class="card-body text-center text-muted py-4">
-                                        <i class="la la-level-up font-large-2 d-block mb-1"></i>
-                                        Nenhum nível de escalonamento configurado para este setor.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Level cards -->
-                            <div id="levelsContainer" class="row"></div>
-
-                            <!-- Escalation flow -->
-                            <div id="flowCard" class="card mt-1" style="display:none;">
-                                <div class="card-header py-1">
-                                    <h6 class="card-title mb-0"><i class="la la-random"></i> Fluxo de Escalonamento</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div id="flowContainer" class="escalation-flow"></div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                </div>
-
+                <div id="sectorList"></div>
             </div>
         </div>
     </div>
 
-    <div class="sidenav-overlay"></div>
-    <div class="drag-target"></div>
+    <!-- RIGHT: Configuration panel -->
+    <div class="col-md-9 right-panel">
+        <div id="noSectorSelected">
+            <div class="card">
+                <div class="card-body text-center text-muted py-5">
+                    <i class="la la-hand-o-left font-large-2 d-block mb-1"></i>
+                    Selecione um setor na lista ao lado para configurar o escalonamento.
+                </div>
+            </div>
+        </div>
 
-    <footer class="footer footer-static footer-light navbar-border navbar-shadow">
-        <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2">
-            <span class="float-md-left d-block d-md-inline-block">Copyright &copy; 2025 <a class="text-bold-800 grey darken-2" href="javascript:void(0)">Cadeia Ajuda</a></span>
-            <span class="float-md-right d-none d-lg-block">Painel Administrativo</span>
-        </p>
-    </footer>
-
-    <!-- Modal Add/Edit -->
-    <div class="modal fade" id="levelModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content" style="border:none;border-radius:12px;overflow:hidden;">
-                <div class="modal-header" style="padding:1.25rem 1.5rem .75rem;">
+        <div id="configArea" style="display:none;">
+            <div class="card mb-2">
+                <div class="card-body py-2 d-flex justify-content-between align-items-center">
                     <div>
-                        <h5 class="modal-title" id="modalTitle" style="margin-bottom:2px;">Novo Nível de Escalonamento</h5>
-                        <small class="text-muted" id="modalSubtitle">Preencha os dados abaixo para configurar o nível.</small>
+                        <span class="sector-color-dot d-inline-block mr-1" id="selectedSectorDot" style="width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.1);vertical-align:middle;"></span>
+                        <strong id="selectedSectorName" class="font-medium-1"></strong>
                     </div>
-                    <button type="button" class="close" data-dismiss="modal" style="margin-top:-8px;"><span>&times;</span></button>
-                </div>
-                <div class="modal-body" style="padding:1rem 1.5rem;">
-                    <div id="modalAlert"></div>
-                    <form id="levelForm">
-
-                        <!-- Section: Informações básicas -->
-                        <div class="modal-section">
-                            <div class="modal-section-title"><i class="la la-info-circle"></i> Informações Básicas</div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-2">
-                                        <label>Nome <span class="text-danger">*</span></label>
-                                        <input type="text" id="fName" class="form-control" placeholder="Ex: Nível 1 - Técnico" required />
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group mb-2">
-                                        <label>Ordem <span class="text-danger">*</span></label>
-                                        <input type="number" id="fOrder" class="form-control" min="1" value="1" required />
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group mb-2">
-                                        <label>Tempo (min) <span class="text-danger">*</span></label>
-                                        <input type="number" id="fTime" class="form-control" min="1" value="30" required />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group mb-0">
-                                        <label>Descrição</label>
-                                        <textarea id="fDesc" class="form-control" rows="2" placeholder="Descrição opcional do nível"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Section: Responsáveis -->
-                        <div class="modal-section" style="margin-bottom:0;">
-                            <div class="modal-section-title"><i class="la la-users"></i> Responsáveis</div>
-
-                            <div class="resp-add-bar mb-3">
-                                <select id="fUserSelect" class="form-control">
-                                    <option value="">— Selecione um usuário —</option>
-                                </select>
-                                <label class="d-flex align-items-center mb-0" style="white-space:nowrap;font-size:.82rem;gap:4px;cursor:pointer;">
-                                    <input type="checkbox" id="fIsPrimary" style="margin:0;" /> Principal
-                                </label>
-                                <button type="button" class="btn btn-primary btn-sm" id="btnAddResp" style="padding:5px 14px;">
-                                    <i class="ft-plus"></i>
-                                </button>
-                            </div>
-
-                            <div id="respListWrapper">
-                                <div id="noRespMsg" class="resp-empty">
-                                    <i class="la la-user-plus"></i>
-                                    Adicione responsáveis usando o campo acima.
-                                </div>
-                                <div id="respListContainer" style="display:none;"></div>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-                <div class="modal-footer" style="padding:.75rem 1.5rem 1.25rem;">
-                    <button type="button" class="btn btn-light" data-dismiss="modal" style="border-radius:6px;">
-                        Cancelar
+                    <button class="btn btn-primary btn-sm" id="btnAddLevel" type="button">
+                        <i class="ft-plus"></i> Novo NÃ­vel
                     </button>
-                    <button type="button" class="btn btn-primary" id="btnSave" style="border-radius:6px;padding:6px 24px;">
-                        <i class="la la-check"></i> <span id="btnSaveText">Cadastrar</span>
-                    </button>
+                </div>
+            </div>
+
+            <div id="loadingArea" class="text-center py-3" style="display:none;">
+                <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+            </div>
+
+            <div id="emptyState" style="display:none;">
+                <div class="card">
+                    <div class="card-body text-center text-muted py-4">
+                        <i class="la la-level-up font-large-2 d-block mb-1"></i>
+                        Nenhum nÃ­vel de escalonamento configurado para este setor.
+                    </div>
+                </div>
+            </div>
+
+            <div id="levelsContainer" class="row"></div>
+
+            <div id="flowCard" class="card mt-1" style="display:none;">
+                <div class="card-header py-1">
+                    <h6 class="card-title mb-0"><i class="la la-random"></i> Fluxo de Escalonamento</h6>
+                </div>
+                <div class="card-body">
+                    <div id="flowContainer" class="escalation-flow"></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal Delete -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmar Exclusão</h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+<!-- Modal Add/Edit -->
+<div class="modal fade" id="levelModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="border:none;border-radius:12px;overflow:hidden;">
+            <div class="modal-header" style="padding:1.25rem 1.5rem .75rem;">
+                <div>
+                    <h5 class="modal-title" id="modalTitle" style="margin-bottom:2px;">Novo NÃ­vel de Escalonamento</h5>
+                    <small class="text-muted" id="modalSubtitle">Preencha os dados abaixo para configurar o nÃ­vel.</small>
                 </div>
-                <div class="modal-body">
-                    <p>Deseja realmente excluir o nível <strong id="deleteNameLabel"></strong>?</p>
-                    <p class="text-muted small">Essa ação não pode ser desfeita.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="btnConfirmDelete">
-                        <i class="ft-trash-2"></i> Excluir
-                    </button>
-                </div>
+                <button type="button" class="close" data-dismiss="modal" style="margin-top:-8px;"><span>&times;</span></button>
+            </div>
+            <div class="modal-body" style="padding:1rem 1.5rem;">
+                <div id="modalAlert"></div>
+                <form id="levelForm">
+                    <div class="modal-section">
+                        <div class="modal-section-title"><i class="la la-info-circle"></i> InformaÃ§Ãµes BÃ¡sicas</div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-2">
+                                    <label>Nome <span class="text-danger">*</span></label>
+                                    <input type="text" id="fName" class="form-control" placeholder="Ex: NÃ­vel 1 - TÃ©cnico" required />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-2">
+                                    <label>Ordem <span class="text-danger">*</span></label>
+                                    <input type="number" id="fOrder" class="form-control" min="1" value="1" required />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-2">
+                                    <label>Tempo (min) <span class="text-danger">*</span></label>
+                                    <input type="number" id="fTime" class="form-control" min="1" value="30" required />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group mb-0">
+                                    <label>DescriÃ§Ã£o</label>
+                                    <textarea id="fDesc" class="form-control" rows="2" placeholder="DescriÃ§Ã£o opcional do nÃ­vel"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-section" style="margin-bottom:0;">
+                        <div class="modal-section-title"><i class="la la-users"></i> ResponsÃ¡veis</div>
+                        <div class="resp-add-bar mb-3">
+                            <select id="fUserSelect" class="form-control">
+                                <option value="">â€” Selecione um usuÃ¡rio â€”</option>
+                            </select>
+                            <label class="d-flex align-items-center mb-0" style="white-space:nowrap;font-size:.82rem;gap:4px;cursor:pointer;">
+                                <input type="checkbox" id="fIsPrimary" style="margin:0;" /> Principal
+                            </label>
+                            <button type="button" class="btn btn-primary btn-sm" id="btnAddResp" style="padding:5px 14px;">
+                                <i class="ft-plus"></i>
+                            </button>
+                        </div>
+                        <div id="respListWrapper">
+                            <div id="noRespMsg" class="resp-empty">
+                                <i class="la la-user-plus"></i>
+                                Adicione responsÃ¡veis usando o campo acima.
+                            </div>
+                            <div id="respListContainer" style="display:none;"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="padding:.75rem 1.5rem 1.25rem;">
+                <button type="button" class="btn btn-light" data-dismiss="modal" style="border-radius:6px;">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSave" style="border-radius:6px;padding:6px 24px;">
+                    <i class="la la-check"></i> <span id="btnSaveText">Cadastrar</span>
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="app-assets/vendors/js/vendors.min.js"></script>
-    <script src="app-assets/js/core/app-menu.js"></script>
-    <script src="app-assets/js/core/app.js"></script>
-    <script src="js/escalation-levels.js"></script>
-</body>
-</html>
+<!-- Modal Delete -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar ExclusÃ£o</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Deseja realmente excluir o nÃ­vel <strong id="deleteNameLabel"></strong>?</p>
+                <p class="text-muted small">Essa aÃ§Ã£o nÃ£o pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDelete">
+                    <i class="ft-trash-2"></i> Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/escalation-levels.js" suppress-error="BL9992"></script>

@@ -1,238 +1,140 @@
 @page "/register/plants"
-@attribute [LayoutAttribute(typeof(EmptyLayout))]
+@layout AdminLayout
 
-<!DOCTYPE html>
-<html lang="pt-BR" data-textdirection="ltr">
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
-    <title>Plantas - Cadeia Ajuda</title>
-    <base href="/" />
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i%7CQuicksand:300,400,500,700" rel="stylesheet" />
-    <link rel="stylesheet" type="text/css" href="app-assets/vendors/css/vendors.min.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/css/bootstrap.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/css/bootstrap-extended.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/css/colors.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/css/components.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/css/core/menu/menu-types/vertical-compact-menu.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/css/core/colors/palette-gradient.css" />
-    <link rel="stylesheet" type="text/css" href="app-assets/fonts/simple-line-icons/style.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <style>
-        /* Tree */
-        .area-tree-node { margin-bottom:4px; }
-        .area-tree-header { display:flex; align-items:center; padding:10px 12px; gap:8px; border:1px solid #e4e7ed; border-radius:5px; background:#fff; transition:background-color .15s; }
-        .area-tree-header:hover { background-color:#f5f7fa; }
-        .area-tree-toggle { background:none; border:none; padding:2px 6px; cursor:pointer; color:#6b6f82; font-size:.9rem; min-width:24px; }
-        .area-tree-toggle:hover { color:#1e9ff2; }
-        .area-tree-toggle .ft-chevron-right { transition:transform .2s; display:inline-block; }
-        .area-tree-toggle.expanded .ft-chevron-right { transform:rotate(90deg); }
-        .area-tree-name { font-weight:600; color:#404e67; }
-        .area-tree-desc { color:#8d9daa; font-size:.85rem; }
-        .area-tree-actions { margin-left:auto; display:flex; gap:4px; }
-        .area-tree-actions .btn { padding:2px 8px; font-size:.85rem; }
-        .area-tree-children { margin-left:28px; border-left:2px solid #e4e7ed; padding-left:8px; padding-top:4px; }
-        .area-leaf-icon { color:#b3bac5; min-width:24px; text-align:center; }
-        .area-node-badge { font-size:.75rem; padding:2px 8px; border-radius:10px; }
+<PageTitle>Plantas - Cadeia Ajuda</PageTitle>
 
-        /* Modal */
-        .modal-section { background:#f8f9fa; border-radius:8px; padding:1rem 1.25rem; margin-bottom:1rem; }
-        .modal-section-title { font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:#1e9ff2; margin-bottom:.75rem; display:flex; align-items:center; gap:.4rem; }
-        .modal-section-title i { font-size:1rem; }
-        #areaModal .modal-header { border-bottom:none; padding-bottom:0; }
-        #areaModal .modal-footer { border-top:none; padding-top:0; }
-        #areaModal .modal-title { font-weight:700; }
-        #areaModal .form-control { border-radius:6px; border:1px solid #e0e5ec; transition:border-color .2s,box-shadow .2s; }
-        #areaModal .form-control:focus { border-color:#1e9ff2; box-shadow:0 0 0 3px rgba(30,159,242,.12); }
-        #areaModal label { font-size:.85rem; font-weight:600; color:#555; margin-bottom:.3rem; }
+<style>
+    /* Tree */
+    .area-tree-node { margin-bottom:4px; }
+    .area-tree-header { display:flex; align-items:center; padding:10px 12px; gap:8px; border:1px solid #e4e7ed; border-radius:5px; background:#fff; transition:background-color .15s; }
+    .area-tree-header:hover { background-color:#f5f7fa; }
+    .area-tree-toggle { background:none; border:none; padding:2px 6px; cursor:pointer; color:#6b6f82; font-size:.9rem; min-width:24px; }
+    .area-tree-toggle:hover { color:#1e9ff2; }
+    .area-tree-toggle .ft-chevron-right { transition:transform .2s; display:inline-block; }
+    .area-tree-toggle.expanded .ft-chevron-right { transform:rotate(90deg); }
+    .area-tree-name { font-weight:600; color:#404e67; }
+    .area-tree-desc { color:#8d9daa; font-size:.85rem; }
+    .area-tree-actions { margin-left:auto; display:flex; gap:4px; }
+    .area-tree-actions .btn { padding:2px 8px; font-size:.85rem; }
+    .area-tree-children { margin-left:28px; border-left:2px solid #e4e7ed; padding-left:8px; padding-top:4px; }
+    .area-leaf-icon { color:#b3bac5; min-width:24px; text-align:center; }
+    .area-node-badge { font-size:.75rem; padding:2px 8px; border-radius:10px; }
 
-        .hierarchy-preview { background:#e8f4fd; border-radius:6px; padding:.5rem .75rem; font-size:.85rem; color:#1565c0; }
-        .hierarchy-preview i { margin-right:4px; }
-    </style>
-</head>
-<body class="vertical-layout vertical-compact-menu 2-columns fixed-navbar" data-open="click" data-menu="vertical-compact-menu" data-col="2-columns">
+    /* Modal */
+    .modal-section { background:#f8f9fa; border-radius:8px; padding:1rem 1.25rem; margin-bottom:1rem; }
+    .modal-section-title { font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:#1e9ff2; margin-bottom:.75rem; display:flex; align-items:center; gap:.4rem; }
+    .modal-section-title i { font-size:1rem; }
+    #areaModal .modal-header { border-bottom:none; padding-bottom:0; }
+    #areaModal .modal-footer { border-top:none; padding-top:0; }
+    #areaModal .modal-title { font-weight:700; }
+    #areaModal .form-control { border-radius:6px; border:1px solid #e0e5ec; transition:border-color .2s,box-shadow .2s; }
+    #areaModal .form-control:focus { border-color:#1e9ff2; box-shadow:0 0 0 3px rgba(30,159,242,.12); }
+    #areaModal label { font-size:.85rem; font-weight:600; color:#555; margin-bottom:.3rem; }
 
-    <!-- Navbar -->
-    <nav class="header-navbar navbar-expand-md navbar navbar-with-menu navbar-without-dd-arrow fixed-top navbar-light navbar-shadow navbar-brand-center">
-        <div class="navbar-wrapper">
-            <div class="navbar-header">
-                <ul class="nav navbar-nav flex-row">
-                    <li class="nav-item mobile-menu d-md-none mr-auto">
-                        <a class="nav-link nav-menu-main menu-toggle hidden-xs" href="javascript:void(0)"><i class="ft-menu font-large-1"></i></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="navbar-brand" href="/dashboard">
-                            <img class="brand-logo" alt="Cadeia Ajuda logo" src="app-assets/images/logo/logo.png">
-                            <h3 class="brand-text">Cadeia Ajuda</h3>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div class="navbar-container content">
-                <div class="collapse navbar-collapse" id="navbar-mobile">
-                    <ul class="nav navbar-nav mr-auto float-left">
-                        <li class="nav-item d-none d-md-block">
-                            <a class="nav-link nav-menu-main menu-toggle hidden-xs" href="javascript:void(0)"><i class="ft-menu"></i></a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+    .hierarchy-preview { background:#e8f4fd; border-radius:6px; padding:.5rem .75rem; font-size:.85rem; color:#1565c0; }
+    .hierarchy-preview i { margin-right:4px; }
+</style>
+
+<div class="row mb-2">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="content-header-title mb-0">Plantas</h4>
+            <p class="text-muted mt-1 mb-0">Gerencie a hierarquia de plantas (f√°bricas, linhas, postos).</p>
         </div>
-    </nav>
+        <button class="btn btn-primary" id="btnAddRoot" type="button">
+            <i class="ft-plus"></i> Nova Planta
+        </button>
+    </div>
+</div>
 
-    <!-- Sidebar -->
-    <div class="main-menu menu-fixed menu-light menu-accordion menu-shadow" data-scroll-to-active="true">
-        <div class="main-menu-content">
-            <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
-                <li class="nav-item"><a href="/dashboard"><i class="la la-home"></i><span class="menu-title">Dashboard</span></a></li>
-                <li class="nav-item active">
-                    <a href="javascript:void(0)"><i class="la la-clipboard"></i><span class="menu-title">Cadastro</span></a>
-                    <ul class="menu-content">
-                        <li><a class="menu-item" href="/register/help-request-types"><i class="la la-question-circle"></i><span>Tipo de Ajuda</span></a></li>
-                        <li><a class="menu-item" href="/register/reasons"><i class="la la-list"></i><span>Motivos</span></a></li>
-                        <li><a class="menu-item" href="/register/sectors"><i class="la la-sitemap"></i><span>Setores</span></a></li>
-                        <li class="active"><a class="menu-item" href="/register/plants"><i class="la la-map"></i><span>Planta</span></a></li>
-                    </ul>
-                </li>
-                <li class="nav-item"><a href="/help-requests"><i class="la la-link"></i><span class="menu-title">Cadeia de Ajuda</span></a></li>
-                <li class="nav-item"><a href="/andon"><i class="la la-bell"></i><span class="menu-title">Andon</span></a></li>
-                <li class="nav-item"><a href="/user/users"><i class="la la-user"></i><span class="menu-title">Usu·rio</span></a></li>
-                <li class="nav-item"><a href="/reports"><i class="la la-bar-chart"></i><span class="menu-title">RelatÛrios</span></a></li>
-            </ul>
+<div id="alertArea"></div>
+
+<div id="loadingArea" class="text-center py-3">
+    <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+</div>
+
+<div id="emptyState" style="display:none;">
+    <div class="card">
+        <div class="card-body text-center text-muted py-4">
+            <i class="la la-map font-large-2 d-block mb-1"></i>
+            Nenhuma planta cadastrada. Clique em "Nova Planta" para come√ßar.
         </div>
     </div>
+</div>
 
-    <!-- Content -->
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
-            <div class="content-header row"></div>
-            <div class="content-body">
+<div class="card" id="treeCard" style="display:none;">
+    <div class="card-body">
+        <div id="treeContainer" class="area-tree"></div>
+    </div>
+</div>
 
-                <div class="row mb-2">
-                    <div class="col-12 d-flex justify-content-between align-items-center">
-                        <div>
-                            <h4 class="content-header-title mb-0">Plantas</h4>
-                            <p class="text-muted mt-1 mb-0">Gerencie a hierarquia de plantas (f·bricas, linhas, postos).</p>
+<!-- Modal Add/Edit -->
+<div class="modal fade" id="areaModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border:none;border-radius:12px;overflow:hidden;">
+            <div class="modal-header" style="padding:1.25rem 1.5rem .75rem;">
+                <div>
+                    <h5 class="modal-title" id="modalTitle" style="margin-bottom:2px;">Nova Planta</h5>
+                    <small class="text-muted" id="modalSubtitle">Preencha os dados abaixo.</small>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" style="margin-top:-8px;"><span>&times;</span></button>
+            </div>
+            <div class="modal-body" style="padding:1rem 1.5rem;">
+                <div id="modalAlert"></div>
+                <form id="areaForm">
+                    <div class="modal-section">
+                        <div class="modal-section-title"><i class="la la-info-circle"></i> Informa√ß√µes</div>
+                        <div class="form-group mb-2">
+                            <label>Nome <span class="text-danger">*</span></label>
+                            <input type="text" id="fName" class="form-control" placeholder="Ex: F√°brica SP, Linha 1, Posto A..." required />
                         </div>
-                        <button class="btn btn-primary" id="btnAddRoot">
-                            <i class="ft-plus"></i> Nova Planta
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Alert -->
-                <div id="alertArea"></div>
-
-                <!-- Loading -->
-                <div id="loadingArea" class="text-center py-3">
-                    <i class="la la-spinner la-spin font-large-1"></i> Carregando...
-                </div>
-
-                <!-- Empty state -->
-                <div id="emptyState" style="display:none;">
-                    <div class="card">
-                        <div class="card-body text-center text-muted py-4">
-                            <i class="la la-map font-large-2 d-block mb-1"></i>
-                            Nenhuma planta cadastrada. Clique em "Nova Planta" para comeÁar.
+                        <div class="form-group mb-2">
+                            <label>Descri√ß√£o</label>
+                            <input type="text" id="fDesc" class="form-control" placeholder="Descri√ß√£o opcional" />
+                        </div>
+                        <div class="form-group mb-2">
+                            <label>Planta Pai</label>
+                            <select id="fParent" class="form-control">
+                                <option value="">Nenhuma (planta raiz)</option>
+                            </select>
+                            <small class="text-muted">Selecione a planta √† qual esta pertence, ou deixe vazio para criar uma planta raiz.</small>
+                        </div>
+                        <div id="hierarchyPreview" class="hierarchy-preview mt-2" style="display:none;">
+                            <i class="la la-sitemap"></i> <strong>Hierarquia:</strong> <span id="hierarchyPath"></span>
                         </div>
                     </div>
-                </div>
-
-                <!-- Tree -->
-                <div class="card" id="treeCard" style="display:none;">
-                    <div class="card-body">
-                        <div id="treeContainer" class="area-tree"></div>
-                    </div>
-                </div>
-
+                </form>
+            </div>
+            <div class="modal-footer" style="padding:.75rem 1.5rem 1.25rem;">
+                <button type="button" class="btn btn-light" data-dismiss="modal" style="border-radius:6px;">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSave" style="border-radius:6px;padding:6px 24px;">
+                    <i class="la la-check"></i> <span id="btnSaveText">Cadastrar</span>
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="sidenav-overlay"></div>
-    <div class="drag-target"></div>
-
-    <footer class="footer footer-static footer-light navbar-border navbar-shadow">
-        <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2">
-            <span class="float-md-left d-block d-md-inline-block">Copyright &copy; 2025 <a class="text-bold-800 grey darken-2" href="javascript:void(0)">Cadeia Ajuda</a></span>
-            <span class="float-md-right d-none d-lg-block">Painel Administrativo</span>
-        </p>
-    </footer>
-
-    <!-- Modal Add/Edit -->
-    <div class="modal fade" id="areaModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content" style="border:none;border-radius:12px;overflow:hidden;">
-                <div class="modal-header" style="padding:1.25rem 1.5rem .75rem;">
-                    <div>
-                        <h5 class="modal-title" id="modalTitle" style="margin-bottom:2px;">Nova Planta</h5>
-                        <small class="text-muted" id="modalSubtitle">Preencha os dados abaixo.</small>
-                    </div>
-                    <button type="button" class="close" data-dismiss="modal" style="margin-top:-8px;"><span>&times;</span></button>
-                </div>
-                <div class="modal-body" style="padding:1rem 1.5rem;">
-                    <div id="modalAlert"></div>
-                    <form id="areaForm">
-                        <div class="modal-section">
-                            <div class="modal-section-title"><i class="la la-info-circle"></i> InformaÁıes</div>
-                            <div class="form-group mb-2">
-                                <label>Nome <span class="text-danger">*</span></label>
-                                <input type="text" id="fName" class="form-control" placeholder="Ex: F·brica SP, Linha 1, Posto A..." required />
-                            </div>
-                            <div class="form-group mb-2">
-                                <label>DescriÁ„o</label>
-                                <input type="text" id="fDesc" class="form-control" placeholder="DescriÁ„o opcional" />
-                            </div>
-                            <div class="form-group mb-2">
-                                <label>Planta Pai</label>
-                                <select id="fParent" class="form-control">
-                                    <option value="">Nenhuma (planta raiz)</option>
-                                </select>
-                                <small class="text-muted">Selecione a planta ‡ qual esta pertence, ou deixe vazio para criar uma planta raiz.</small>
-                            </div>
-                            <div id="hierarchyPreview" class="hierarchy-preview mt-2" style="display:none;">
-                                <i class="la la-sitemap"></i> <strong>Hierarquia:</strong> <span id="hierarchyPath"></span>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer" style="padding:.75rem 1.5rem 1.25rem;">
-                    <button type="button" class="btn btn-light" data-dismiss="modal" style="border-radius:6px;">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="btnSave" style="border-radius:6px;padding:6px 24px;">
-                        <i class="la la-check"></i> <span id="btnSaveText">Cadastrar</span>
-                    </button>
-                </div>
+<!-- Modal Delete -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border:none;border-radius:12px;overflow:hidden;">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-weight:700;">Confirmar Exclus√£o</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Deseja realmente excluir a planta <strong id="deleteNameLabel"></strong>?</p>
+                <p class="text-muted small">Essa a√ß√£o n√£o pode ser desfeita. Plantas com sub-plantas n√£o podem ser exclu√≠das.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-dismiss="modal" style="border-radius:6px;">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDelete" style="border-radius:6px;">
+                    <i class="ft-trash-2"></i> Excluir
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal Delete -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content" style="border:none;border-radius:12px;overflow:hidden;">
-                <div class="modal-header">
-                    <h5 class="modal-title" style="font-weight:700;">Confirmar Exclus„o</h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                </div>
-                <div class="modal-body">
-                    <p>Deseja realmente excluir a planta <strong id="deleteNameLabel"></strong>?</p>
-                    <p class="text-muted small">Essa aÁ„o n„o pode ser desfeita. Plantas com sub-plantas n„o podem ser excluÌdas.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-dismiss="modal" style="border-radius:6px;">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="btnConfirmDelete" style="border-radius:6px;">
-                        <i class="ft-trash-2"></i> Excluir
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="app-assets/vendors/js/vendors.min.js"></script>
-    <script src="app-assets/js/core/app-menu.js"></script>
-    <script src="app-assets/js/core/app.js"></script>
-    <script src="js/areas.js"></script>
-</body>
-</html>
+<script src="js/areas.js" suppress-error="BL9992"></script>
