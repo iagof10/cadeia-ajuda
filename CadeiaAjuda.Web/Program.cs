@@ -19,6 +19,8 @@ if (isAspire)
     builder.AddServiceDefaults();
 }
 
+var apiBaseUri = new Uri(apiBaseUrl!);
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -27,67 +29,67 @@ builder.Services.AddOutputCache();
 
 builder.Services.AddHttpClient<WeatherApiClient>(client =>
     {
-        client.BaseAddress = new(apiBaseUrl);
+        client.BaseAddress = apiBaseUri;
     });
 
 builder.Services.AddHttpClient<TenantApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<UserApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<AuthApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<SectorApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<HelpRequestTypeApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<EscalationLevelApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<AreaApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<ReasonApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<HelpRequestApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<DashboardApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<SessionApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<RoleApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpContextAccessor();
@@ -109,7 +111,14 @@ app.UseAntiforgery();
 
 app.UseOutputCache();
 
-app.MapStaticAssets();
+if (isAspire)
+{
+    app.MapStaticAssets();
+}
+else
+{
+    app.UseStaticFiles();
+}
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
