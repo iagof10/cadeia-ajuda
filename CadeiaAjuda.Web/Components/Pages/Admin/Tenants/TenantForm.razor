@@ -44,19 +44,19 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>CNPJ <span class="text-danger">*</span></label>
-                                        <InputText @bind-Value="model.Cnpj" class="form-control" placeholder="00.000.000/0000-00" />
+                                        <InputText @bind-Value="model.Cnpj" class="form-control" placeholder="00.000.000/0000-00" data-mask="cnpj" />
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>E-mail <span class="text-danger">*</span></label>
-                                        <InputText @bind-Value="model.Email" class="form-control" placeholder="contato@empresa.com" />
+                                        <InputText @bind-Value="model.Email" class="form-control" type="email" placeholder="contato@empresa.com" />
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Telefone</label>
-                                        <InputText @bind-Value="model.Phone" class="form-control" placeholder="(00) 00000-0000" />
+                                        <InputText @bind-Value="model.Phone" class="form-control" placeholder="(00) 00000-0000" data-mask="phone" />
                                     </div>
                                 </div>
                             </div>
