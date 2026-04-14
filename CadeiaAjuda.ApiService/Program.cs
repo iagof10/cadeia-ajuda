@@ -57,17 +57,13 @@ app.UseSwaggerUI(options =>
 });
 
 // Apply pending migrations on startup (development only)
-//if (app.Environment.IsDevelopment())
-//{
-//    using var scope = app.Services.CreateScope();
-//    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-//    db.Database.Migrate();
-//    //await DataSeeder.SeedAsync(db);
-//}
-
-using var scope = app.Services.CreateScope();
-var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-await DataSeeder.SeedAsync(db);
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+    //await DataSeeder.SeedAsync(db);
+}
 
 // ============ API Endpoints ============
 
