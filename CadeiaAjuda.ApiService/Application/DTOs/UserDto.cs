@@ -1,5 +1,7 @@
 namespace CadeiaAjuda.ApiService.Application.DTOs;
 
+using CadeiaAjuda.ApiService.Domain.Entities;
+
 public class UserDto
 {
     public Guid Id { get; set; }
@@ -14,6 +16,8 @@ public class UserDto
     public DateTime CreatedAt { get; set; }
     public Guid? RoleId { get; set; }
     public string RoleName { get; set; } = string.Empty;
+    public UserType UserType { get; set; }
+    public string UserTypeName { get; set; } = string.Empty;
     public List<string> Permissions { get; set; } = [];
 }
 
@@ -26,6 +30,7 @@ public class UserCreateDto
     public string Password { get; set; } = string.Empty;
     public Guid TenantId { get; set; }
     public Guid? RoleId { get; set; }
+    public UserType UserType { get; set; } = UserType.Standard;
 }
 
 public class UserUpdateDto
@@ -39,6 +44,7 @@ public class UserUpdateDto
     public Guid TenantId { get; set; }
     public bool Active { get; set; }
     public Guid? RoleId { get; set; }
+    public UserType UserType { get; set; } = UserType.Standard;
 }
 
 public class LoginDto

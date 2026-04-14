@@ -52,7 +52,8 @@ public static class DataSeeder
                 Login = adminLogin,
                 PasswordHash = HashPassword(adminPassword),
                 TenantId = tenant.Id,
-                Active = true
+                Active = true,
+                UserType = UserType.Standard
             };
 
             db.Users.Add(user);

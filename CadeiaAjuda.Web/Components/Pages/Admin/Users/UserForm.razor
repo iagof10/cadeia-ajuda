@@ -85,6 +85,17 @@
                                         <small class="text-muted">Define as permissões de acesso do usuário</small>
                                     </div>
                                 </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Tipo de Usuário</label>
+                                        <InputSelect @bind-Value="model.UserType" class="form-control">
+                                            <option value="@UserType.Standard">Padrão</option>
+                                            <option value="@UserType.Andon">Andon</option>
+                                            <option value="@UserType.Manager">Gestor</option>
+                                            <option value="@UserType.Administrator">Administrator</option>
+                                        </InputSelect>
+                                    </div>
+                                </div>
                                 @if (isEdit)
                                 {
                                     <div class="col-md-4">
@@ -152,7 +163,8 @@
                     Login = user.Login,
                     SelectedTenantId = user.TenantId.ToString(),
                     ActiveValue = user.Active.ToString().ToLower(),
-                    SelectedRoleId = user.RoleId?.ToString() ?? ""
+                    SelectedRoleId = user.RoleId?.ToString() ?? "",
+                    UserType = user.UserType
                 };
             }
         }

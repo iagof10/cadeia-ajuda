@@ -16,6 +16,10 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         builder.Property(t => t.Email).IsRequired().HasMaxLength(200);
         builder.Property(t => t.Phone).HasMaxLength(20);
         builder.Property(t => t.Identifier).IsRequired().HasMaxLength(100);
+        builder.Property(t => t.StandardUserLimit);
+        builder.Property(t => t.AndonUserLimit);
+        builder.Property(t => t.ManagerUserLimit);
+        builder.Property(t => t.AdministratorUserLimit);
         builder.HasIndex(t => t.Cnpj).IsUnique();
         builder.HasIndex(t => t.Identifier).IsUnique();
     }

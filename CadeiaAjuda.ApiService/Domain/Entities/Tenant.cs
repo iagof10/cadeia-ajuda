@@ -8,6 +8,10 @@ public class Tenant : EntityBase
     public string Email { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public string Identifier { get; set; } = string.Empty;
+    public int? StandardUserLimit { get; set; }
+    public int? AndonUserLimit { get; set; }
+    public int? ManagerUserLimit { get; set; }
+    public int? AdministratorUserLimit { get; set; }
 
     // Navigation properties
     public ICollection<User> Users { get; set; } = [];

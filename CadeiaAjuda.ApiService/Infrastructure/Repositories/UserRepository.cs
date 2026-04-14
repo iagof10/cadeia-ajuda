@@ -44,4 +44,7 @@ public class UserRepository : Repository<User>, IUserRepository
 
     public async Task<bool> ExistsByEmailAsync(Guid tenantId, string email, Guid? excludeId = null)
         => await _dbSet.AnyAsync(u => u.TenantId == tenantId && u.Email == email && (!excludeId.HasValue || u.Id != excludeId.Value));
+
+    public async Task<int> CountByTenantAndTypeAsync(Guid tenantId, UserType userType, Guid? excludeId = null)
+        => await _dbSet.CountAsync(u => u.TenantId == tenantId && u.UserType == userType && (!excludeId.HasValue || u.Id != excludeId.Value));
 }

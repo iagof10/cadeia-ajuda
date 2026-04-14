@@ -33,6 +33,7 @@
                                     <th>E-mail</th>
                                     <th>Login</th>
                                     <th>Telefone</th>
+                                    <th>Tipo</th>
                                     <th>Status</th>
                                     <th>Ações</th>
                                 </tr>
@@ -41,7 +42,7 @@
                                 @if (isLoading)
                                 {
                                     <tr>
-                                        <td colspan="6" class="text-center py-3">
+                                        <td colspan="7" class="text-center py-3">
                                             <i class="la la-spinner la-spin font-large-1"></i> Carregando...
                                         </td>
                                     </tr>
@@ -49,7 +50,7 @@
                                 else if (!users.Any())
                                 {
                                     <tr>
-                                        <td colspan="6" class="text-center py-3 text-muted">Nenhum usuário encontrado.</td>
+                                        <td colspan="7" class="text-center py-3 text-muted">Nenhum usuário encontrado.</td>
                                     </tr>
                                 }
                                 else
@@ -61,6 +62,7 @@
                                             <td>@user.Email</td>
                                             <td><code>@user.Login</code></td>
                                             <td>@user.Phone</td>
+                                            <td>@user.UserTypeName</td>
                                             <td>
                                                 @if (user.Active)
                                                 {

@@ -43,6 +43,8 @@ public class UserService : IUserService
         if (await _repository.ExistsByEmailAsync(dto.TenantId, dto.Email))
             throw new InvalidOperationException("Já existe um usuário com este e-mail nesta empresa.");
 
+        await ValidateUserTypeLimitAsync(dto.TenantId, dto.UserType);
+
         var user = new User
         {
             Name = dto.Name,
@@ -51,7 +53,8 @@ public class UserService : IUserService
             Login = dto.Login,
             PasswordHash = HashPassword(dto.Password),
             TenantId = dto.TenantId,
-            RoleId = dto.RoleId
+            RoleId = dto.RoleId,
+            UserType = dto.UserType
         };
 
         await _repository.AddAsync(user);
@@ -72,6 +75,8 @@ public class UserService : IUserService
         if (await _repository.ExistsByEmailAsync(dto.TenantId, dto.Email, dto.Id))
             throw new InvalidOperationException("Já existe um usuário com este e-mail nesta empresa.");
 
+        await ValidateUserTypeLimitAsync(dto.TenantId, dto.UserType, dto.Id);
+
         user.Name = dto.Name;
         user.Email = dto.Email;
         user.Phone = dto.Phone;
@@ -79,6 +84,7 @@ public class UserService : IUserService
         user.TenantId = dto.TenantId;
         user.Active = dto.Active;
         user.RoleId = dto.RoleId;
+        user.UserType = dto.UserType;
 
         if (!string.IsNullOrWhiteSpace(dto.Password))
         {
@@ -116,6 +122,35 @@ public class UserService : IUserService
 
         return MapToDto(user);
     }
+
+    private async Task ValidateUserTypeLimitAsync(Guid tenantId, UserType userType, Guid? excludeUserId = null)
+    {
+        var tenant = await _tenantRepository.GetByIdAsync(tenantId)
+            ?? throw new InvalidOperationException("Empresa não encontrada.");
+
+        var limit = userType switch
+        {
+            UserType.Andon => tenant.AndonUserLimit,
+            UserType.Manager => tenant.ManagerUserLimit,
+            UserType.Administrator => tenant.AdministratorUserLimit,
+            _ => tenant.StandardUserLimit
+        };
+
+        if (!limit.HasValue)
+            return;
+
+        var count = await _repository.CountByTenantAndTypeAsync(tenantId, userType, excludeUserId);
+        if (count >= limit.Value)
+            throw new InvalidOperationException($"Limite de usuários do tipo {GetUserTypeName(userType)} atingido para esta empresa.");
+    }
+
+    private static string GetUserTypeName(UserType userType) => userType switch
+    {
+        UserType.Andon => "Andon",
+        UserType.Manager => "Manager",
+        UserType.Administrator => "Administrator",
+        _ => "Padrão"
+    };
 
     private static string HashPassword(string password)
     {
@@ -160,6 +195,8 @@ public class UserService : IUserService
         CreatedAt = user.CreatedAt,
         RoleId = user.RoleId,
         RoleName = user.Role?.Name ?? string.Empty,
+        UserType = user.UserType,
+        UserTypeName = GetUserTypeName(user.UserType),
         Permissions = user.Role?.RolePermissions
             .Select(rp => rp.Permission.Key)
             .ToList() ?? []
