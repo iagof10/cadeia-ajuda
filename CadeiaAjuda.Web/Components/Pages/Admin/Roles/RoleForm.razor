@@ -97,8 +97,8 @@
                                 <a href="/user/roles" class="btn btn-secondary mr-1">
                                     <i class="ft-x"></i> Cancelar
                                 </a>
-                                <button type="button" class="btn btn-primary" id="btnSave">
-                                    <i class="la la-check"></i> Salvar
+                                <button type="button" class="btn btn-warning" id="btnSave">
+                                    <i class="la la-check"></i> Cadastrar
                                 </button>
                             </div>
                         </div>
@@ -341,7 +341,7 @@
         }
 
         btn.disabled = false;
-        btn.innerHTML = '<i class="la la-check"></i> Salvar';
+        btn.innerHTML = '<i class="la la-check"></i> ' + (isEdit ? 'Salvar Alterações' : 'Cadastrar');
     });
 
     // ---- Init ----
@@ -376,6 +376,7 @@
             if (isEdit && roleId) {
                 $('pageTitle').textContent = 'Editar Perfil';
                 $('statusRow').style.display = '';
+                $('btnSave').innerHTML = '<i class="la la-check"></i> Salvar Alterações';
 
                 var role = await fetchJson('/bff/roles/' + roleId);
                 $('roleName').value = role.name || '';
