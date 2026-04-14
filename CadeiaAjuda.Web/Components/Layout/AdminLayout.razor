@@ -52,7 +52,7 @@
 <div class="main-menu menu-fixed menu-light menu-accordion menu-shadow" data-scroll-to-active="true">
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
-            @if (HasPermission("dashboard.view"))
+            @if (!isAndonUser && HasPermission("dashboard.view"))
             {
                 <li class="nav-item @(IsActive("/dashboard") ? "active" : "")">
                     <NavLink href="/dashboard">
@@ -61,7 +61,7 @@
                     </NavLink>
                 </li>
             }
-            @if (HasAnyPermission("help_request_types.view", "reasons.view", "sectors.view", "areas.view", "escalation.view"))
+            @if (!isAndonUser && HasAnyPermission("help_request_types.view", "reasons.view", "sectors.view", "areas.view", "escalation.view"))
             {
                 <li class="nav-item @(IsActive("/register/help-request-types") || IsActive("/register/reasons") || IsActive("/register/sectors") || IsActive("/register/plants") || IsActive("/register/escalation") ? "active" : "")">
                     <a href="javascript:void(0)">
@@ -117,7 +117,7 @@
                     </ul>
                 </li>
             }
-            @if (HasAnyPermission("help_requests.view", "help_requests.close"))
+            @if (!isAndonUser && HasAnyPermission("help_requests.view", "help_requests.close"))
             {
                 <li class="nav-item @(IsActive("/help-requests") ? "active" : "")">
                     <a href="javascript:void(0)">
@@ -146,7 +146,7 @@
                     </ul>
                 </li>
             }
-            @if (HasPermission("andon.view"))
+            @if (isAndonUser && HasPermission("andon.view"))
             {
                 <li class="nav-item @(IsActive("/andon") ? "active" : "")">
                     <NavLink href="/andon" Match="NavLinkMatch.Prefix">
@@ -155,7 +155,7 @@
                     </NavLink>
                 </li>
             }
-            @if (HasAnyPermission("users.view", "roles.view"))
+            @if (!isAndonUser && HasAnyPermission("users.view", "roles.view"))
             {
                 <li class="nav-item @(IsActive("/user/users") || IsActive("/user/roles") ? "active" : "")">
                     <a href="javascript:void(0)">
@@ -184,7 +184,7 @@
                     </ul>
                 </li>
             }
-            @if (HasPermission("reports.view"))
+            @if (!isAndonUser && HasPermission("reports.view"))
             {
                 <li class="nav-item @(IsActive("/reports") ? "active" : "")">
                     <NavLink href="/reports" Match="NavLinkMatch.Prefix">
@@ -308,6 +308,7 @@ private string currentUserName = "";
 private string userInitials = "";
 private string tenantIdentifier = "";
 private List<string> permissions = [];
+private bool isAndonUser;
 
 protected override void OnInitialized()
 {
@@ -321,6 +322,7 @@ protected override void OnInitialized()
         tenantIdentifier = user.TenantIdentifier;
         userInitials = GetInitials(user.Name);
         permissions = user.Permissions ?? [];
+        isAndonUser = user.UserType == UserType.Andon;
     }
 }
 

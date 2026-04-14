@@ -151,6 +151,20 @@ app.Use(async (context, next) =>
             return;
         }
 
+        // Andon users can only access /andon
+        if (user.UserType == UserType.Andon && !path.StartsWith("/andon", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.Redirect("/andon");
+            return;
+        }
+
+        // Non-Andon users cannot access /andon
+        if (user.UserType != UserType.Andon && path.StartsWith("/andon", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.Redirect("/dashboard");
+            return;
+        }
+
         var sessionApi = context.RequestServices.GetRequiredService<SessionApiClient>();
         var token = auth.GetSessionToken();
 
@@ -279,7 +293,9 @@ app.MapPost("/auth/do-login", async (HttpContext httpContext, AuthApiClient auth
         auth.SetSessionToken(session.SessionToken);
     }
 
-    return Results.Redirect("/dashboard");
+    // Andon users can only access /andon
+    var redirectUrl = result.User.UserType == UserType.Andon ? "/andon" : "/dashboard";
+    return Results.Redirect(redirectUrl);
 }).DisableAntiforgery();
 
 app.MapPost("/auth/check-session", async (HttpContext httpContext, AuthApiClient authApi, SessionApiClient sessionApi) =>
