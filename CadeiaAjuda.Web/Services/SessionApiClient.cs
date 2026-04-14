@@ -46,6 +46,24 @@ public class SessionApiClient
     {
         await _http.PatchAsync($"/api/sessions/activity/{sessionToken}", null);
     }
+
+    public async Task<bool> HasActiveSessionAsync(Guid userId)
+    {
+        try
+        {
+            var result = await _http.GetFromJsonAsync<ActiveSessionResult>($"/api/sessions/active/{userId}");
+            return result?.HasActiveSession ?? false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}
+
+public class ActiveSessionResult
+{
+    public bool HasActiveSession { get; set; }
 }
 
 public class SessionResult

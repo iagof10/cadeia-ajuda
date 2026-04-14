@@ -245,6 +245,7 @@ app.MapPost("/auth/do-login", async (HttpContext httpContext, AuthApiClient auth
     var tenantIdentifier = form["TenantIdentifier"].ToString();
     var login = form["Login"].ToString();
     var password = form["Password"].ToString();
+    var forceLogin = form["ForceLogin"].ToString() == "true";
 
     if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password))
         return Results.Redirect($"/login/{tenantIdentifier}?error=empty");
@@ -252,6 +253,16 @@ app.MapPost("/auth/do-login", async (HttpContext httpContext, AuthApiClient auth
     var result = await authApi.LoginAsync(tenantIdentifier, login, password);
     if (!result.Success || result.User is null)
         return Results.Redirect($"/login/{tenantIdentifier}?error=invalid");
+
+    // Check for active session (unless user already confirmed)
+    if (!forceLogin)
+    {
+        var hasActive = await sessionApi.HasActiveSessionAsync(result.User.Id);
+        if (hasActive)
+        {
+            return Results.Redirect($"/login/{tenantIdentifier}?confirm=active&login={Uri.EscapeDataString(login)}");
+        }
+    }
 
     // Create session (invalidates ALL previous active sessions for this user)
     var ip = httpContext.Connection.RemoteIpAddress?.ToString();
@@ -295,6 +306,16 @@ bffAuth.MapPost("/login", async (HttpContext httpContext, AuthApiClient authApi,
     var result = await authApi.LoginAsync(dto.TenantIdentifier, dto.Login, dto.Password);
     if (!result.Success || result.User is null)
         return Results.Json(new { error = "Login ou senha inválidos." }, statusCode: 401);
+
+    // Check for active session (unless user already confirmed)
+    if (!dto.ForceLogin)
+    {
+        var hasActive = await sessionApi.HasActiveSessionAsync(result.User.Id);
+        if (hasActive)
+        {
+            return Results.Json(new { activeSession = true, message = "Este usuário já possui uma sessão ativa em outro dispositivo. Deseja desconectar e continuar?" }, statusCode: 409);
+        }
+    }
 
     // Create session (invalidates any previous active session for this user)
     var ip = httpContext.Connection.RemoteIpAddress?.ToString();
@@ -565,5 +586,5 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
-record BffLoginModel(string TenantIdentifier, string Login, string Password);
+record BffLoginModel(string TenantIdentifier, string Login, string Password, bool ForceLogin = false);
 
