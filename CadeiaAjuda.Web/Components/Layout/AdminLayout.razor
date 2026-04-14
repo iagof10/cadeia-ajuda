@@ -309,6 +309,7 @@ private string userInitials = "";
 private string tenantIdentifier = "";
 private List<string> permissions = [];
 private bool isAndonUser;
+private bool isAdmin;
 
 protected override void OnInitialized()
 {
@@ -323,19 +324,19 @@ protected override void OnInitialized()
         userInitials = GetInitials(user.Name);
         permissions = user.Permissions ?? [];
         isAndonUser = user.UserType == UserType.Andon;
+        isAdmin = user.UserType == UserType.Administrator;
     }
 }
 
 private bool HasPermission(string key)
 {
-    // No permissions assigned = full access (user without role)
-    if (permissions.Count == 0) return true;
+    if (isAdmin) return true;
     return permissions.Contains(key);
 }
 
 private bool HasAnyPermission(params string[] keys)
 {
-    if (permissions.Count == 0) return true;
+    if (isAdmin) return true;
     return keys.Any(k => permissions.Contains(k));
 }
 

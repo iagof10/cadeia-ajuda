@@ -185,12 +185,14 @@ app.Use(async (context, next) =>
 
         // Permission check per route
         var requiredPermission = GetRequiredPermission(path);
-        if (requiredPermission is not null
-            && user.Permissions.Count > 0
-            && !user.Permissions.Contains(requiredPermission))
+        if (requiredPermission is not null)
         {
-            context.Response.Redirect("/dashboard?error=forbidden");
-            return;
+            // Administrator has full access (andon already blocked above)
+            if (user.UserType != UserType.Administrator && !user.Permissions.Contains(requiredPermission))
+            {
+                context.Response.Redirect("/dashboard?error=forbidden");
+                return;
+            }
         }
     }
 
