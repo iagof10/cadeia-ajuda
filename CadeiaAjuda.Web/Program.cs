@@ -6,11 +6,8 @@ using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var port = builder.Configuration["PORT"];
-if (!string.IsNullOrWhiteSpace(port))
-{
-    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-}
+var port = builder.Configuration["PORT"] ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"];
 var isAspire = string.IsNullOrWhiteSpace(apiBaseUrl);
