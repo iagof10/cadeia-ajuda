@@ -6,9 +6,6 @@ using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var port = builder.Configuration["PORT"] ?? "8080";
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"];
 var isAspire = string.IsNullOrWhiteSpace(apiBaseUrl);
 
@@ -17,6 +14,12 @@ if (isAspire)
     apiBaseUrl = "https+http://apiservice";
     // Add service defaults & Aspire client integrations (only when running under Aspire).
     builder.AddServiceDefaults();
+}
+else
+{
+    // Standalone mode: use PORT env var or default 8080
+    var port = builder.Configuration["PORT"] ?? "8080";
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 }
 
 var apiBaseUri = new Uri(apiBaseUrl!);

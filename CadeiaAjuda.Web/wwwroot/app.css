@@ -66,7 +66,7 @@ h1:focus {
     margin: 0;
     border-right: none;
     box-sizing: border-box;
-    box-shadow: inset -4px 0 0 #666ee8;
+    box-shadow: inset -4px 0 0 #f57c00;
 }
 
 .vertical-compact-menu .main-menu .navigation > li.active > a > i {

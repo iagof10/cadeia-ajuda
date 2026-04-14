@@ -252,6 +252,48 @@
         text-transform: uppercase;
         line-height: 1;
     }
+
+    /* Menu active state: orange instead of blue */
+    .main-menu .navigation > li.active > a {
+        color: #f57c00 !important;
+        background: linear-gradient(118deg, rgba(245,124,0,.2), rgba(245,124,0,.01)) !important;
+    }
+
+    .main-menu .navigation > li.active > a > i {
+        color: #f57c00 !important;
+    }
+
+    .main-menu .navigation li.active > a .menu-title {
+        color: #f57c00 !important;
+    }
+
+    .main-menu .navigation li .menu-content li.active > a {
+        color: #f57c00 !important;
+    }
+
+    .main-menu .navigation > li.active > a::before,
+    .main-menu .navigation > li.active > a::after {
+        background: #f57c00 !important;
+    }
+
+    .main-menu .navigation > li.open > a,
+    .main-menu .navigation > li.menu-collapsed-open > a,
+    .main-menu .navigation > li.active > a,
+    .main-menu .navigation > li.hover > a,
+    .main-menu .navigation > li:hover > a,
+    .vertical-compact-menu .main-menu .navigation > li.active > a,
+    .vertical-compact-menu .main-menu .navigation > li.open > a,
+    .vertical-compact-menu .main-menu .navigation > li.hover > a {
+        border-right-color: #f57c00 !important;
+    }
+
+    .main-menu .navigation > li ul .active {
+        background: transparent !important;
+    }
+
+    .main-menu .navigation > li ul .active > a {
+        color: #f57c00 !important;
+    }
 </style>
 
 @code {
