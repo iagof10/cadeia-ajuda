@@ -1,172 +1,13 @@
 @page "/user/roles/new"
 @page "/user/roles/edit/{Id:guid}"
-@inject RoleApiClient RoleApi
-@inject AuthStateService Auth
-@inject NavigationManager Navigation
+@layout AdminLayout
 
-<PageTitle>@(isEdit ? "Editar" : "Novo") Perfil - Cadeia Ajuda</PageTitle>
+<PageTitle>Perfil - Cadeia Ajuda</PageTitle>
 
-<section>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title">@(isEdit ? "Editar" : "Novo") Perfil</h4>
-                </div>
-                <div class="card-content">
-                    <div class="card-body">
-                        @if (isLoading)
-                        {
-                            <div class="text-center py-3">
-                                <i class="la la-spinner la-spin font-large-1"></i> Carregando...
-                            </div>
-                        }
-                        else
-                        {
-                            @if (!string.IsNullOrEmpty(errorMessage))
-                            {
-                                <div class="alert alert-danger mb-2">
-                                    <i class="la la-exclamation-circle"></i> @errorMessage
-                                </div>
-                            }
-
-                            <EditForm Model="model" OnValidSubmit="HandleSubmit" FormName="roleForm">
-                                <DataAnnotationsValidator />
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Nome do Perfil <span class="text-danger">*</span></label>
-                                            <InputText @bind-Value="model.Name" class="form-control" placeholder="Ex: Operador, Supervisor, Administrador" />
-                                            <ValidationMessage For="@(() => model.Name)" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Descrição</label>
-                                            <InputText @bind-Value="model.Description" class="form-control" placeholder="Descrição do perfil" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                @if (isEdit)
-                                {
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label>Status</label>
-                                                <select class="form-control" @bind="model.ActiveValue">
-                                                    <option value="true">Ativo</option>
-                                                    <option value="false">Inativo</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            </EditForm>
-
-                            <div>
-                                <hr />
-
-                                <h5 class="mb-3"><i class="la la-shield"></i> Permissões</h5>
-
-                                <div class="mb-3">
-                                    <button type="button" class="btn btn-sm btn-outline-primary mr-1" @onclick="SelectAll">
-                                        <i class="ft-check-square"></i> Marcar Todas
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="DeselectAll">
-                                        <i class="ft-square"></i> Desmarcar Todas
-                                    </button>
-                                    <span class="ml-2 text-muted">@selectedPermissions.Count de @allPermissions.Count selecionadas</span>
-                                </div>
-
-                                @foreach (var group in permissionGroups)
-                                {
-                                    var groupKey = group.Key;
-                                    var groupPerms = group.Value;
-                                    var groupSelectedCount = groupPerms.Count(p => selectedPermissions.Contains(p.Key));
-                                    var allGroupSelected = groupSelectedCount == groupPerms.Count;
-
-                                    <div class="card mb-2">
-                                        <div class="card-header py-2 d-flex align-items-center justify-content-between"
-                                             style="background:#f8f9fa;cursor:pointer;"
-                                             @onclick="() => ToggleGroup(groupKey)">
-                                            <h6 class="mb-0">
-                                                <i class="la @(IsGroupExpanded(groupKey) ? "la-angle-down" : "la-angle-right") mr-1"></i>
-                                                @groupKey
-                                                <span class="badge badge-light ml-1">@groupSelectedCount / @groupPerms.Count</span>
-                                            </h6>
-                                            <button type="button"
-                                                    class="btn btn-sm btn-link p-0"
-                                                    @onclick="() => ToggleGroupAll(groupKey)"
-                                                    @onclick:stopPropagation="true">
-                                                @if (allGroupSelected)
-                                                {
-                                                    <span class="text-muted">Desmarcar grupo</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-primary">Marcar grupo</span>
-                                                }
-                                            </button>
-                                        </div>
-                                        @if (IsGroupExpanded(groupKey))
-                                        {
-                                            <div class="card-body py-2">
-                                                <div class="row">
-                                                    @foreach (var perm in groupPerms)
-                                                    {
-                                                        var pk = perm.Key;
-                                                        var selected = selectedPermissions.Contains(pk);
-
-                                                        <div class="col-md-4 col-sm-6 col-12 mb-1">
-                                                            <div class="perm-item @(selected ? "perm-selected" : "")"
-                                                                 @onclick="() => TogglePermission(pk)">
-                                                                <span class="perm-check">
-                                                                    <input type="checkbox"
-                                                                           checked="@selected"
-                                                                           @onclick:stopPropagation="true"
-                                                                           @onchange="@(e => OnPermissionCheckboxChanged(pk, e))" />
-                                                                </span>
-                                                                <span>
-                                                                    <span class="perm-label">@perm.Name</span>
-                                                                    <small class="perm-key text-muted d-block">@pk</small>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    }
-                                                </div>
-                                            </div>
-                                        }
-                                    </div>
-                                }
-                            </div>
-
-                            <hr />
-
-                            <div class="form-actions text-right">
-                                <NavLink href="/user/roles" class="btn btn-secondary mr-1">
-                                    <i class="ft-x"></i> Cancelar
-                                </NavLink>
-                                <button type="button" class="btn btn-primary" disabled="@isSaving" @onclick="HandleSubmit">
-                                    @if (isSaving)
-                                    {
-                                        <i class="la la-spinner la-spin"></i>
-                                    }
-                                    else
-                                    {
-                                        <i class="la la-check"></i>
-                                    }
-                                    Salvar
-                                </button>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+}
 
 <style>
     .perm-item {
@@ -180,188 +21,382 @@
         transition: all .15s;
         user-select: none;
     }
-
-        .perm-item:hover {
-            background: #f0f4ff;
-        }
-
-        .perm-item.perm-selected {
-            background: #e8f4fd;
-            border-color: #1e9ff2;
-        }
-
-    .perm-check {
-        font-size: 1.3rem;
-        line-height: 1;
-        flex-shrink: 0;
-        margin-top: 1px;
-    }
-
-    .perm-label {
-        font-weight: 600;
-        font-size: .9rem;
-    }
-
-    .perm-key {
-        font-size: .75rem;
-    }
+    .perm-item:hover { background: #f0f4ff; }
+    .perm-item.perm-selected { background: #e8f4fd; border-color: #1e9ff2; }
+    .perm-check { font-size: 1.3rem; line-height: 1; flex-shrink: 0; margin-top: 1px; }
+    .perm-label { font-weight: 600; font-size: .9rem; }
+    .perm-key { font-size: .75rem; }
+    .group-header { background: #f8f9fa; cursor: pointer; padding: .5rem 1rem; display: flex; align-items: center; justify-content: space-between; }
+    .group-header h6 { margin: 0; }
+    .group-body { padding: .5rem 1rem; }
 </style>
 
-@code {
-    [Parameter]
-    public Guid? Id { get; set; }
+<section>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title" id="pageTitle">Novo Perfil</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
 
-    private bool isEdit => Id.HasValue;
-    private bool isLoading = true;
-    private bool isSaving;
-    private string? errorMessage;
+                        <div id="loadingArea" class="text-center py-3">
+                            <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+                        </div>
 
-    private RoleFormModel model = new();
-    private List<PermissionViewModel> allPermissions = [];
-    private Dictionary<string, List<PermissionViewModel>> permissionGroups = new();
-    private HashSet<string> selectedPermissions = new();
-    private Dictionary<string, bool> groupExpanded = new();
+                        <div id="formArea" style="display:none;">
+                            <div id="alertArea"></div>
 
-    protected override async Task OnInitializedAsync()
-    {
-        isLoading = true;
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Nome do Perfil <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="roleName" placeholder="Ex: Operador, Supervisor, Administrador" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Descrição</label>
+                                        <input type="text" class="form-control" id="roleDescription" placeholder="Descrição do perfil" />
+                                    </div>
+                                </div>
+                            </div>
 
-        allPermissions = await RoleApi.GetAllPermissionsAsync();
-        permissionGroups = allPermissions
-            .GroupBy(p => p.Group)
-            .OrderBy(g => g.Min(p => p.SortOrder))
-            .ToDictionary(g => g.Key, g => g.OrderBy(p => p.SortOrder).ToList());
+                            <div class="row" id="statusRow" style="display:none;">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Status</label>
+                                        <select class="form-control" id="roleActive">
+                                            <option value="true">Ativo</option>
+                                            <option value="false">Inativo</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
 
-        groupExpanded = permissionGroups.Keys.ToDictionary(k => k, _ => true);
+                            <hr />
 
-        if (isEdit)
-        {
-            var role = await RoleApi.GetByIdAsync(Id!.Value);
-            if (role is not null)
-            {
-                model.Name = role.Name;
-                model.Description = role.Description;
-                model.ActiveValue = role.Active ? "true" : "false";
-                selectedPermissions = new HashSet<string>(role.Permissions);
-            }
-        }
+                            <h5 class="mb-3"><i class="la la-shield"></i> Permissões</h5>
 
-        isLoading = false;
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-sm btn-outline-primary mr-1" id="btnSelectAll">
+                                    <i class="ft-check-square"></i> Marcar Todas
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary mr-1" id="btnDeselectAll">
+                                    <i class="ft-square"></i> Desmarcar Todas
+                                </button>
+                                <span class="ml-2 text-muted" id="permCounter">0 de 0 selecionadas</span>
+                            </div>
+
+                            <div id="permissionsArea"></div>
+
+                            <hr />
+
+                            <div class="form-actions text-right">
+                                <a href="/user/roles" class="btn btn-secondary mr-1">
+                                    <i class="ft-x"></i> Cancelar
+                                </a>
+                                <button type="button" class="btn btn-primary" id="btnSave">
+                                    <i class="la la-check"></i> Salvar
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script suppress-error="BL9992">
+(function () {
+    'use strict';
+
+    if (window.__roleFormInitialized) return;
+    window.__roleFormInitialized = true;
+
+    // ---- Parse route ----
+    var pathParts = window.location.pathname.split('/');
+    var isEdit = pathParts.length >= 4 && pathParts[2] === 'roles' && pathParts[3] === 'edit';
+    var roleId = isEdit && pathParts.length >= 5 ? pathParts[4] : null;
+
+    // ---- State ----
+    var allPermissions = [];
+    var permissionGroups = {};
+    var selectedPermissions = {};
+    var expandedGroups = {};
+    var currentUser = null;
+
+    // ---- DOM ----
+    function $(id) { return document.getElementById(id); }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
     }
 
-    private async Task HandleSubmit()
-    {
-        isSaving = true;
-        errorMessage = null;
+    function showAlert(msg, type) {
+        $('alertArea').innerHTML =
+            '<div class="alert alert-' + type + ' alert-dismissible mb-2" role="alert">' +
+            '<button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>' +
+            '<i class="la la-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i> ' + escapeHtml(msg) +
+            '</div>';
+    }
 
-        if (string.IsNullOrWhiteSpace(model.Name))
-        {
-            errorMessage = "Informe o nome do perfil.";
-            isSaving = false;
+    // ---- API ----
+    async function fetchJson(url) {
+        var resp = await fetch(url);
+        if (!resp.ok) throw new Error('Erro ao carregar');
+        return await resp.json();
+    }
+
+    // ---- Render ----
+    function updateCounter() {
+        var total = allPermissions.length;
+        var selected = Object.keys(selectedPermissions).length;
+        $('permCounter').textContent = selected + ' de ' + total + ' selecionadas';
+    }
+
+    function renderPermissions() {
+        var container = $('permissionsArea');
+        container.innerHTML = '';
+
+        var groupNames = Object.keys(permissionGroups);
+        groupNames.forEach(function (groupName) {
+            var perms = permissionGroups[groupName];
+            var isExpanded = expandedGroups[groupName] !== false;
+
+            var groupSelectedCount = perms.filter(function (p) { return selectedPermissions[p.key]; }).length;
+            var allGroupSelected = groupSelectedCount === perms.length;
+
+            var card = document.createElement('div');
+            card.className = 'card mb-2';
+
+            // Header
+            var header = document.createElement('div');
+            header.className = 'group-header';
+            header.innerHTML =
+                '<h6>' +
+                    '<i class="la ' + (isExpanded ? 'la-angle-down' : 'la-angle-right') + ' mr-1"></i>' +
+                    escapeHtml(groupName) +
+                    ' <span class="badge badge-light ml-1">' + groupSelectedCount + ' / ' + perms.length + '</span>' +
+                '</h6>' +
+                '<button type="button" class="btn btn-sm btn-link p-0 btn-toggle-group" data-group="' + escapeHtml(groupName) + '">' +
+                    (allGroupSelected
+                        ? '<span class="text-muted">Desmarcar grupo</span>'
+                        : '<span class="text-primary">Marcar grupo</span>') +
+                '</button>';
+
+            // Click header to expand/collapse
+            header.querySelector('h6').addEventListener('click', function () {
+                expandedGroups[groupName] = !isExpanded;
+                renderPermissions();
+            });
+
+            // Click "Marcar grupo" / "Desmarcar grupo"
+            header.querySelector('.btn-toggle-group').addEventListener('click', function (e) {
+                e.stopPropagation();
+                perms.forEach(function (p) {
+                    if (allGroupSelected)
+                        delete selectedPermissions[p.key];
+                    else
+                        selectedPermissions[p.key] = true;
+                });
+                updateCounter();
+                renderPermissions();
+            });
+
+            card.appendChild(header);
+
+            // Body (permissions)
+            if (isExpanded) {
+                var body = document.createElement('div');
+                body.className = 'group-body';
+
+                var row = document.createElement('div');
+                row.className = 'row';
+
+                perms.forEach(function (perm) {
+                    var isSelected = !!selectedPermissions[perm.key];
+
+                    var col = document.createElement('div');
+                    col.className = 'col-md-4 col-sm-6 col-12 mb-1';
+
+                    var item = document.createElement('div');
+                    item.className = 'perm-item' + (isSelected ? ' perm-selected' : '');
+
+                    var cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.checked = isSelected;
+
+                    var labelSpan = document.createElement('span');
+                    labelSpan.innerHTML =
+                        '<span class="perm-label">' + escapeHtml(perm.name) + '</span>' +
+                        '<small class="perm-key text-muted d-block">' + escapeHtml(perm.key) + '</small>';
+
+                    var checkSpan = document.createElement('span');
+                    checkSpan.className = 'perm-check';
+                    checkSpan.appendChild(cb);
+
+                    item.appendChild(checkSpan);
+                    item.appendChild(labelSpan);
+
+                    // Click on item or checkbox toggles
+                    function toggle(e) {
+                        if (selectedPermissions[perm.key])
+                            delete selectedPermissions[perm.key];
+                        else
+                            selectedPermissions[perm.key] = true;
+                        updateCounter();
+                        renderPermissions();
+                    }
+
+                    item.addEventListener('click', function (e) {
+                        if (e.target === cb) return; // handled by checkbox
+                        toggle(e);
+                    });
+
+                    cb.addEventListener('change', function (e) {
+                        toggle(e);
+                    });
+
+                    col.appendChild(item);
+                    row.appendChild(col);
+                });
+
+                body.appendChild(row);
+                card.appendChild(body);
+            }
+
+            container.appendChild(card);
+        });
+
+        updateCounter();
+    }
+
+    // ---- Select / Deselect All ----
+    $('btnSelectAll').addEventListener('click', function () {
+        allPermissions.forEach(function (p) { selectedPermissions[p.key] = true; });
+        updateCounter();
+        renderPermissions();
+    });
+
+    $('btnDeselectAll').addEventListener('click', function () {
+        selectedPermissions = {};
+        updateCounter();
+        renderPermissions();
+    });
+
+    // ---- Save ----
+    $('btnSave').addEventListener('click', async function () {
+        var name = $('roleName').value.trim();
+        var description = $('roleDescription').value.trim();
+
+        $('alertArea').innerHTML = '';
+
+        if (!name) {
+            showAlert('Informe o nome do perfil.', 'danger');
             return;
         }
 
-        var currentUser = Auth.GetCurrentUser();
-        if (currentUser is null)
-        {
-            errorMessage = "Sessão expirada.";
-            isSaving = false;
+        if (!currentUser) {
+            showAlert('Sessão expirada. Faça login novamente.', 'danger');
             return;
         }
 
-        var saveModel = new RoleSaveModel
-        {
-            Name = model.Name,
-            Description = model.Description,
-            TenantId = currentUser.TenantId,
-            Active = model.ActiveValue == "true",
-            Permissions = selectedPermissions.ToList()
+        var payload = {
+            name: name,
+            description: description,
+            tenantId: currentUser.tenantId,
+            active: $('roleActive').value === 'true',
+            permissions: Object.keys(selectedPermissions)
         };
 
-        HttpResponseMessage response;
-        if (isEdit)
-            response = await RoleApi.UpdateAsync(Id!.Value, saveModel);
-        else
-            response = await RoleApi.CreateAsync(saveModel);
+        var btn = $('btnSave');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="la la-spinner la-spin"></i> Salvando...';
 
-        if (response.IsSuccessStatusCode)
-        {
-            Navigation.NavigateTo("/user/roles", forceLoad: true);
+        try {
+            var url = isEdit ? '/bff/roles/' + roleId : '/bff/roles';
+            var method = isEdit ? 'PUT' : 'POST';
+
+            var resp = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (resp.ok) {
+                window.location.href = '/user/roles';
+            } else {
+                var body = {};
+                try { body = await resp.json(); } catch (e) { }
+                showAlert(body.error || 'Erro ao salvar o perfil.', 'danger');
+            }
+        } catch (e) {
+            showAlert('Erro de conexão.', 'danger');
         }
-        else
-        {
-            var body = await response.Content.ReadAsStringAsync();
-            errorMessage = body.Contains("error")
-                ? "Já existe um perfil com este nome."
-                : "Erro ao salvar o perfil.";
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="la la-check"></i> Salvar';
+    });
+
+    // ---- Init ----
+    (async function init() {
+        try {
+            // Load user
+            try { currentUser = await fetchJson('/bff/me'); } catch (e) { currentUser = null; }
+
+            // Load permissions
+            allPermissions = await fetchJson('/bff/permissions');
+
+            // Build groups (maintain order)
+            var groupOrder = [];
+            var groupMap = {};
+            allPermissions.forEach(function (p) {
+                if (!groupMap[p.group]) {
+                    groupMap[p.group] = [];
+                    groupOrder.push(p.group);
+                }
+                groupMap[p.group].push(p);
+            });
+            // Sort each group by sortOrder
+            groupOrder.forEach(function (g) {
+                groupMap[g].sort(function (a, b) { return a.sortOrder - b.sortOrder; });
+            });
+            permissionGroups = groupMap;
+
+            // Expand all groups by default
+            groupOrder.forEach(function (g) { expandedGroups[g] = true; });
+
+            // If editing, load role
+            if (isEdit && roleId) {
+                $('pageTitle').textContent = 'Editar Perfil';
+                $('statusRow').style.display = '';
+
+                var role = await fetchJson('/bff/roles/' + roleId);
+                $('roleName').value = role.name || '';
+                $('roleDescription').value = role.description || '';
+                $('roleActive').value = role.active ? 'true' : 'false';
+
+                if (role.permissions && role.permissions.length) {
+                    role.permissions.forEach(function (key) {
+                        selectedPermissions[key] = true;
+                    });
+                }
+            }
+
+            renderPermissions();
+
+            $('loadingArea').style.display = 'none';
+            $('formArea').style.display = '';
+        } catch (e) {
+            $('loadingArea').innerHTML =
+                '<div class="alert alert-danger"><i class="la la-exclamation-circle"></i> Erro ao carregar dados. Recarregue a página.</div>';
         }
-
-        isSaving = false;
-    }
-
-    private void TogglePermission(string key)
-    {
-        if (!selectedPermissions.Remove(key))
-            selectedPermissions.Add(key);
-    }
-
-    private void OnPermissionCheckboxChanged(string key, ChangeEventArgs e)
-    {
-        bool isSelected = false;
-
-        if (e.Value is bool boolValue)
-            isSelected = boolValue;
-        else if (e.Value is string stringValue)
-            isSelected = stringValue == "true" || stringValue == "on";
-
-        if (isSelected)
-            selectedPermissions.Add(key);
-        else
-            selectedPermissions.Remove(key);
-    }
-
-    private void SelectAll()
-    {
-        selectedPermissions = allPermissions
-            .Select(p => p.Key)
-            .ToHashSet();
-    }
-
-    private void DeselectAll()
-    {
-        selectedPermissions = [];
-    }
-
-    private void ToggleGroup(string groupName)
-    {
-        var current = IsGroupExpanded(groupName);
-        groupExpanded[groupName] = !current;
-    }
-
-    private bool IsGroupExpanded(string groupName)
-        => groupExpanded.TryGetValue(groupName, out var expanded) && expanded;
-
-    private void ToggleGroupAll(string groupName)
-    {
-        if (!permissionGroups.TryGetValue(groupName, out var perms))
-            return;
-
-        var allSelected = perms.All(p => selectedPermissions.Contains(p.Key));
-
-        foreach (var p in perms)
-        {
-            if (allSelected)
-                selectedPermissions.Remove(p.Key);
-            else
-                selectedPermissions.Add(p.Key);
-        }
-    }
-
-    private sealed class RoleFormModel
-    {
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Informe o nome do perfil.")]
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string ActiveValue { get; set; } = "true";
-    }
-}
+    })();
+})();
+</script>
