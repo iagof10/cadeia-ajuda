@@ -7,6 +7,7 @@ public class HelpRequestTypeDto
     public string Description { get; set; } = string.Empty;
     public Guid SectorId { get; set; }
     public string SectorName { get; set; } = string.Empty;
+    public string SectorColor { get; set; } = string.Empty;
     public Guid TenantId { get; set; }
     public string TenantName { get; set; } = string.Empty;
     public bool Active { get; set; }

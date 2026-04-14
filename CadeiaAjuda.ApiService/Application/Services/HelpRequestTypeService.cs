@@ -91,6 +91,7 @@ public class HelpRequestTypeService : IHelpRequestTypeService
         Description = item.Description,
         SectorId = item.SectorId,
         SectorName = item.Sector?.Name ?? string.Empty,
+        SectorColor = item.Sector?.Color ?? string.Empty,
         TenantId = item.TenantId,
         TenantName = item.Tenant?.Name ?? string.Empty,
         Active = item.Active,
