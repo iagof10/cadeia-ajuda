@@ -46,7 +46,6 @@ public class ReasonFormModel
 
     public string Description { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Selecione a empresa.")]
     public string SelectedTenantId { get; set; } = string.Empty;
 
     public Guid TenantId { get; set; }
