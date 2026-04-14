@@ -26,8 +26,6 @@ steps:
       - --platform
       - managed
       - --allow-unauthenticated
-      - --set-env-vars
-      - ApiBaseUrl=${_API_BASE_URL}
 
 images:
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$COMMIT_SHA

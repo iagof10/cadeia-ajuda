@@ -6,16 +6,20 @@ using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var port = builder.Configuration["PORT"];
-if (!string.IsNullOrWhiteSpace(port))
+var port = builder.Configuration["PORT"] ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"];
+var isAspire = string.IsNullOrWhiteSpace(apiBaseUrl);
+
+if (isAspire)
 {
-    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+    apiBaseUrl = "https+http://apiservice";
+    // Add service defaults & Aspire client integrations (only when running under Aspire).
+    builder.AddServiceDefaults();
 }
 
-var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https+http://apiservice";
-
-// Add service defaults & Aspire client integrations.
-builder.AddServiceDefaults();
+var apiBaseUri = new Uri(apiBaseUrl!);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -25,67 +29,67 @@ builder.Services.AddOutputCache();
 
 builder.Services.AddHttpClient<WeatherApiClient>(client =>
     {
-        client.BaseAddress = new(apiBaseUrl);
+        client.BaseAddress = apiBaseUri;
     });
 
 builder.Services.AddHttpClient<TenantApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<UserApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<AuthApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<SectorApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<HelpRequestTypeApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<EscalationLevelApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<AreaApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<ReasonApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<HelpRequestApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<DashboardApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<SessionApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpClient<RoleApiClient>(client =>
 {
-    client.BaseAddress = new(apiBaseUrl);
+    client.BaseAddress = apiBaseUri;
 });
 
 builder.Services.AddHttpContextAccessor();
@@ -107,7 +111,14 @@ app.UseAntiforgery();
 
 app.UseOutputCache();
 
-app.MapStaticAssets();
+if (isAspire)
+{
+    app.MapStaticAssets();
+}
+else
+{
+    app.UseStaticFiles();
+}
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
@@ -584,7 +595,10 @@ bffRoles.MapDelete("/{id:guid}", async (Guid id, RoleApiClient api) =>
 app.MapGet("/bff/permissions", async (RoleApiClient api) =>
     Results.Ok(await api.GetAllPermissionsAsync())).DisableAntiforgery();
 
-app.MapDefaultEndpoints();
+if (isAspire)
+{
+    app.MapDefaultEndpoints();
+}
 
 app.Run();
 
