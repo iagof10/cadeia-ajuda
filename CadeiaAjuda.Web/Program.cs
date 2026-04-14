@@ -245,7 +245,6 @@ app.MapPost("/auth/do-login", async (HttpContext httpContext, AuthApiClient auth
     var tenantIdentifier = form["TenantIdentifier"].ToString();
     var login = form["Login"].ToString();
     var password = form["Password"].ToString();
-    var forceLogin = form["ForceLogin"].ToString() == "true";
 
     if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password))
         return Results.Redirect($"/login/{tenantIdentifier}?error=empty");
@@ -253,16 +252,6 @@ app.MapPost("/auth/do-login", async (HttpContext httpContext, AuthApiClient auth
     var result = await authApi.LoginAsync(tenantIdentifier, login, password);
     if (!result.Success || result.User is null)
         return Results.Redirect($"/login/{tenantIdentifier}?error=invalid");
-
-    // Check for active session (unless user already confirmed)
-    if (!forceLogin)
-    {
-        var hasActive = await sessionApi.HasActiveSessionAsync(result.User.Id);
-        if (hasActive)
-        {
-            return Results.Redirect($"/login/{tenantIdentifier}?confirm=active&login={Uri.EscapeDataString(login)}");
-        }
-    }
 
     // Create session (invalidates ALL previous active sessions for this user)
     var ip = httpContext.Connection.RemoteIpAddress?.ToString();
@@ -277,6 +266,19 @@ app.MapPost("/auth/do-login", async (HttpContext httpContext, AuthApiClient auth
     }
 
     return Results.Redirect("/dashboard");
+}).DisableAntiforgery();
+
+app.MapPost("/auth/check-session", async (HttpContext httpContext, AuthApiClient authApi, SessionApiClient sessionApi) =>
+{
+    var dto = await httpContext.Request.ReadFromJsonAsync<BffLoginModel>();
+    if (dto is null) return Results.BadRequest();
+
+    var result = await authApi.LoginAsync(dto.TenantIdentifier, dto.Login, dto.Password);
+    if (!result.Success || result.User is null)
+        return Results.Json(new { valid = false });
+
+    var hasActive = await sessionApi.HasActiveSessionAsync(result.User.Id);
+    return Results.Ok(new { valid = true, hasActiveSession = hasActive });
 }).DisableAntiforgery();
 
 app.MapGet("/auth/logout", async (AuthStateService auth, SessionApiClient sessionApi) =>

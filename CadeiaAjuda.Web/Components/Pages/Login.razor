@@ -31,13 +31,12 @@
 
             <form method="post" action="/auth/do-login" id="loginForm">
                 <input type="hidden" name="TenantIdentifier" value="@Identifier" />
-                <input type="hidden" name="ForceLogin" id="forceLoginField" value="false" />
 
                 <div class="auth-field">
                     <label>Login</label>
                     <div class="auth-input-group">
                         <i class="la la-user"></i>
-                        <input type="text" name="Login" id="loginField" class="form-control" placeholder="Seu login de acesso" required value="@PrefillLogin" />
+                        <input type="text" name="Login" id="loginField" class="form-control" placeholder="Seu login de acesso" required />
                     </div>
                 </div>
 
@@ -56,9 +55,11 @@
                     </div>
                 }
 
-                <button type="submit" class="btn-auth-submit">
-                    <span>Entrar</span>
-                    <i class="ft-arrow-right"></i>
+                <div id="loginError" class="auth-error" style="display:none;"></div>
+
+                <button type="submit" class="btn-auth-submit" id="btnSubmit">
+                    <span id="btnText">Entrar</span>
+                    <i class="ft-arrow-right" id="btnIcon"></i>
                 </button>
             </form>
 
@@ -71,23 +72,20 @@
     </div>
 </div>
 
-@if (ShowActiveSessionModal)
-{
-    <div class="session-modal-overlay">
-        <div class="session-modal">
-            <div class="session-modal-icon">
-                <i class="la la-exclamation-triangle"></i>
-            </div>
-            <h3>Sessão ativa detectada</h3>
-            <p>Este usuário já possui uma sessão ativa em outro dispositivo. Ao continuar, a sessão anterior será encerrada.</p>
-            <p class="text-muted" style="font-size: 0.85rem;">Deseja desconectar a outra sessão e entrar aqui?</p>
-            <div class="session-modal-actions">
-                <a href="/login/@Identifier" class="btn-session-cancel">Cancelar</a>
-                <button type="button" class="btn-session-confirm" onclick="forceLogin()">Sim, entrar aqui</button>
-            </div>
+<div class="session-modal-overlay" id="sessionModal" style="display:none;">
+    <div class="session-modal">
+        <div class="session-modal-icon">
+            <i class="la la-exclamation-triangle"></i>
+        </div>
+        <h3>Sessão ativa detectada</h3>
+        <p>Este usuário já possui uma sessão ativa em outro dispositivo. Ao continuar, a sessão anterior será encerrada.</p>
+        <p class="text-muted" style="font-size: 0.85rem;">Deseja desconectar a outra sessão e entrar aqui?</p>
+        <div class="session-modal-actions">
+            <button type="button" class="btn-session-cancel" onclick="closeSessionModal()">Cancelar</button>
+            <button type="button" class="btn-session-confirm" onclick="forceLogin()">Sim, entrar aqui</button>
         </div>
     </div>
-}
+</div>
 
 <style>
     .auth-wrapper {
@@ -446,14 +444,6 @@
     [SupplyParameterFromQuery(Name = "error")]
     public string? Error { get; set; }
 
-    [SupplyParameterFromQuery(Name = "confirm")]
-    public string? Confirm { get; set; }
-
-    [SupplyParameterFromQuery(Name = "login")]
-    public string? PrefillLogin { get; set; }
-
-    private bool ShowActiveSessionModal => Confirm == "active";
-
     private string? ErrorMessage => Error switch
     {
         "invalid" => "Login ou senha inválidos.",
@@ -463,9 +453,94 @@
 }
 
 <script suppress-error="BL9992">
+    var skipSessionCheck = false;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('loginForm');
+        if (!form) return;
+
+        form.addEventListener('submit', async function (e) {
+            if (skipSessionCheck) return; // Let form submit normally
+
+            e.preventDefault();
+
+            var login = document.getElementById('loginField').value;
+            var password = document.getElementById('passwordField').value;
+            var tenant = '@Identifier';
+
+            if (!login || !password) {
+                showLoginError('Preencha o login e a senha.');
+                return;
+            }
+
+            setLoading(true);
+            hideLoginError();
+
+            try {
+                var resp = await fetch('/auth/check-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tenantIdentifier: tenant, login: login, password: password })
+                });
+
+                var data = await resp.json();
+
+                if (!data.valid) {
+                    showLoginError('Login ou senha inválidos.');
+                    setLoading(false);
+                    return;
+                }
+
+                if (data.hasActiveSession) {
+                    setLoading(false);
+                    document.getElementById('sessionModal').style.display = 'flex';
+                    return;
+                }
+
+                // No active session — submit normally
+                skipSessionCheck = true;
+                form.submit();
+            } catch {
+                setLoading(false);
+                skipSessionCheck = true;
+                form.submit();
+            }
+        });
+    });
+
     function forceLogin() {
-        document.getElementById('forceLoginField').value = 'true';
+        document.getElementById('sessionModal').style.display = 'none';
+        skipSessionCheck = true;
         var form = document.getElementById('loginForm');
         if (form) form.submit();
+    }
+
+    function closeSessionModal() {
+        document.getElementById('sessionModal').style.display = 'none';
+    }
+
+    function showLoginError(msg) {
+        var el = document.getElementById('loginError');
+        el.innerHTML = '<i class="la la-exclamation-circle"></i> ' + msg;
+        el.style.display = 'flex';
+    }
+
+    function hideLoginError() {
+        document.getElementById('loginError').style.display = 'none';
+    }
+
+    function setLoading(loading) {
+        var btn = document.getElementById('btnSubmit');
+        var text = document.getElementById('btnText');
+        var icon = document.getElementById('btnIcon');
+        if (loading) {
+            btn.disabled = true;
+            text.textContent = 'Verificando...';
+            icon.className = 'la la-spinner la-spin';
+        } else {
+            btn.disabled = false;
+            text.textContent = 'Entrar';
+            icon.className = 'ft-arrow-right';
+        }
     }
 </script>
