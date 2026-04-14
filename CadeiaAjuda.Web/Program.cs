@@ -12,10 +12,15 @@ if (!string.IsNullOrWhiteSpace(port))
     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 }
 
-var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https+http://apiservice";
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"];
+var isAspire = string.IsNullOrWhiteSpace(apiBaseUrl);
 
-// Add service defaults & Aspire client integrations.
-builder.AddServiceDefaults();
+if (isAspire)
+{
+    apiBaseUrl = "https+http://apiservice";
+    // Add service defaults & Aspire client integrations (only when running under Aspire).
+    builder.AddServiceDefaults();
+}
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -584,7 +589,10 @@ bffRoles.MapDelete("/{id:guid}", async (Guid id, RoleApiClient api) =>
 app.MapGet("/bff/permissions", async (RoleApiClient api) =>
     Results.Ok(await api.GetAllPermissionsAsync())).DisableAntiforgery();
 
-app.MapDefaultEndpoints();
+if (isAspire)
+{
+    app.MapDefaultEndpoints();
+}
 
 app.Run();
 
