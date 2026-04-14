@@ -76,7 +76,7 @@
                                     <div class="form-group">
                                         <label>Perfil</label>
                                         <InputSelect @bind-Value="model.SelectedRoleId" class="form-control">
-                                            <option value="">Sem perfil (acesso total)</option>
+
                                             @foreach (var role in availableRoles)
                                             {
                                                 <option value="@role.Id">@role.Name</option>
