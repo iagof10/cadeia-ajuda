@@ -5,14 +5,14 @@
 @inject AuthStateService Auth
 @inject NavigationManager Navigation
 
-<PageTitle>@(isEdit ? "Editar Usu·rio" : "Novo Usu·rio") - Cadeia Ajuda</PageTitle>
+<PageTitle>@(isEdit ? "Editar Usu√°rio" : "Novo Usu√°rio") - Cadeia Ajuda</PageTitle>
 
 <section>
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">@(isEdit ? "Editar Usu·rio" : "Novo Usu·rio")</h4>
+                    <h4 class="card-title">@(isEdit ? "Editar Usu√°rio" : "Novo Usu√°rio")</h4>
                 </div>
                 <div class="card-content">
                     <div class="card-body">
@@ -82,14 +82,14 @@
                                                 <option value="@role.Id">@role.Name</option>
                                             }
                                         </InputSelect>
-                                        <small class="text-muted">Define as permissıes de acesso do usu·rio</small>
+                                        <small class="text-muted">Define as permiss√µes de acesso do usu√°rio</small>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>Tipo de Usu·rio</label>
+                                        <label>Tipo de Usu√°rio</label>
                                         <InputSelect @bind-Value="model.UserType" class="form-control">
-                                            <option value="@UserType.Standard">Padr„o</option>
+                                            <option value="@UserType.Standard">Padr√£o</option>
                                             <option value="@UserType.Andon">Andon</option>
                                             <option value="@UserType.Manager">Gestor</option>
                                             <option value="@UserType.Administrator">Administrator</option>
@@ -119,7 +119,7 @@
                                     {
                                         <i class="la la-spinner la-spin"></i>
                                     }
-                                    <i class="la la-check"></i> @(isEdit ? "Salvar AlteraÁıes" : "Cadastrar")
+                                    <i class="la la-check"></i> @(isEdit ? "Salvar Altera√ß√µes" : "Cadastrar")
                                 </button>
                             </div>
                         </EditForm>

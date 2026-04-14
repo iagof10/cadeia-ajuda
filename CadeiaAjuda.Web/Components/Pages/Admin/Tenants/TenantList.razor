@@ -5,11 +5,17 @@
 
 <!-- users list start -->
 <section class="users-list-wrapper">
+    <div class="row mb-2">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4 class="content-header-title mb-0">Empresas</h4>
+            <NavLink href="/tenants/new" class="btn btn-warning" title="Adicionar empresa">
+                <i class="ft-plus"></i> Nova Empresa
+            </NavLink>
+        </div>
+    </div>
+
     <div class="row mb-2 align-items-end">
         <div class="col-12">
-            <NavLink href="/tenants/new" class="btn btn-primary btn-icon mr-1" title="Adicionar empresa">
-                <i class="ft-plus"></i>
-            </NavLink>
             <button type="button" class="btn btn-outline-danger btn-icon mr-1" title="Exportar PDF">
                 <i class="ft-file"></i>
             </button>
@@ -56,7 +62,7 @@
                                     <th>Telefone</th>
                                     <th>Identificador</th>
                                     <th>Status</th>
-                                    <th>Ações</th>
+                                    <th>AÃ§Ãµes</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -97,7 +103,7 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="dropdown">
-                                                    <button type="button" class="btn btn-sm btn-link p-0 text-secondary tenant-actions-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mais ações">
+                                                    <button type="button" class="btn btn-sm btn-link p-0 text-secondary tenant-actions-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mais aÃ§Ãµes">
                                                         <i class="ft-more-vertical"></i>
                                                     </button>
                                                     <div class="dropdown-menu dropdown-menu-right">

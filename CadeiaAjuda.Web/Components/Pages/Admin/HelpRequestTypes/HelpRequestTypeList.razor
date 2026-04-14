@@ -2,13 +2,14 @@
 @inject HelpRequestTypeApiClient Api
 @inject AuthStateService Auth
 
-<PageTitle>Tipos de Solicitação - Cadeia Ajuda</PageTitle>
+<PageTitle>Tipos de SolicitaÃ§Ã£o - Cadeia Ajuda</PageTitle>
 
 <section class="hrt-list-wrapper">
     <div class="row mb-2">
-        <div class="col-12">
-            <NavLink href="/register/help-request-types/new" class="btn btn-primary btn-icon mr-1" title="Adicionar tipo de solicitação">
-                <i class="ft-plus"></i>
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4 class="content-header-title mb-0">Tipos de SolicitaÃ§Ã£o</h4>
+            <NavLink href="/register/help-request-types/new" class="btn btn-warning" title="Adicionar tipo de solicitaÃ§Ã£o">
+                <i class="ft-plus"></i> Novo Tipo
             </NavLink>
         </div>
     </div>
@@ -30,10 +31,10 @@
                             <thead>
                                 <tr>
                                     <th>Nome</th>
-                                    <th>Descrição</th>
+                                    <th>DescriÃ§Ã£o</th>
                                      <th>Setor</th>
                                      <th>Status</th>
-                                    <th>Ações</th>
+                                    <th>AÃ§Ãµes</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -48,7 +49,7 @@
                                 else if (!items.Any())
                                 {
                                     <tr>
-                                        <td colspan="5" class="text-center py-3 text-muted">Nenhum tipo de solicitação encontrado.</td>
+                                        <td colspan="5" class="text-center py-3 text-muted">Nenhum tipo de solicitaÃ§Ã£o encontrado.</td>
                                     </tr>
                                 }
                                 else
@@ -71,7 +72,7 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="dropdown">
-                                                    <button type="button" class="btn btn-sm btn-link p-0 text-secondary hrt-actions-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mais ações">
+                                                    <button type="button" class="btn btn-sm btn-link p-0 text-secondary hrt-actions-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mais aÃ§Ãµes">
                                                         <i class="ft-more-vertical"></i>
                                                     </button>
                                                     <div class="dropdown-menu dropdown-menu-right">
@@ -143,7 +144,7 @@
         if (response.IsSuccessStatusCode)
         {
             item.Active = !item.Active;
-            successMessage = $"Tipo de solicitação \"{item.Name}\" {(item.Active ? "ativado" : "inativado")} com sucesso.";
+            successMessage = $"Tipo de solicitaÃ§Ã£o \"{item.Name}\" {(item.Active ? "ativado" : "inativado")} com sucesso.";
         }
     }
 }

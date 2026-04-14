@@ -50,11 +50,11 @@ public class UserViewModel
 
 public class UserFormModel
 {
-    [Required(ErrorMessage = "Informe o nome do usu·rio.")]
+    [Required(ErrorMessage = "Informe o nome do usu√°rio.")]
     public string Name { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Informe o e-mail.")]
-    [EmailAddress(ErrorMessage = "Informe um e-mail v·lido.")]
+    [EmailAddress(ErrorMessage = "Informe um e-mail v√°lido.")]
     public string Email { get; set; } = string.Empty;
 
     public string Phone { get; set; } = string.Empty;

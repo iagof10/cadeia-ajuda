@@ -154,19 +154,19 @@
         if (area.description) {
             var descSpan = document.createElement('span');
             descSpan.className = 'area-tree-desc';
-            descSpan.textContent = 'ó ' + area.description;
+            descSpan.textContent = '‚Äî ' + area.description;
             header.appendChild(descSpan);
         }
 
         if (hasChildren) {
             var countBadge = document.createElement('span');
             countBadge.className = 'area-node-badge badge badge-light';
-            countBadge.textContent = children.length + ' sub-·rea(s)';
+            countBadge.textContent = children.length + ' sub-√°rea(s)';
             header.appendChild(countBadge);
         } else {
             var leafBadge = document.createElement('span');
             leafBadge.className = 'area-node-badge badge badge-info';
-            leafBadge.innerHTML = '<i class="ft-target" style="font-size:.65rem;"></i> nÛ final';
+            leafBadge.innerHTML = '<i class="ft-target" style="font-size:.65rem;"></i> n√≥ final';
             header.appendChild(leafBadge);
         }
 
@@ -183,7 +183,7 @@
         var btnAddChild = document.createElement('button');
         btnAddChild.type = 'button';
         btnAddChild.className = 'btn btn-sm btn-outline-primary';
-        btnAddChild.title = 'Adicionar sub-·rea';
+        btnAddChild.title = 'Adicionar sub-√°rea';
         btnAddChild.innerHTML = '<i class="ft-plus"></i>';
         btnAddChild.addEventListener('click', function () { openAddModal(area.id); });
         actions.appendChild(btnAddChild);
@@ -241,7 +241,7 @@
     }
 
     function populateParentSelect(excludeId) {
-        fParent.innerHTML = '<option value="">Nenhuma (·rea raiz)</option>';
+        fParent.innerHTML = '<option value="">Nenhuma (√°rea raiz)</option>';
         var roots = getRoots();
         roots.forEach(function (root) {
             if (root.id === excludeId) return;
@@ -265,7 +265,7 @@
 
         var children = getChildren(area.id);
         children.forEach(function (child) {
-            addParentOption(child, prefix + 'ó ', excludeId);
+            addParentOption(child, prefix + '‚Äî ', excludeId);
         });
     }
 
@@ -282,7 +282,7 @@
         var parentId = fParent.value || null;
         if (parentId) {
             var path = getAncestorPath(parentId);
-            var newName = fName.value.trim() || 'Nova ¡rea';
+            var newName = fName.value.trim() || 'Nova √Årea';
             path.push(newName);
             hierarchyPath.textContent = path.join(' > ');
             hierarchyPreview.style.display = '';
@@ -303,8 +303,8 @@
         }
 
         populateParentSelect(null);
-        modalTitle.textContent = 'Nova ¡rea';
-        modalSubtitle.textContent = 'Preencha os dados abaixo para criar uma ·rea.';
+        modalTitle.textContent = 'Nova √Årea';
+        modalSubtitle.textContent = 'Preencha os dados abaixo para criar uma √°rea.';
         btnSaveText.textContent = 'Cadastrar';
         $('#areaModal').modal('show');
     }
@@ -324,9 +324,9 @@
             updateHierarchyPreview();
         }, 0);
 
-        modalTitle.textContent = 'Editar ¡rea';
-        modalSubtitle.textContent = 'Altere os dados da ·rea.';
-        btnSaveText.textContent = 'Salvar AlteraÁıes';
+        modalTitle.textContent = 'Editar √Årea';
+        modalSubtitle.textContent = 'Altere os dados da √°rea.';
+        btnSaveText.textContent = 'Salvar Altera√ß√µes';
         $('#areaModal').modal('show');
     }
 
@@ -344,12 +344,12 @@
 
         var name = fName.value.trim();
         if (!name) {
-            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Informe o nome da ·rea.</div>';
+            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Informe o nome da √°rea.</div>';
             return;
         }
 
         if (!currentUser || !currentUser.tenantId) {
-            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Usu·rio n„o autenticado.</div>';
+            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Usu√°rio n√£o autenticado.</div>';
             return;
         }
 
@@ -384,7 +384,7 @@
 
             if (resp.ok) {
                 $('#areaModal').modal('hide');
-                showAlert(editingId ? '¡rea atualizada com sucesso.' : '¡rea criada com sucesso.', 'success');
+                showAlert(editingId ? '√Årea atualizada com sucesso.' : '√Årea criada com sucesso.', 'success');
                 await loadAreas();
             } else {
                 var body = {};
@@ -392,11 +392,11 @@
                 modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> ' + escapeHtml(body.error || 'Ocorreu um erro ao salvar.') + '</div>';
             }
         } catch (e) {
-            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Erro de conex„o.</div>';
+            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Erro de conex√£o.</div>';
         }
 
         btnSave.disabled = false;
-        btnSaveText.textContent = editingId ? 'Salvar AlteraÁıes' : 'Cadastrar';
+        btnSaveText.textContent = editingId ? 'Salvar Altera√ß√µes' : 'Cadastrar';
     }
 
     // ---- Toggle Active ----
@@ -404,13 +404,13 @@
         try {
             var resp = await fetch('/bff/areas/' + area.id + '/toggle-active', { method: 'PATCH' });
             if (resp.ok) {
-                showAlert('¡rea "' + area.name + '" ' + (area.active ? 'inativada' : 'ativada') + ' com sucesso.', 'success');
+                showAlert('√Årea "' + area.name + '" ' + (area.active ? 'inativada' : 'ativada') + ' com sucesso.', 'success');
                 await loadAreas();
             } else {
-                showAlert('Erro ao alterar status da ·rea.', 'danger');
+                showAlert('Erro ao alterar status da √°rea.', 'danger');
             }
         } catch (e) {
-            showAlert('Erro de conex„o.', 'danger');
+            showAlert('Erro de conex√£o.', 'danger');
         }
     }
 
@@ -423,16 +423,16 @@
             var resp = await fetch('/bff/areas/' + deletingId, { method: 'DELETE' });
             if (resp.ok) {
                 $('#deleteModal').modal('hide');
-                showAlert('¡rea excluÌda com sucesso.', 'success');
+                showAlert('√Årea exclu√≠da com sucesso.', 'success');
                 await loadAreas();
             } else {
                 var body = {};
                 try { body = await resp.json(); } catch (e) { }
-                showAlert(body.error || 'Ocorreu um erro ao excluir a ·rea.', 'danger');
+                showAlert(body.error || 'Ocorreu um erro ao excluir a √°rea.', 'danger');
                 $('#deleteModal').modal('hide');
             }
         } catch (e) {
-            showAlert('Erro de conex„o.', 'danger');
+            showAlert('Erro de conex√£o.', 'danger');
             $('#deleteModal').modal('hide');
         }
 
@@ -456,7 +456,7 @@
             await loadCurrentUser();
             await loadAreas();
         } catch (e) {
-            showAlert('Erro ao carregar dados iniciais. Recarregue a p·gina.', 'danger');
+            showAlert('Erro ao carregar dados iniciais. Recarregue a p√°gina.', 'danger');
         }
     })();
 })();

@@ -86,7 +86,7 @@
     }
 
     function formatDate(isoStr) {
-        if (!isoStr) return 'ó';
+        if (!isoStr) return '‚Äî';
         var d = new Date(isoStr);
         return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     }
@@ -363,9 +363,9 @@
 
         summSector.innerHTML = sector
             ? '<span class="sector-dot" style="background-color:' + escapeHtml(sector.color || '#999') + ';"></span>' + escapeHtml(sector.name)
-            : 'ó';
-        summType.textContent = type ? type.name : 'ó';
-        summArea.textContent = area ? getAreaPath(area.id) : 'ó';
+            : '‚Äî';
+        summType.textContent = type ? type.name : '‚Äî';
+        summArea.textContent = area ? getAreaPath(area.id) : '‚Äî';
     }
 
     // ---- Submit ----
@@ -373,7 +373,7 @@
         alertCreate.innerHTML = '';
 
         if (!currentUser) {
-            showCreateAlert('Usu·rio n„o autenticado.', 'danger');
+            showCreateAlert('Usu√°rio n√£o autenticado.', 'danger');
             return;
         }
 
@@ -406,7 +406,7 @@
                 showCreateAlert(body.error || 'Ocorreu um erro ao abrir o chamado.', 'danger');
             }
         } catch (e) {
-            showCreateAlert('Erro de conex„o.', 'danger');
+            showCreateAlert('Erro de conex√£o.', 'danger');
         }
 
         btnSubmit.disabled = false;
@@ -428,7 +428,7 @@
         alertEl.innerHTML = '';
 
         if (!login || !password) {
-            alertEl.innerHTML = '<div class="alert alert-warning mb-2"><i class="la la-warning"></i> Informe usu·rio e senha.</div>';
+            alertEl.innerHTML = '<div class="alert alert-warning mb-2"><i class="la la-warning"></i> Informe usu√°rio e senha.</div>';
             return;
         }
 
@@ -451,10 +451,10 @@
             } else {
                 var body = {};
                 try { body = await resp.json(); } catch (e) { }
-                alertEl.innerHTML = '<div class="alert alert-danger mb-2"><i class="la la-warning"></i> ' + escapeHtml(body.error || 'Usu·rio ou senha inv·lidos.') + '</div>';
+                alertEl.innerHTML = '<div class="alert alert-danger mb-2"><i class="la la-warning"></i> ' + escapeHtml(body.error || 'Usu√°rio ou senha inv√°lidos.') + '</div>';
             }
         } catch (e) {
-            alertEl.innerHTML = '<div class="alert alert-danger mb-2"><i class="la la-warning"></i> Erro de conex„o.</div>';
+            alertEl.innerHTML = '<div class="alert alert-danger mb-2"><i class="la la-warning"></i> Erro de conex√£o.</div>';
         }
 
         btnConfirmCloseAuth.disabled = false;
@@ -477,7 +477,7 @@
             await loadCurrentUser();
             await Promise.all([loadRequests(), loadSectors(), loadHelpRequestTypes(), loadAreas()]);
         } catch (e) {
-            showListAlert('Erro ao carregar dados iniciais. Recarregue a p·gina.', 'danger');
+            showListAlert('Erro ao carregar dados iniciais. Recarregue a p√°gina.', 'danger');
         }
     })();
 })();

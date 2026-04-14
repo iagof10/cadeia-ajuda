@@ -56,7 +56,7 @@ public class TenantFormModel
     public string Cnpj { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Informe o e-mail.")]
-    [EmailAddress(ErrorMessage = "Informe um e-mail válido.")]
+    [EmailAddress(ErrorMessage = "Informe um e-mail vÃ¡lido.")]
     public string Email { get; set; } = string.Empty;
 
     public string Phone { get; set; } = string.Empty;
@@ -68,15 +68,15 @@ public class TenantFormModel
 
     public bool Active { get; set; } = true;
 
-    [Range(0, int.MaxValue, ErrorMessage = "Informe um limite válido.")]
+    [Range(0, int.MaxValue, ErrorMessage = "Informe um limite vÃ¡lido.")]
     public int? StandardUserLimit { get; set; }
 
-    [Range(0, int.MaxValue, ErrorMessage = "Informe um limite válido.")]
+    [Range(0, int.MaxValue, ErrorMessage = "Informe um limite vÃ¡lido.")]
     public int? AndonUserLimit { get; set; }
 
-    [Range(0, int.MaxValue, ErrorMessage = "Informe um limite válido.")]
+    [Range(0, int.MaxValue, ErrorMessage = "Informe um limite vÃ¡lido.")]
     public int? ManagerUserLimit { get; set; }
 
-    [Range(0, int.MaxValue, ErrorMessage = "Informe um limite válido.")]
+    [Range(0, int.MaxValue, ErrorMessage = "Informe um limite vÃ¡lido.")]
     public int? AdministratorUserLimit { get; set; }
 }

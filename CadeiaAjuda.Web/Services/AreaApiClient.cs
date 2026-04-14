@@ -60,7 +60,7 @@ public class AreaViewModel
 
 public class AreaFormModel
 {
-    [Required(ErrorMessage = "Informe o nome da área.")]
+    [Required(ErrorMessage = "Informe o nome da Ã¡rea.")]
     public string Name { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;

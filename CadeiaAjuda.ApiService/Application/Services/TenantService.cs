@@ -28,10 +28,10 @@ public class TenantService : ITenantService
     public async Task<TenantDto> CreateAsync(TenantCreateDto dto)
     {
         if (await _repository.ExistsByCnpjAsync(dto.Cnpj))
-            throw new InvalidOperationException("Já existe um tenant com este CNPJ.");
+            throw new InvalidOperationException("JÃ¡ existe um tenant com este CNPJ.");
 
         if (await _repository.ExistsByIdentifierAsync(dto.Identifier))
-            throw new InvalidOperationException("Já existe um tenant com este identificador.");
+            throw new InvalidOperationException("JÃ¡ existe um tenant com este identificador.");
 
         var tenant = new Tenant
         {
@@ -59,10 +59,10 @@ public class TenantService : ITenantService
         if (tenant is null) return null;
 
         if (await _repository.ExistsByCnpjAsync(dto.Cnpj, dto.Id))
-            throw new InvalidOperationException("Já existe um tenant com este CNPJ.");
+            throw new InvalidOperationException("JÃ¡ existe um tenant com este CNPJ.");
 
         if (await _repository.ExistsByIdentifierAsync(dto.Identifier, dto.Id))
-            throw new InvalidOperationException("Já existe um tenant com este identificador.");
+            throw new InvalidOperationException("JÃ¡ existe um tenant com este identificador.");
 
         tenant.Name = dto.Name;
         tenant.TradeName = dto.TradeName;

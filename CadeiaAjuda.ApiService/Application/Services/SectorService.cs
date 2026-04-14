@@ -34,7 +34,7 @@ public class SectorService : ISectorService
     public async Task<SectorDto> CreateAsync(SectorCreateDto dto)
     {
         if (await _repository.ExistsByNameAsync(dto.TenantId, dto.Name))
-            throw new InvalidOperationException("Já existe um setor com este nome nesta empresa.");
+            throw new InvalidOperationException("JÃ¡ existe um setor com este nome nesta empresa.");
 
         var sector = new Sector
         {
@@ -56,7 +56,7 @@ public class SectorService : ISectorService
         if (sector is null) return null;
 
         if (await _repository.ExistsByNameAsync(dto.TenantId, dto.Name, dto.Id))
-            throw new InvalidOperationException("Já existe um setor com este nome nesta empresa.");
+            throw new InvalidOperationException("JÃ¡ existe um setor com este nome nesta empresa.");
 
         sector.Name = dto.Name;
         sector.Color = dto.Color;

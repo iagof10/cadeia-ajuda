@@ -68,7 +68,7 @@
 
     function getUserName(userId) {
         var u = users.find(function (x) { return x.id === userId; });
-        return u ? u.name : 'ó';
+        return u ? u.name : '‚Äî';
     }
 
     // ---- API calls ----
@@ -172,7 +172,7 @@
                         (r.isPrimary ? '? ' : '') + escapeHtml(r.userName) + '</span>';
                 });
             } else {
-                respBadges = '<span class="text-muted small"><em>Nenhum respons·vel definido</em></span>';
+                respBadges = '<span class="text-muted small"><em>Nenhum respons√°vel definido</em></span>';
             }
 
             var inactiveFooter = '';
@@ -185,7 +185,7 @@
                 '<div class="card ' + (!level.active ? 'border-danger' : '') + '">' +
                 '<div class="card-header d-flex justify-content-between align-items-center py-1">' +
                 '<div>' +
-                '<span class="badge badge-pill ' + (level.active ? 'badge-primary' : 'badge-danger') + ' mr-1">NÌvel ' + level.order + '</span>' +
+                '<span class="badge badge-pill ' + (level.active ? 'badge-primary' : 'badge-danger') + ' mr-1">N√≠vel ' + level.order + '</span>' +
                 '<strong>' + escapeHtml(level.name) + '</strong>' +
                 '</div>' +
                 '<div class="dropdown">' +
@@ -199,7 +199,7 @@
                 '<div class="card-body pt-1 pb-2">' +
                 (level.description ? '<p class="text-muted small mb-1">' + escapeHtml(level.description) + '</p>' : '') +
                 '<div class="mb-1"><i class="la la-clock-o text-primary"></i> <span class="small">Tempo para escalonar: <strong>' + formatTime(level.escalationTimeMinutes) + '</strong></span></div>' +
-                '<div class="mt-1"><span class="small font-weight-bold d-block mb-1"><i class="la la-users text-primary"></i> Respons·veis:</span>' +
+                '<div class="mt-1"><span class="small font-weight-bold d-block mb-1"><i class="la la-users text-primary"></i> Respons√°veis:</span>' +
                 respBadges +
                 '</div>' +
                 '</div>' +
@@ -268,7 +268,7 @@
     }
 
     function refreshUserDropdown() {
-        fUserSelect.innerHTML = '<option value="">ó Selecione um usu·rio ó</option>';
+        fUserSelect.innerHTML = '<option value="">‚Äî Selecione um usu√°rio ‚Äî</option>';
         users.filter(function (u) {
             return u.active && !responsibles.some(function (r) { return r.userId === u.id; });
         }).forEach(function (u) {
@@ -303,7 +303,7 @@
                 ? '<span class="resp-role-tag" style="background:#d4edda;color:#155724;">? Principal</span>'
                 : '';
             var starClass = resp.isPrimary ? 'btn-star active' : 'btn-star';
-            var starTitle = resp.isPrimary ? 'Respons·vel principal' : 'Definir como principal';
+            var starTitle = resp.isPrimary ? 'Respons√°vel principal' : 'Definir como principal';
 
             respListContainer.insertAdjacentHTML('beforeend',
                 '<div class="resp-card' + (resp.isPrimary ? ' is-primary' : '') + '" data-idx="' + idx + '">' +
@@ -342,7 +342,7 @@
         resetModal();
         var nextOrder = levels.length > 0 ? Math.max.apply(null, levels.map(function (l) { return l.order; })) + 1 : 1;
         fOrder.value = nextOrder;
-        modalTitle.textContent = 'Novo NÌvel de Escalonamento';
+        modalTitle.textContent = 'Novo N√≠vel de Escalonamento';
         btnSaveText.textContent = 'Cadastrar';
         $('#levelModal').modal('show');
     }
@@ -361,8 +361,8 @@
             return { userId: r.userId, isPrimary: r.isPrimary };
         });
 
-        modalTitle.textContent = 'Editar NÌvel de Escalonamento';
-        btnSaveText.textContent = 'Salvar AlteraÁıes';
+        modalTitle.textContent = 'Editar N√≠vel de Escalonamento';
+        btnSaveText.textContent = 'Salvar Altera√ß√µes';
         renderResponsiblesTable();
         refreshUserDropdown();
         $('#levelModal').modal('show');
@@ -382,7 +382,7 @@
 
         var name = fName.value.trim();
         if (!name) {
-            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Informe o nome do nÌvel.</div>';
+            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Informe o nome do n√≠vel.</div>';
             return;
         }
         var order = parseInt(fOrder.value);
@@ -398,7 +398,7 @@
 
         var sector = sectors.find(function (s) { return s.id === selectedSectorId; });
         if (!sector) {
-            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Setor inv·lido.</div>';
+            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Setor inv√°lido.</div>';
             return;
         }
 
@@ -436,7 +436,7 @@
 
             if (resp.ok) {
                 $('#levelModal').modal('hide');
-                showAlert(editingId ? 'NÌvel atualizado com sucesso.' : 'NÌvel criado com sucesso.', 'success');
+                showAlert(editingId ? 'N√≠vel atualizado com sucesso.' : 'N√≠vel criado com sucesso.', 'success');
                 await loadLevels();
             } else {
                 var body = {};
@@ -444,11 +444,11 @@
                 modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> ' + escapeHtml(body.error || 'Ocorreu um erro ao salvar.') + '</div>';
             }
         } catch (e) {
-            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Erro de conex„o.</div>';
+            modalAlert.innerHTML = '<div class="alert alert-danger"><i class="la la-warning"></i> Erro de conex√£o.</div>';
         }
 
         btnSave.disabled = false;
-        btnSaveText.textContent = editingId ? 'Salvar AlteraÁıes' : 'Cadastrar';
+        btnSaveText.textContent = editingId ? 'Salvar Altera√ß√µes' : 'Cadastrar';
     }
 
     // ---- Delete ----
@@ -460,14 +460,14 @@
             var resp = await fetch('/bff/escalation-levels/' + deletingId, { method: 'DELETE' });
             if (resp.ok) {
                 $('#deleteModal').modal('hide');
-                showAlert('NÌvel excluÌdo com sucesso.', 'success');
+                showAlert('N√≠vel exclu√≠do com sucesso.', 'success');
                 await loadLevels();
             } else {
-                showAlert('Ocorreu um erro ao excluir o nÌvel.', 'danger');
+                showAlert('Ocorreu um erro ao excluir o n√≠vel.', 'danger');
                 $('#deleteModal').modal('hide');
             }
         } catch (e) {
-            showAlert('Erro de conex„o.', 'danger');
+            showAlert('Erro de conex√£o.', 'danger');
             $('#deleteModal').modal('hide');
         }
 
@@ -502,7 +502,7 @@
         try {
             await Promise.all([loadSectors(), loadUsers()]);
         } catch (e) {
-            showAlert('Erro ao carregar dados iniciais. Recarregue a p·gina.', 'danger');
+            showAlert('Erro ao carregar dados iniciais. Recarregue a p√°gina.', 'danger');
         }
     })();
 })();

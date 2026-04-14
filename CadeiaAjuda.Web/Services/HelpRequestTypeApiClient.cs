@@ -46,7 +46,7 @@ public class HelpRequestTypeViewModel
 
 public class HelpRequestTypeFormModel
 {
-    [Required(ErrorMessage = "Informe o nome do tipo de solicitação.")]
+    [Required(ErrorMessage = "Informe o nome do tipo de solicitaÃ§Ã£o.")]
     public string Name { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;

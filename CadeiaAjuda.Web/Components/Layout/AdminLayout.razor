@@ -139,7 +139,7 @@
                             <li class="@(IsActive("/help-requests/close") ? "active" : "")">
                                 <NavLink class="menu-item" href="/help-requests/close" Match="NavLinkMatch.All">
                                     <i class="la la-times-circle"></i>
-                                    <span>Encerrar Cadeia de Ajuda</span>
+                                    <span>Encerrar Ajuda</span>
                                 </NavLink>
                             </li>
                         }
@@ -251,6 +251,12 @@
         letter-spacing: 0.5px;
         text-transform: uppercase;
         line-height: 1;
+    }
+
+    /* Page titles: orange */
+    .content-header-title,
+    .card-header .card-title {
+        color: #f57c00 !important;
     }
 
     /* Menu active state: orange instead of blue */

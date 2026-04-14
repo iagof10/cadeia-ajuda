@@ -38,10 +38,10 @@ public class UserService : IUserService
     public async Task<UserDto> CreateAsync(UserCreateDto dto)
     {
         if (await _repository.ExistsByLoginAsync(dto.TenantId, dto.Login))
-            throw new InvalidOperationException("J· existe um usu·rio com este login nesta empresa.");
+            throw new InvalidOperationException("J√° existe um usu√°rio com este login nesta empresa.");
 
         if (await _repository.ExistsByEmailAsync(dto.TenantId, dto.Email))
-            throw new InvalidOperationException("J· existe um usu·rio com este e-mail nesta empresa.");
+            throw new InvalidOperationException("J√° existe um usu√°rio com este e-mail nesta empresa.");
 
         await ValidateUserTypeLimitAsync(dto.TenantId, dto.UserType);
 
@@ -70,10 +70,10 @@ public class UserService : IUserService
         if (user is null) return null;
 
         if (await _repository.ExistsByLoginAsync(dto.TenantId, dto.Login, dto.Id))
-            throw new InvalidOperationException("J· existe um usu·rio com este login nesta empresa.");
+            throw new InvalidOperationException("J√° existe um usu√°rio com este login nesta empresa.");
 
         if (await _repository.ExistsByEmailAsync(dto.TenantId, dto.Email, dto.Id))
-            throw new InvalidOperationException("J· existe um usu·rio com este e-mail nesta empresa.");
+            throw new InvalidOperationException("J√° existe um usu√°rio com este e-mail nesta empresa.");
 
         await ValidateUserTypeLimitAsync(dto.TenantId, dto.UserType, dto.Id);
 
@@ -126,7 +126,7 @@ public class UserService : IUserService
     private async Task ValidateUserTypeLimitAsync(Guid tenantId, UserType userType, Guid? excludeUserId = null)
     {
         var tenant = await _tenantRepository.GetByIdAsync(tenantId)
-            ?? throw new InvalidOperationException("Empresa n„o encontrada.");
+            ?? throw new InvalidOperationException("Empresa n√£o encontrada.");
 
         var limit = userType switch
         {
@@ -141,7 +141,7 @@ public class UserService : IUserService
 
         var count = await _repository.CountByTenantAndTypeAsync(tenantId, userType, excludeUserId);
         if (count >= limit.Value)
-            throw new InvalidOperationException($"Limite de usu·rios do tipo {GetUserTypeName(userType)} atingido para esta empresa.");
+            throw new InvalidOperationException($"Limite de usu√°rios do tipo {GetUserTypeName(userType)} atingido para esta empresa.");
     }
 
     private static string GetUserTypeName(UserType userType) => userType switch
@@ -149,7 +149,7 @@ public class UserService : IUserService
         UserType.Andon => "Andon",
         UserType.Manager => "Manager",
         UserType.Administrator => "Administrator",
-        _ => "Padr„o"
+        _ => "Padr√£o"
     };
 
     private static string HashPassword(string password)

@@ -217,7 +217,7 @@ app.Use(async (context, next) =>
         if (string.IsNullOrEmpty(token))
         {
             context.Response.StatusCode = 401;
-            await context.Response.WriteAsJsonAsync(new { error = "Sess„o n„o encontrada. FaÁa login novamente." });
+            await context.Response.WriteAsJsonAsync(new { error = "Sess√£o n√£o encontrada. Fa√ßa login novamente." });
             return;
         }
 
@@ -226,7 +226,7 @@ app.Use(async (context, next) =>
         {
             auth.Clear();
             context.Response.StatusCode = 401;
-            await context.Response.WriteAsJsonAsync(new { error = "Sess„o expirada ou encerrada em outro dispositivo." });
+            await context.Response.WriteAsJsonAsync(new { error = "Sess√£o expirada ou encerrada em outro dispositivo." });
             return;
         }
 
@@ -321,7 +321,7 @@ bffAuth.MapPost("/login", async (HttpContext httpContext, AuthApiClient authApi,
 
     var result = await authApi.LoginAsync(dto.TenantIdentifier, dto.Login, dto.Password);
     if (!result.Success || result.User is null)
-        return Results.Json(new { error = "Login ou senha inv·lidos." }, statusCode: 401);
+        return Results.Json(new { error = "Login ou senha inv√°lidos." }, statusCode: 401);
 
     // Check for active session (unless user already confirmed)
     if (!dto.ForceLogin)
@@ -329,7 +329,7 @@ bffAuth.MapPost("/login", async (HttpContext httpContext, AuthApiClient authApi,
         var hasActive = await sessionApi.HasActiveSessionAsync(result.User.Id);
         if (hasActive)
         {
-            return Results.Json(new { activeSession = true, message = "Este usu·rio j· possui uma sess„o ativa em outro dispositivo. Deseja desconectar e continuar?" }, statusCode: 409);
+            return Results.Json(new { activeSession = true, message = "Este usu√°rio j√° possui uma sess√£o ativa em outro dispositivo. Deseja desconectar e continuar?" }, statusCode: 409);
         }
     }
 
@@ -339,7 +339,7 @@ bffAuth.MapPost("/login", async (HttpContext httpContext, AuthApiClient authApi,
     var session = await sessionApi.CreateSessionAsync(result.User.Id, result.User.TenantId, ip, ua);
 
     if (session is null)
-        return Results.Json(new { error = "Erro ao criar sess„o." }, statusCode: 500);
+        return Results.Json(new { error = "Erro ao criar sess√£o." }, statusCode: 500);
 
     // Set cookies
     auth.SetCurrentUser(result.User);
@@ -531,7 +531,7 @@ bffHelpRequests.MapPatch("/{id:guid}/close-with-auth", async (Guid id, HelpReque
 
     var authResult = await authApi.LoginAsync(loggedUser.TenantIdentifier, model.Login, model.Password);
     if (!authResult.Success || authResult.User is null)
-        return Results.Json(new { error = "Usu·rio ou senha inv·lidos." }, statusCode: 401);
+        return Results.Json(new { error = "Usu√°rio ou senha inv√°lidos." }, statusCode: 401);
 
     var response = await api.CloseAsync(id, new HelpRequestCloseModel { ClosedByUserId = authResult.User.Id });
     var body = await response.Content.ReadAsStringAsync();

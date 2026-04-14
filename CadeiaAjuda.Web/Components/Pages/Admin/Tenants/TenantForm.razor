@@ -29,7 +29,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Nome da Empresa <span class="text-danger">*</span></label>
-                                        <InputText @bind-Value="model.Name" class="form-control" placeholder="Razão social" />
+                                        <InputText @bind-Value="model.Name" class="form-control" placeholder="RazÃ£o social" />
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -66,7 +66,7 @@
                                     <div class="form-group">
                                         <label>Identificador do Tenant <span class="text-danger">*</span></label>
                                         <InputText @bind-Value="model.Identifier" class="form-control" placeholder="empresa-xyz" />
-                                        <small class="text-muted">Identificador único, sem espaços.</small>
+                                        <small class="text-muted">Identificador Ãºnico, sem espaÃ§os.</small>
                                     </div>
                                 </div>
                                 @if (isEdit)
@@ -85,12 +85,12 @@
 
                             <div class="row">
                                 <div class="col-12">
-                                    <h5 class="mt-1">Limites de usuários por tipo</h5>
+                                    <h5 class="mt-1">Limites de usuÃ¡rios por tipo</h5>
                                     <p class="text-muted mb-1">Deixe em branco para ilimitado.</p>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>Padrão</label>
+                                        <label>PadrÃ£o</label>
                                         <InputNumber @bind-Value="model.StandardUserLimit" class="form-control" placeholder="Ilimitado" />
                                         <ValidationMessage For="() => model.StandardUserLimit" />
                                     </div>
@@ -127,7 +127,7 @@
                                     {
                                         <i class="la la-spinner la-spin"></i>
                                     }
-                                    <i class="la la-check"></i> @(isEdit ? "Salvar Alterações" : "Cadastrar")
+                                    <i class="la la-check"></i> @(isEdit ? "Salvar AlteraÃ§Ãµes" : "Cadastrar")
                                 </button>
                             </div>
                         </EditForm>

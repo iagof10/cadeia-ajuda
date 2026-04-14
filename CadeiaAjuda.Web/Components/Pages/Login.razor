@@ -9,8 +9,8 @@
             <div class="auth-brand">
                 <img src="app-assets/images/logo/AssistChain-logo-2.png" alt="AssistChain" class="brand-logo-full" />
             </div>
-            <h1>Gerencie suas operaÁıes com agilidade</h1>
-            <p>Plataforma completa para gest„o de cadeia de ajuda, chamados e escalonamento em tempo real.</p>
+            <h1>Gerencie suas opera√ß√µes com agilidade</h1>
+            <p>Plataforma completa para gest√£o de cadeia de ajuda, chamados e escalonamento em tempo real.</p>
             <div class="auth-left-shapes">
                 <div class="shape shape-1"></div>
                 <div class="shape shape-2"></div>
@@ -26,7 +26,7 @@
                     <img src="app-assets/images/logo/AssistChain-logo.png" alt="AssistChain" class="brand-logo-mobile" />
                 </div>
                 <h2>Bem-vindo de volta!</h2>
-                <p class="text-muted">FaÁa login para acessar sua conta</p>
+                <p class="text-muted">Fa√ßa login para acessar sua conta</p>
             </div>
 
             <form method="post" action="/auth/do-login" id="loginForm">
@@ -77,9 +77,9 @@
         <div class="session-modal-icon">
             <i class="la la-exclamation-triangle"></i>
         </div>
-        <h3>Sess„o ativa detectada</h3>
-        <p>Este usu·rio j· possui uma sess„o ativa em outro dispositivo. Ao continuar, a sess„o anterior ser· encerrada.</p>
-        <p class="text-muted" style="font-size: 0.85rem;">Deseja desconectar a outra sess„o e entrar aqui?</p>
+        <h3>Sess√£o ativa detectada</h3>
+        <p>Este usu√°rio j√° possui uma sess√£o ativa em outro dispositivo. Ao continuar, a sess√£o anterior ser√° encerrada.</p>
+        <p class="text-muted" style="font-size: 0.85rem;">Deseja desconectar a outra sess√£o e entrar aqui?</p>
         <div class="session-modal-actions">
             <button type="button" class="btn-session-cancel" onclick="closeSessionModal()">Cancelar</button>
             <button type="button" class="btn-session-confirm" onclick="forceLogin()">Sim, entrar aqui</button>
@@ -446,7 +446,7 @@
 
     private string? ErrorMessage => Error switch
     {
-        "invalid" => "Login ou senha inv·lidos.",
+        "invalid" => "Login ou senha inv√°lidos.",
         "empty" => "Preencha o login e a senha.",
         _ => null
     };
@@ -486,7 +486,7 @@
                 var data = await resp.json();
 
                 if (!data.valid) {
-                    showLoginError('Login ou senha inv·lidos.');
+                    showLoginError('Login ou senha inv√°lidos.');
                     setLoading(false);
                     return;
                 }
@@ -497,7 +497,7 @@
                     return;
                 }
 
-                // No active session ó submit normally
+                // No active session ‚Äî submit normally
                 skipSessionCheck = true;
                 form.submit();
             } catch {

@@ -34,7 +34,7 @@ public class AreaService : IAreaService
     public async Task<AreaDto> CreateAsync(AreaCreateDto dto)
     {
         if (await _repository.ExistsByNameAsync(dto.TenantId, dto.Name, dto.ParentId))
-            throw new InvalidOperationException("Já existe uma área com este nome neste nível.");
+            throw new InvalidOperationException("JÃ¡ existe uma Ã¡rea com este nome neste nÃ­vel.");
 
         var area = new Area
         {
@@ -57,7 +57,7 @@ public class AreaService : IAreaService
         if (area is null) return null;
 
         if (await _repository.ExistsByNameAsync(dto.TenantId, dto.Name, dto.ParentId, dto.Id))
-            throw new InvalidOperationException("Já existe uma área com este nome neste nível.");
+            throw new InvalidOperationException("JÃ¡ existe uma Ã¡rea com este nome neste nÃ­vel.");
 
         area.Name = dto.Name;
         area.Description = dto.Description;
@@ -90,7 +90,7 @@ public class AreaService : IAreaService
         if (area is null) return false;
 
         if (await _repository.HasChildrenAsync(id))
-            throw new InvalidOperationException("Não é possível excluir uma área que possui sub-áreas. Remova as sub-áreas primeiro.");
+            throw new InvalidOperationException("NÃ£o Ã© possÃ­vel excluir uma Ã¡rea que possui sub-Ã¡reas. Remova as sub-Ã¡reas primeiro.");
 
         _repository.Remove(area);
         await _repository.SaveChangesAsync();

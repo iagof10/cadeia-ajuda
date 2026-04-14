@@ -70,9 +70,8 @@
         <div class="col-12 d-flex justify-content-between align-items-center">
             <div>
                 <h4 class="content-header-title mb-0">Cadeia de Ajuda</h4>
-                <p class="text-muted mt-1 mb-0">Chamados de ajuda abertos.</p>
             </div>
-            <button class="btn btn-primary" id="btnNewRequest" type="button">
+            <button class="btn btn-warning" id="btnNewRequest" type="button">
                 <i class="ft-plus"></i> Novo Chamado
             </button>
         </div>
@@ -100,14 +99,14 @@
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th>CÛdigo</th>
+                                <th>C√≥digo</th>
                                 <th>Setor</th>
                                 <th>Tipo</th>
                                 <th>Recurso</th>
                                 <th>Solicitante</th>
                                 <th>Status</th>
                                 <th>Data</th>
-                                <th>AÁıes</th>
+                                <th>A√ß√µes</th>
                             </tr>
                         </thead>
                         <tbody id="listBody"></tbody>
@@ -123,7 +122,6 @@
     <div class="row mb-2">
         <div class="col-12">
             <h4 class="content-header-title mb-0">Novo Chamado</h4>
-            <p class="text-muted mt-1 mb-0">Siga os passos para abrir um chamado de ajuda.</p>
         </div>
     </div>
 
@@ -140,7 +138,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" data-step="1" href="javascript:void(0)">
-                        <span class="step-number">2</span> Tipo de SolicitaÁ„o
+                        <span class="step-number">2</span> Tipo de Solicita√ß√£o
                     </a>
                 </li>
                 <li class="nav-item">
@@ -150,7 +148,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" data-step="3" href="javascript:void(0)">
-                        <span class="step-number">4</span> ConfirmaÁ„o
+                        <span class="step-number">4</span> Confirma√ß√£o
                     </a>
                 </li>
             </ul>
@@ -168,45 +166,45 @@
 
                 <!-- Panel 1: Tipo -->
                 <div class="tab-pane" id="panel1">
-                    <h5 class="mb-3"><i class="la la-question-circle text-primary"></i> Selecione o Tipo de SolicitaÁ„o</h5>
-                    <p class="text-muted mb-3">Escolha o tipo de ajuda que vocÍ precisa.</p>
+                    <h5 class="mb-3"><i class="la la-question-circle text-primary"></i> Selecione o Tipo de Solicita√ß√£o</h5>
+                    <p class="text-muted mb-3">Escolha o tipo de ajuda que voc√™ precisa.</p>
                     <div id="typeList"></div>
                     <div id="typeEmpty" class="text-center text-muted py-3" style="display:none;">
-                        <i class="la la-info-circle"></i> Nenhum tipo de solicitaÁ„o encontrado para este setor.
+                        <i class="la la-info-circle"></i> Nenhum tipo de solicita√ß√£o encontrado para este setor.
                     </div>
                 </div>
 
                 <!-- Panel 2: Recurso -->
                 <div class="tab-pane" id="panel2">
                     <h5 class="mb-3"><i class="la la-cubes text-primary"></i> Selecione o Recurso</h5>
-                    <p class="text-muted mb-3">Escolha em qual recurso (posto/equipamento) vocÍ est·.</p>
+                    <p class="text-muted mb-3">Escolha em qual recurso (posto/equipamento) voc√™ est√°.</p>
                     <div id="areaList"></div>
                     <div id="areaEmpty" class="text-center text-muted py-3" style="display:none;">
-                        <i class="la la-info-circle"></i> Nenhum recurso (nÛ final) encontrado.
+                        <i class="la la-info-circle"></i> Nenhum recurso (n√≥ final) encontrado.
                     </div>
                 </div>
 
-                <!-- Panel 3: ConfirmaÁ„o -->
+                <!-- Panel 3: Confirma√ß√£o -->
                 <div class="tab-pane" id="panel3">
                     <h5 class="mb-3"><i class="la la-check-circle text-primary"></i> Confirme o Chamado</h5>
-                    <p class="text-muted mb-3">Revise as informaÁıes antes de abrir o chamado.</p>
+                    <p class="text-muted mb-3">Revise as informa√ß√µes antes de abrir o chamado.</p>
                     <div class="row">
                         <div class="col-md-4">
                             <div class="summary-section">
                                 <div class="summary-label">Setor</div>
-                                <div class="summary-value" id="summSector">ó</div>
+                                <div class="summary-value" id="summSector">‚Äî</div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="summary-section">
-                                <div class="summary-label">Tipo de SolicitaÁ„o</div>
-                                <div class="summary-value" id="summType">ó</div>
+                                <div class="summary-label">Tipo de Solicita√ß√£o</div>
+                                <div class="summary-value" id="summType">‚Äî</div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="summary-section">
                                 <div class="summary-label">Recurso</div>
-                                <div class="summary-value" id="summArea">ó</div>
+                                <div class="summary-value" id="summArea">‚Äî</div>
                             </div>
                         </div>
                     </div>
@@ -239,7 +237,7 @@
                 <div id="closeAuthAlert"></div>
                 <p class="text-muted mb-3">Informe suas credenciais para encerrar o chamado <strong id="closeAuthCode"></strong>.</p>
                 <div class="form-group">
-                    <label for="closeAuthLogin">Usu·rio</label>
+                    <label for="closeAuthLogin">Usu√°rio</label>
                     <input type="text" class="form-control" id="closeAuthLogin" placeholder="Login" autocomplete="username" />
                 </div>
                 <div class="form-group">
@@ -564,7 +562,7 @@
             $('alertCreate').innerHTML = '';
 
             if (!currentUser) {
-                showAlert('alertCreate', 'Usu·rio n„o autenticado.', 'danger');
+                showAlert('alertCreate', 'Usu√°rio n√£o autenticado.', 'danger');
                 return;
             }
 
@@ -598,7 +596,7 @@
                     showAlert('alertCreate', body.error || 'Ocorreu um erro ao abrir o chamado.', 'danger');
                 }
             } catch (e) {
-                showAlert('alertCreate', 'Erro de conex„o.', 'danger');
+                showAlert('alertCreate', 'Erro de conex√£o.', 'danger');
             }
 
             btn.disabled = false;
@@ -613,7 +611,7 @@
             alertEl.innerHTML = '';
 
             if (!login || !password) {
-                alertEl.innerHTML = '<div class="alert alert-warning mb-2"><i class="la la-warning"></i> Informe usu·rio e senha.</div>';
+                alertEl.innerHTML = '<div class="alert alert-warning mb-2"><i class="la la-warning"></i> Informe usu√°rio e senha.</div>';
                 return;
             }
 
@@ -637,10 +635,10 @@
                 } else {
                     var body = {};
                     try { body = await resp.json(); } catch (e) { }
-                    alertEl.innerHTML = '<div class="alert alert-danger mb-2"><i class="la la-warning"></i> ' + escapeHtml(body.error || 'Usu·rio ou senha inv·lidos.') + '</div>';
+                    alertEl.innerHTML = '<div class="alert alert-danger mb-2"><i class="la la-warning"></i> ' + escapeHtml(body.error || 'Usu√°rio ou senha inv√°lidos.') + '</div>';
                 }
             } catch (e) {
-                alertEl.innerHTML = '<div class="alert alert-danger mb-2"><i class="la la-warning"></i> Erro de conex„o.</div>';
+                alertEl.innerHTML = '<div class="alert alert-danger mb-2"><i class="la la-warning"></i> Erro de conex√£o.</div>';
             }
 
             btn.disabled = false;
@@ -665,7 +663,7 @@
                 await loadCurrentUser();
                 await Promise.all([loadRequests(), loadSectors(), loadHelpRequestTypes(), loadAreas()]);
             } catch (e) {
-                showAlert('alertList', 'Erro ao carregar dados iniciais. Recarregue a p·gina.', 'danger');
+                showAlert('alertList', 'Erro ao carregar dados iniciais. Recarregue a p√°gina.', 'danger');
             }
         })();
     })();

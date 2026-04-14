@@ -34,7 +34,7 @@ public class EscalationLevelService : IEscalationLevelService
     public async Task<EscalationLevelDto> CreateAsync(EscalationLevelCreateDto dto)
     {
         if (await _repository.ExistsByOrderAsync(dto.TenantId, dto.SectorId, dto.Order))
-            throw new InvalidOperationException("Já existe um nível de escalonamento com esta ordem para este setor.");
+            throw new InvalidOperationException("JÃ¡ existe um nÃ­vel de escalonamento com esta ordem para este setor.");
 
         var level = new EscalationLevel
         {
@@ -64,7 +64,7 @@ public class EscalationLevelService : IEscalationLevelService
         if (level is null) return null;
 
         if (await _repository.ExistsByOrderAsync(dto.TenantId, dto.SectorId, dto.Order, dto.Id))
-            throw new InvalidOperationException("Já existe um nível de escalonamento com esta ordem para este setor.");
+            throw new InvalidOperationException("JÃ¡ existe um nÃ­vel de escalonamento com esta ordem para este setor.");
 
         level.Name = dto.Name;
         level.Description = dto.Description;

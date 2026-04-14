@@ -34,7 +34,7 @@ public class HelpRequestTypeService : IHelpRequestTypeService
     public async Task<HelpRequestTypeDto> CreateAsync(HelpRequestTypeCreateDto dto)
     {
         if (await _repository.ExistsByNameAsync(dto.TenantId, dto.Name))
-            throw new InvalidOperationException("Já existe um tipo de solicitação com este nome nesta empresa.");
+            throw new InvalidOperationException("JÃ¡ existe um tipo de solicitaÃ§Ã£o com este nome nesta empresa.");
 
         var item = new HelpRequestType
         {
@@ -57,7 +57,7 @@ public class HelpRequestTypeService : IHelpRequestTypeService
         if (item is null) return null;
 
         if (await _repository.ExistsByNameAsync(dto.TenantId, dto.Name, dto.Id))
-            throw new InvalidOperationException("Já existe um tipo de solicitação com este nome nesta empresa.");
+            throw new InvalidOperationException("JÃ¡ existe um tipo de solicitaÃ§Ã£o com este nome nesta empresa.");
 
         item.Name = dto.Name;
         item.Description = dto.Description;

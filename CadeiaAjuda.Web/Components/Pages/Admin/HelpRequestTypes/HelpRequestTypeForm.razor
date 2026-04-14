@@ -5,14 +5,14 @@
 @inject SectorApiClient SectorApi
 @inject NavigationManager Navigation
 
-<PageTitle>@(isEdit ? "Editar Tipo de Solicitação" : "Novo Tipo de Solicitação") - Cadeia Ajuda</PageTitle>
+<PageTitle>@(isEdit ? "Editar Tipo de SolicitaÃ§Ã£o" : "Novo Tipo de SolicitaÃ§Ã£o") - Cadeia Ajuda</PageTitle>
 
 <section>
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">@(isEdit ? "Editar Tipo de Solicitação" : "Novo Tipo de Solicitação")</h4>
+                    <h4 class="card-title">@(isEdit ? "Editar Tipo de SolicitaÃ§Ã£o" : "Novo Tipo de SolicitaÃ§Ã£o")</h4>
                 </div>
                 <div class="card-content">
                     <div class="card-body">
@@ -31,14 +31,14 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Nome <span class="text-danger">*</span></label>
-                                        <InputText @bind-Value="model.Name" class="form-control" placeholder="Nome do tipo de solicitação" />
+                                        <InputText @bind-Value="model.Name" class="form-control" placeholder="Nome do tipo de solicitaÃ§Ã£o" />
                                         <ValidationMessage For="() => model.Name" />
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Descrição</label>
-                                        <InputText @bind-Value="model.Description" class="form-control" placeholder="Descrição do tipo" />
+                                        <label>DescriÃ§Ã£o</label>
+                                        <InputText @bind-Value="model.Description" class="form-control" placeholder="DescriÃ§Ã£o do tipo" />
                                     </div>
                                 </div>
                             </div>
@@ -48,7 +48,7 @@
                                     <div class="form-group">
                                         <label>Setor <span class="text-danger">*</span></label>
                                         <InputSelect @bind-Value="model.SelectedSectorId" class="form-control">
-                                            <option value="">— Selecione —</option>
+                                            <option value="">â€” Selecione â€”</option>
                                             @foreach (var sector in allSectors.Where(s => s.Active))
                                             {
                                                 <option value="@sector.Id">@sector.Name</option>
@@ -80,7 +80,7 @@
                                     {
                                         <i class="la la-spinner la-spin"></i>
                                     }
-                                    <i class="la la-check"></i> @(isEdit ? "Salvar Alterações" : "Cadastrar")
+                                    <i class="la la-check"></i> @(isEdit ? "Salvar AlteraÃ§Ãµes" : "Cadastrar")
                                 </button>
                             </div>
                         </EditForm>
