@@ -8,5 +8,6 @@ public interface IHelpRequestRepository : IRepository<HelpRequest>
     Task<IEnumerable<HelpRequest>> GetByTenantIdAsync(Guid tenantId);
     Task<HelpRequest?> GetByIdWithIncludesAsync(Guid id);
     Task<int> CountByTenantAsync(Guid tenantId);
+    Task<bool> HasOpenBySectorAndAreaAsync(Guid tenantId, Guid sectorId, Guid areaId);
     void Remove(HelpRequest entity);
 }

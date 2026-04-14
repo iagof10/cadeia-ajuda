@@ -1,5 +1,7 @@
 @page "/login/{Identifier}"
 @layout LoginLayout
+@inject AuthStateService Auth
+@inject NavigationManager Navigation
 
 <PageTitle>Login - Cadeia Ajuda</PageTitle>
 
@@ -450,6 +452,15 @@
         "empty" => "Preencha o login e a senha.",
         _ => null
     };
+
+    protected override void OnInitialized()
+    {
+        var user = Auth.GetCurrentUser();
+        if (user is not null)
+        {
+            Navigation.NavigateTo("/dashboard", forceLoad: true);
+        }
+    }
 }
 
 <script suppress-error="BL9992">

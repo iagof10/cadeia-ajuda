@@ -33,6 +33,10 @@ public class HelpRequestService : IHelpRequestService
 
     public async Task<HelpRequestDto> CreateAsync(HelpRequestCreateDto dto)
     {
+        var hasDuplicate = await _repository.HasOpenBySectorAndAreaAsync(dto.TenantId, dto.SectorId, dto.AreaId);
+        if (hasDuplicate)
+            throw new InvalidOperationException("Já existe um chamado aberto para este setor e recurso.");
+
         var count = await _repository.CountByTenantAsync(dto.TenantId);
         var code = $"CA-{(count + 1):D5}";
 

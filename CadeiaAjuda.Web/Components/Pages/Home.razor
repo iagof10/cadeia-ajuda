@@ -1,6 +1,7 @@
 @page "/"
 @layout LoginLayout
 @inject NavigationManager Navigation
+@inject AuthStateService Auth
 
 <PageTitle>Cadeia Ajuda</PageTitle>
 
@@ -276,6 +277,15 @@
 @code {
     [SupplyParameterFromForm]
     private IdentifierModel model { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        var user = Auth.GetCurrentUser();
+        if (user is not null)
+        {
+            Navigation.NavigateTo("/dashboard", forceLoad: true);
+        }
+    }
 
     private void GoToLogin()
     {

@@ -43,6 +43,13 @@ public class HelpRequestRepository : Repository<HelpRequest>, IHelpRequestReposi
     public async Task<int> CountByTenantAsync(Guid tenantId)
         => await _dbSet.CountAsync(h => h.TenantId == tenantId);
 
+    public async Task<bool> HasOpenBySectorAndAreaAsync(Guid tenantId, Guid sectorId, Guid areaId)
+        => await _dbSet.AnyAsync(h =>
+            h.TenantId == tenantId &&
+            h.SectorId == sectorId &&
+            h.AreaId == areaId &&
+            h.Status != HelpRequestStatus.Closed);
+
     public void Remove(HelpRequest entity)
         => _dbSet.Remove(entity);
 }
