@@ -40,4 +40,4 @@ substitutions:
   _REGION: us-central1
   _REPOSITORY: cloud-run-source-deploy
   _IMAGE: cadeia-ajuda-web
-  _API_BASE_URL: https://cadeia-ajuda-api-REPLACE_ME.a.run.app
+  _API_BASE_URL: https://cadeia-ajuda-api-677662115710.us-central1.run.app
