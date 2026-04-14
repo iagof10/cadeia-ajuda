@@ -114,9 +114,6 @@
 (function () {
     'use strict';
 
-    if (window.__roleFormInitialized) return;
-    window.__roleFormInitialized = true;
-
     // ---- Parse route ----
     var pathParts = window.location.pathname.split('/');
     var isEdit = pathParts.length >= 4 && pathParts[2] === 'roles' && pathParts[3] === 'edit';
@@ -347,6 +344,17 @@
     // ---- Init ----
     (async function init() {
         try {
+            // Reset UI for re-navigation
+            $('pageTitle').textContent = 'Novo Perfil';
+            $('statusRow').style.display = 'none';
+            $('roleName').value = '';
+            $('roleDescription').value = '';
+            $('roleActive').value = 'true';
+            $('alertArea').innerHTML = '';
+            $('loadingArea').style.display = '';
+            $('formArea').style.display = 'none';
+            $('btnSave').innerHTML = '<i class="la la-check"></i> Cadastrar';
+
             // Load user
             try { currentUser = await fetchJson('/bff/me'); } catch (e) { currentUser = null; }
 

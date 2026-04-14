@@ -99,7 +99,7 @@
                         @if (HasPermission("areas.view"))
                         {
                             <li class="@(IsActive("/register/plants") ? "active" : "")">
-                                <NavLink class="menu-item" href="/register/plants" Match="NavLinkMatch.Prefix">
+                                <NavLink class="menu-item" href="/register/plants" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
                                     <i class="la la-map"></i>
                                     <span>Planta</span>
                                 </NavLink>
@@ -108,7 +108,7 @@
                         @if (HasPermission("escalation.view"))
                         {
                             <li class="@(IsActive("/register/escalation") ? "active" : "")">
-                                <NavLink class="menu-item" href="/register/escalation-levels" Match="NavLinkMatch.Prefix">
+                                <NavLink class="menu-item" href="/register/escalation-levels" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
                                     <i class="la la-level-up"></i>
                                     <span>Escalação</span>
                                 </NavLink>
@@ -128,7 +128,7 @@
                         @if (HasPermission("help_requests.view"))
                         {
                             <li class="@((IsActive("/help-requests") && !IsActive("/help-requests/close")) ? "active" : "")">
-                                <NavLink class="menu-item" href="/help-requests" Match="NavLinkMatch.All">
+                                <NavLink class="menu-item" href="/help-requests" Match="NavLinkMatch.All" data-enhance-nav="false">
                                     <i class="la la-life-ring"></i>
                                     <span>Cadeia de Ajuda</span>
                                 </NavLink>
@@ -137,7 +137,7 @@
                         @if (HasPermission("help_requests.close"))
                         {
                             <li class="@(IsActive("/help-requests/close") ? "active" : "")">
-                                <NavLink class="menu-item" href="/help-requests/close" Match="NavLinkMatch.All">
+                                <NavLink class="menu-item" href="/help-requests/close" Match="NavLinkMatch.All" data-enhance-nav="false">
                                     <i class="la la-times-circle"></i>
                                     <span>Encerrar Ajuda</span>
                                 </NavLink>
@@ -149,7 +149,7 @@
             @if (isAndonUser && HasPermission("andon.view"))
             {
                 <li class="nav-item @(IsActive("/andon") ? "active" : "")">
-                    <NavLink href="/andon" Match="NavLinkMatch.Prefix">
+                    <NavLink href="/andon" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
                         <i class="la la-bell"></i>
                         <span class="menu-title">Andon</span>
                     </NavLink>
@@ -175,7 +175,7 @@
                         @if (HasPermission("roles.view"))
                         {
                             <li class="@(IsActive("/user/roles") ? "active" : "")">
-                                <NavLink class="menu-item" href="/user/roles" Match="NavLinkMatch.Prefix">
+                                <NavLink class="menu-item" href="/user/roles" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
                                     <i class="la la-shield"></i>
                                     <span>Perfil</span>
                                 </NavLink>
