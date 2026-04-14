@@ -6,6 +6,14 @@ using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = builder.Configuration["PORT"];
+if (!string.IsNullOrWhiteSpace(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https+http://apiservice";
+
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 
@@ -17,67 +25,67 @@ builder.Services.AddOutputCache();
 
 builder.Services.AddHttpClient<WeatherApiClient>(client =>
     {
-        client.BaseAddress = new("https+http://apiservice");
+        client.BaseAddress = new(apiBaseUrl);
     });
 
 builder.Services.AddHttpClient<TenantApiClient>(client =>
 {
-    client.BaseAddress = new("https+http://apiservice");
+    client.BaseAddress = new(apiBaseUrl);
 });
 
 builder.Services.AddHttpClient<UserApiClient>(client =>
 {
-    client.BaseAddress = new("https+http://apiservice");
+    client.BaseAddress = new(apiBaseUrl);
 });
 
 builder.Services.AddHttpClient<AuthApiClient>(client =>
 {
-    client.BaseAddress = new("https+http://apiservice");
+    client.BaseAddress = new(apiBaseUrl);
 });
 
 builder.Services.AddHttpClient<SectorApiClient>(client =>
 {
-    client.BaseAddress = new("https+http://apiservice");
+    client.BaseAddress = new(apiBaseUrl);
 });
 
 builder.Services.AddHttpClient<HelpRequestTypeApiClient>(client =>
 {
-    client.BaseAddress = new("https+http://apiservice");
+    client.BaseAddress = new(apiBaseUrl);
 });
 
 builder.Services.AddHttpClient<EscalationLevelApiClient>(client =>
 {
-    client.BaseAddress = new("https+http://apiservice");
+    client.BaseAddress = new(apiBaseUrl);
 });
 
 builder.Services.AddHttpClient<AreaApiClient>(client =>
 {
-    client.BaseAddress = new("https+http://apiservice");
+    client.BaseAddress = new(apiBaseUrl);
 });
 
 builder.Services.AddHttpClient<ReasonApiClient>(client =>
 {
-    client.BaseAddress = new("https+http://apiservice");
+    client.BaseAddress = new(apiBaseUrl);
 });
 
 builder.Services.AddHttpClient<HelpRequestApiClient>(client =>
 {
-    client.BaseAddress = new("https+http://apiservice");
+    client.BaseAddress = new(apiBaseUrl);
 });
 
 builder.Services.AddHttpClient<DashboardApiClient>(client =>
 {
-    client.BaseAddress = new("https+http://apiservice");
+    client.BaseAddress = new(apiBaseUrl);
 });
 
 builder.Services.AddHttpClient<SessionApiClient>(client =>
 {
-    client.BaseAddress = new("https+http://apiservice");
+    client.BaseAddress = new(apiBaseUrl);
 });
 
 builder.Services.AddHttpClient<RoleApiClient>(client =>
 {
-    client.BaseAddress = new("https+http://apiservice");
+    client.BaseAddress = new(apiBaseUrl);
 });
 
 builder.Services.AddHttpContextAccessor();

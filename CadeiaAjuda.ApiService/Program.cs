@@ -5,6 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = builder.Configuration["PORT"];
+if (!string.IsNullOrWhiteSpace(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 
@@ -44,10 +50,11 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();
 
-if (app.Environment.IsDevelopment())
+app.MapOpenApi();
+app.UseSwaggerUI(options =>
 {
-    app.MapOpenApi();
-}
+    options.SwaggerEndpoint("/openapi/v1.json", "CadeiaAjuda API");
+});
 
 // Apply pending migrations on startup (development only)
 if (app.Environment.IsDevelopment())
@@ -546,5 +553,6 @@ app.MapGet("/api/permissions", async (IRoleService service) =>
 app.MapDefaultEndpoints();
 
 app.Run();
+
 
 record CreateSessionRequest(Guid UserId, Guid TenantId, string? IpAddress, string? UserAgent);
