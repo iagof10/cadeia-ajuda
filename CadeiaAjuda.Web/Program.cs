@@ -268,6 +268,19 @@ app.MapPost("/auth/do-login", async (HttpContext httpContext, AuthApiClient auth
     return Results.Redirect("/dashboard");
 }).DisableAntiforgery();
 
+app.MapPost("/auth/check-session", async (HttpContext httpContext, AuthApiClient authApi, SessionApiClient sessionApi) =>
+{
+    var dto = await httpContext.Request.ReadFromJsonAsync<BffLoginModel>();
+    if (dto is null) return Results.BadRequest();
+
+    var result = await authApi.LoginAsync(dto.TenantIdentifier, dto.Login, dto.Password);
+    if (!result.Success || result.User is null)
+        return Results.Json(new { valid = false });
+
+    var hasActive = await sessionApi.HasActiveSessionAsync(result.User.Id);
+    return Results.Ok(new { valid = true, hasActiveSession = hasActive });
+}).DisableAntiforgery();
+
 app.MapGet("/auth/logout", async (AuthStateService auth, SessionApiClient sessionApi) =>
 {
     var user = auth.GetCurrentUser();
@@ -295,6 +308,16 @@ bffAuth.MapPost("/login", async (HttpContext httpContext, AuthApiClient authApi,
     var result = await authApi.LoginAsync(dto.TenantIdentifier, dto.Login, dto.Password);
     if (!result.Success || result.User is null)
         return Results.Json(new { error = "Login ou senha inválidos." }, statusCode: 401);
+
+    // Check for active session (unless user already confirmed)
+    if (!dto.ForceLogin)
+    {
+        var hasActive = await sessionApi.HasActiveSessionAsync(result.User.Id);
+        if (hasActive)
+        {
+            return Results.Json(new { activeSession = true, message = "Este usuário já possui uma sessão ativa em outro dispositivo. Deseja desconectar e continuar?" }, statusCode: 409);
+        }
+    }
 
     // Create session (invalidates any previous active session for this user)
     var ip = httpContext.Connection.RemoteIpAddress?.ToString();
@@ -565,5 +588,5 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
-record BffLoginModel(string TenantIdentifier, string Login, string Password);
+record BffLoginModel(string TenantIdentifier, string Login, string Password, bool ForceLogin = false);
 

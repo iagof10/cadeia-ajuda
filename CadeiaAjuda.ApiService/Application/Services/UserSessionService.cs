@@ -11,6 +11,7 @@ public interface IUserSessionService
     Task InvalidateSessionAsync(string sessionToken);
     Task InvalidateAllUserSessionsAsync(Guid userId);
     Task UpdateActivityAsync(string sessionToken);
+    Task<bool> HasActiveSessionAsync(Guid userId);
 }
 
 public class UserSessionService : IUserSessionService
@@ -91,6 +92,12 @@ public class UserSessionService : IUserSessionService
         session.LastActivityAt = DateTime.UtcNow;
         _repository.Update(session);
         await _repository.SaveChangesAsync();
+    }
+
+    public async Task<bool> HasActiveSessionAsync(Guid userId)
+    {
+        var activeSessions = await _repository.GetActiveByUserIdAsync(userId);
+        return activeSessions.Count > 0;
     }
 
     private static string GenerateToken()

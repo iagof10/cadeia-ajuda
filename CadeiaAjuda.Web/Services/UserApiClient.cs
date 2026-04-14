@@ -44,6 +44,8 @@ public class UserViewModel
     public DateTime CreatedAt { get; set; }
     public Guid? RoleId { get; set; }
     public string RoleName { get; set; } = string.Empty;
+    public UserType UserType { get; set; }
+    public string UserTypeName { get; set; } = string.Empty;
 }
 
 public class UserFormModel
@@ -72,4 +74,5 @@ public class UserFormModel
 
     public string? SelectedRoleId { get; set; }
     public Guid? RoleId { get; set; }
+    public UserType UserType { get; set; } = UserType.Standard;
 }

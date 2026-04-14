@@ -36,7 +36,7 @@
                     <label>Login</label>
                     <div class="auth-input-group">
                         <i class="la la-user"></i>
-                        <input type="text" name="Login" class="form-control" placeholder="Seu login de acesso" required />
+                        <input type="text" name="Login" id="loginField" class="form-control" placeholder="Seu login de acesso" required />
                     </div>
                 </div>
 
@@ -44,7 +44,7 @@
                     <label>Senha</label>
                     <div class="auth-input-group">
                         <i class="la la-lock"></i>
-                        <input type="password" name="Password" class="form-control" placeholder="Sua senha" required />
+                        <input type="password" name="Password" id="passwordField" class="form-control" placeholder="Sua senha" required />
                     </div>
                 </div>
 
@@ -55,9 +55,11 @@
                     </div>
                 }
 
-                <button type="submit" class="btn-auth-submit">
-                    <span>Entrar</span>
-                    <i class="ft-arrow-right"></i>
+                <div id="loginError" class="auth-error" style="display:none;"></div>
+
+                <button type="submit" class="btn-auth-submit" id="btnSubmit">
+                    <span id="btnText">Entrar</span>
+                    <i class="ft-arrow-right" id="btnIcon"></i>
                 </button>
             </form>
 
@@ -66,6 +68,21 @@
                     <i class="ft-arrow-left"></i> Trocar empresa
                 </a>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="session-modal-overlay" id="sessionModal" style="display:none;">
+    <div class="session-modal">
+        <div class="session-modal-icon">
+            <i class="la la-exclamation-triangle"></i>
+        </div>
+        <h3>Sessão ativa detectada</h3>
+        <p>Este usuário já possui uma sessão ativa em outro dispositivo. Ao continuar, a sessão anterior será encerrada.</p>
+        <p class="text-muted" style="font-size: 0.85rem;">Deseja desconectar a outra sessão e entrar aqui?</p>
+        <div class="session-modal-actions">
+            <button type="button" class="btn-session-cancel" onclick="closeSessionModal()">Cancelar</button>
+            <button type="button" class="btn-session-confirm" onclick="forceLogin()">Sim, entrar aqui</button>
         </div>
     </div>
 </div>
@@ -331,6 +348,93 @@
             font-size: 1.35rem;
         }
     }
+
+    /* ===== SESSION MODAL ===== */
+    .session-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .session-modal {
+        background: #fff;
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 420px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .session-modal-icon {
+        font-size: 3rem;
+        color: #f59e0b;
+        margin-bottom: 1rem;
+    }
+
+    .session-modal h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .session-modal p {
+        color: #6b7280;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 0.5rem;
+    }
+
+    .session-modal-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 1.5rem;
+        justify-content: center;
+    }
+
+    .btn-session-cancel {
+        padding: 10px 24px;
+        border-radius: 10px;
+        border: 2px solid #e5e7eb;
+        background: #fff;
+        color: #6b7280;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: border-color 0.2s;
+    }
+
+    .btn-session-cancel:hover {
+        border-color: #d1d5db;
+        color: #374151;
+    }
+
+    .btn-session-confirm {
+        padding: 10px 24px;
+        border-radius: 10px;
+        border: none;
+        background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+
+    .btn-session-confirm:hover {
+        opacity: 0.9;
+    }
 </style>
 
 @code {
@@ -347,3 +451,96 @@
         _ => null
     };
 }
+
+<script suppress-error="BL9992">
+    var skipSessionCheck = false;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('loginForm');
+        if (!form) return;
+
+        form.addEventListener('submit', async function (e) {
+            if (skipSessionCheck) return; // Let form submit normally
+
+            e.preventDefault();
+
+            var login = document.getElementById('loginField').value;
+            var password = document.getElementById('passwordField').value;
+            var tenant = '@Identifier';
+
+            if (!login || !password) {
+                showLoginError('Preencha o login e a senha.');
+                return;
+            }
+
+            setLoading(true);
+            hideLoginError();
+
+            try {
+                var resp = await fetch('/auth/check-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tenantIdentifier: tenant, login: login, password: password })
+                });
+
+                var data = await resp.json();
+
+                if (!data.valid) {
+                    showLoginError('Login ou senha inválidos.');
+                    setLoading(false);
+                    return;
+                }
+
+                if (data.hasActiveSession) {
+                    setLoading(false);
+                    document.getElementById('sessionModal').style.display = 'flex';
+                    return;
+                }
+
+                // No active session — submit normally
+                skipSessionCheck = true;
+                form.submit();
+            } catch {
+                setLoading(false);
+                skipSessionCheck = true;
+                form.submit();
+            }
+        });
+    });
+
+    function forceLogin() {
+        document.getElementById('sessionModal').style.display = 'none';
+        skipSessionCheck = true;
+        var form = document.getElementById('loginForm');
+        if (form) form.submit();
+    }
+
+    function closeSessionModal() {
+        document.getElementById('sessionModal').style.display = 'none';
+    }
+
+    function showLoginError(msg) {
+        var el = document.getElementById('loginError');
+        el.innerHTML = '<i class="la la-exclamation-circle"></i> ' + msg;
+        el.style.display = 'flex';
+    }
+
+    function hideLoginError() {
+        document.getElementById('loginError').style.display = 'none';
+    }
+
+    function setLoading(loading) {
+        var btn = document.getElementById('btnSubmit');
+        var text = document.getElementById('btnText');
+        var icon = document.getElementById('btnIcon');
+        if (loading) {
+            btn.disabled = true;
+            text.textContent = 'Verificando...';
+            icon.className = 'la la-spinner la-spin';
+        } else {
+            btn.disabled = false;
+            text.textContent = 'Entrar';
+            icon.className = 'ft-arrow-right';
+        }
+    }
+</script>

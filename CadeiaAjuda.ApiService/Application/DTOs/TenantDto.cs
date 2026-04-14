@@ -11,6 +11,10 @@ public class TenantDto
     public string Identifier { get; set; } = string.Empty;
     public bool Active { get; set; }
     public DateTime CreatedAt { get; set; }
+    public int? StandardUserLimit { get; set; }
+    public int? AndonUserLimit { get; set; }
+    public int? ManagerUserLimit { get; set; }
+    public int? AdministratorUserLimit { get; set; }
 }
 
 public class TenantCreateDto
@@ -21,6 +25,10 @@ public class TenantCreateDto
     public string Email { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public string Identifier { get; set; } = string.Empty;
+    public int? StandardUserLimit { get; set; }
+    public int? AndonUserLimit { get; set; }
+    public int? ManagerUserLimit { get; set; }
+    public int? AdministratorUserLimit { get; set; }
 }
 
 public class TenantUpdateDto
@@ -33,4 +41,8 @@ public class TenantUpdateDto
     public string Phone { get; set; } = string.Empty;
     public string Identifier { get; set; } = string.Empty;
     public bool Active { get; set; }
+    public int? StandardUserLimit { get; set; }
+    public int? AndonUserLimit { get; set; }
+    public int? ManagerUserLimit { get; set; }
+    public int? AdministratorUserLimit { get; set; }
 }

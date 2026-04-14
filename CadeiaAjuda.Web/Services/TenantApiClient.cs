@@ -39,6 +39,10 @@ public class TenantViewModel
     public string Identifier { get; set; } = string.Empty;
     public bool Active { get; set; }
     public DateTime CreatedAt { get; set; }
+    public int? StandardUserLimit { get; set; }
+    public int? AndonUserLimit { get; set; }
+    public int? ManagerUserLimit { get; set; }
+    public int? AdministratorUserLimit { get; set; }
 }
 
 public class TenantFormModel
@@ -63,4 +67,16 @@ public class TenantFormModel
     public string ActiveValue { get; set; } = "true";
 
     public bool Active { get; set; } = true;
+
+    [Range(0, int.MaxValue, ErrorMessage = "Informe um limite válido.")]
+    public int? StandardUserLimit { get; set; }
+
+    [Range(0, int.MaxValue, ErrorMessage = "Informe um limite válido.")]
+    public int? AndonUserLimit { get; set; }
+
+    [Range(0, int.MaxValue, ErrorMessage = "Informe um limite válido.")]
+    public int? ManagerUserLimit { get; set; }
+
+    [Range(0, int.MaxValue, ErrorMessage = "Informe um limite válido.")]
+    public int? AdministratorUserLimit { get; set; }
 }

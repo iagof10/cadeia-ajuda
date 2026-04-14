@@ -40,7 +40,11 @@ public class TenantService : ITenantService
             Cnpj = dto.Cnpj,
             Email = dto.Email,
             Phone = dto.Phone,
-            Identifier = dto.Identifier
+            Identifier = dto.Identifier,
+            StandardUserLimit = dto.StandardUserLimit,
+            AndonUserLimit = dto.AndonUserLimit,
+            ManagerUserLimit = dto.ManagerUserLimit,
+            AdministratorUserLimit = dto.AdministratorUserLimit
         };
 
         await _repository.AddAsync(tenant);
@@ -67,6 +71,10 @@ public class TenantService : ITenantService
         tenant.Phone = dto.Phone;
         tenant.Identifier = dto.Identifier;
         tenant.Active = dto.Active;
+        tenant.StandardUserLimit = dto.StandardUserLimit;
+        tenant.AndonUserLimit = dto.AndonUserLimit;
+        tenant.ManagerUserLimit = dto.ManagerUserLimit;
+        tenant.AdministratorUserLimit = dto.AdministratorUserLimit;
 
         _repository.Update(tenant);
         await _repository.SaveChangesAsync();
@@ -96,6 +104,10 @@ public class TenantService : ITenantService
         Phone = tenant.Phone,
         Identifier = tenant.Identifier,
         Active = tenant.Active,
-        CreatedAt = tenant.CreatedAt
+        CreatedAt = tenant.CreatedAt,
+        StandardUserLimit = tenant.StandardUserLimit,
+        AndonUserLimit = tenant.AndonUserLimit,
+        ManagerUserLimit = tenant.ManagerUserLimit,
+        AdministratorUserLimit = tenant.AdministratorUserLimit
     };
 }

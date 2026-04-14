@@ -10,4 +10,5 @@ public interface IUserRepository : IRepository<User>
     Task<User?> GetByLoginAsync(Guid tenantId, string login);
     Task<bool> ExistsByLoginAsync(Guid tenantId, string login, Guid? excludeId = null);
     Task<bool> ExistsByEmailAsync(Guid tenantId, string email, Guid? excludeId = null);
+    Task<int> CountByTenantAndTypeAsync(Guid tenantId, UserType userType, Guid? excludeId = null);
 }

@@ -481,6 +481,12 @@ namespace CadeiaAjuda.ApiService.Infrastructure.Data.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("boolean");
 
+                    b.Property<int?>("AdministratorUserLimit")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("AndonUserLimit")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Cnpj")
                         .IsRequired()
                         .HasMaxLength(18)
@@ -499,6 +505,9 @@ namespace CadeiaAjuda.ApiService.Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<int?>("ManagerUserLimit")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -508,6 +517,9 @@ namespace CadeiaAjuda.ApiService.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
+
+                    b.Property<int?>("StandardUserLimit")
+                        .HasColumnType("integer");
 
                     b.Property<string>("TradeName")
                         .IsRequired()
@@ -635,6 +647,11 @@ namespace CadeiaAjuda.ApiService.Infrastructure.Data.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserType")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.HasKey("Id");
 

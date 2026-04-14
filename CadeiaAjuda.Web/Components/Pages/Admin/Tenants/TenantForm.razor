@@ -83,6 +83,41 @@
                                 }
                             </div>
 
+                            <div class="row">
+                                <div class="col-12">
+                                    <h5 class="mt-1">Limites de usuários por tipo</h5>
+                                    <p class="text-muted mb-1">Deixe em branco para ilimitado.</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Padrão</label>
+                                        <InputNumber @bind-Value="model.StandardUserLimit" class="form-control" placeholder="Ilimitado" />
+                                        <ValidationMessage For="() => model.StandardUserLimit" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Andon</label>
+                                        <InputNumber @bind-Value="model.AndonUserLimit" class="form-control" placeholder="Ilimitado" />
+                                        <ValidationMessage For="() => model.AndonUserLimit" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Manager</label>
+                                        <InputNumber @bind-Value="model.ManagerUserLimit" class="form-control" placeholder="Ilimitado" />
+                                        <ValidationMessage For="() => model.ManagerUserLimit" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Administrator</label>
+                                        <InputNumber @bind-Value="model.AdministratorUserLimit" class="form-control" placeholder="Ilimitado" />
+                                        <ValidationMessage For="() => model.AdministratorUserLimit" />
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="form-actions text-right mt-2">
                                 <NavLink href="/tenants" class="btn btn-light mr-1">
                                     <i class="ft-x"></i> Cancelar
@@ -129,7 +164,11 @@
                     Phone = tenant.Phone,
                     Identifier = tenant.Identifier,
                     ActiveValue = tenant.Active.ToString().ToLower(),
-                    Active = tenant.Active
+                    Active = tenant.Active,
+                    StandardUserLimit = tenant.StandardUserLimit,
+                    AndonUserLimit = tenant.AndonUserLimit,
+                    ManagerUserLimit = tenant.ManagerUserLimit,
+                    AdministratorUserLimit = tenant.AdministratorUserLimit
                 };
             }
         }

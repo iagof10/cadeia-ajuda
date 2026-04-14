@@ -39,6 +39,8 @@ public class LoggedUser
     public string TenantIdentifier { get; set; } = string.Empty;
     public Guid? RoleId { get; set; }
     public string RoleName { get; set; } = string.Empty;
+    public UserType UserType { get; set; }
+    public string UserTypeName { get; set; } = string.Empty;
     public List<string> Permissions { get; set; } = [];
 }
 

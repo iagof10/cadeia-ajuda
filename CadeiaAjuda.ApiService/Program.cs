@@ -405,6 +405,12 @@ sessions.MapPatch("/activity/{sessionToken}", async (string sessionToken, IUserS
     return Results.Ok();
 });
 
+sessions.MapGet("/active/{userId:guid}", async (Guid userId, IUserSessionService service) =>
+{
+    var hasActive = await service.HasActiveSessionAsync(userId);
+    return Results.Ok(new { hasActiveSession = hasActive });
+});
+
 // --- Reasons ---
 var reasons = app.MapGroup("/api/reasons");
 
