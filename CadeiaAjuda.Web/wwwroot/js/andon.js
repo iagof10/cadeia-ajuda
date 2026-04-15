@@ -6,6 +6,8 @@
     var FALLBACK_POLL = 30000;
     var WARNING_MINUTES = 30;
     var CRITICAL_MINUTES = 60;
+    var SHOW_CLOCK = true;
+    var ENABLE_SOUND = false;
     var requests = [];
     var sortedCards = [];
     var visibleStart = 0;
@@ -267,8 +269,31 @@
         } catch (e) { }
     }
 
+    async function loadUserSettings() {
+        try {
+            var r = await fetch('/bff/andon-user-settings');
+            if (r.ok) {
+                var data = await r.json();
+                if (typeof data.carouselIntervalSeconds === 'number' && data.carouselIntervalSeconds > 0) {
+                    CAROUSEL_INTERVAL = data.carouselIntervalSeconds * 1000;
+                }
+                if (typeof data.showClock === 'boolean') {
+                    SHOW_CLOCK = data.showClock;
+                    var clockEl = document.getElementById('andonClock');
+                    var dotEl = document.querySelector('.andon-live-dot');
+                    if (clockEl) clockEl.style.display = SHOW_CLOCK ? '' : 'none';
+                    if (dotEl) dotEl.style.display = SHOW_CLOCK ? '' : 'none';
+                }
+                if (typeof data.enableSound === 'boolean') {
+                    ENABLE_SOUND = data.enableSound;
+                }
+            }
+        } catch (e) { }
+    }
+
     (async function () {
         await loadAndonSettings();
+        await loadUserSettings();
         await load();
         startCarousel();
         await connectSignalR();

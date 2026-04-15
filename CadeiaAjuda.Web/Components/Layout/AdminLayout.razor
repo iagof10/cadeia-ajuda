@@ -149,10 +149,16 @@
             }
             @if (isAndonUser)
             {
-                <li class="nav-item @(IsActive("/andon") ? "active" : "")">
-                    <NavLink href="/andon" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
+                <li class="nav-item @(IsActive("/andon") && !IsActive("/andon/settings") ? "active" : "")">
+                    <NavLink href="/andon" Match="NavLinkMatch.All" data-enhance-nav="false">
                         <i class="ft-monitor"></i>
                         <span class="menu-title">Andon</span>
+                    </NavLink>
+                </li>
+                <li class="nav-item @(IsActive("/andon/settings") ? "active" : "")">
+                    <NavLink href="/andon/settings" Match="NavLinkMatch.Prefix">
+                        <i class="ft-settings"></i>
+                        <span class="menu-title">Configuração</span>
                     </NavLink>
                 </li>
             }
@@ -241,7 +247,7 @@
 <!-- BEGIN: Footer-->
 <footer class="footer footer-static footer-light navbar-border navbar-shadow">
     <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2">
-        <span class="float-md-left d-block d-md-inline-block">Copyright &copy; @DateTime.Now.Year <a class="text-bold-800 grey darken-2" href="javascript:void(0)">Cadeia Ajuda</a></span>
+        <span class="float-md-left d-block d-md-inline-block">Copyright &copy; @DateTime.Now.Year <a class="text-bold-800 grey darken-2" href="https://assistchain.com.br" target="_blank">AssistChain</a></span>
         <span class="float-md-right d-none d-lg-block">Painel Administrativo</span>
     </p>
 </footer>

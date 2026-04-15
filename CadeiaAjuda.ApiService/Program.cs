@@ -645,6 +645,46 @@ andonSettings.MapPut("/{tenantId:guid}", async (Guid tenantId, AndonSettingsUpda
     return Results.Ok(new { success = true });
 });
 
+// --- Andon User Settings (per user) ---
+var andonUserSettings = app.MapGroup("/api/andon-user-settings");
+
+andonUserSettings.MapGet("/{userId:guid}", async (Guid userId, AppDbContext db) =>
+{
+    var settings = await db.AndonUserSettings.FirstOrDefaultAsync(s => s.UserId == userId);
+    if (settings is null)
+    {
+        settings = new CadeiaAjuda.ApiService.Domain.Entities.AndonUserSettings { UserId = userId };
+        db.AndonUserSettings.Add(settings);
+        await db.SaveChangesAsync();
+    }
+    return Results.Ok(new
+    {
+        settings.Id,
+        settings.UserId,
+        settings.CarouselIntervalSeconds,
+        settings.ShowClock,
+        settings.EnableSound
+    });
+});
+
+andonUserSettings.MapPut("/{userId:guid}", async (Guid userId, AndonUserSettingsUpdateModel model, AppDbContext db) =>
+{
+    var settings = await db.AndonUserSettings.FirstOrDefaultAsync(s => s.UserId == userId);
+    if (settings is null)
+    {
+        settings = new CadeiaAjuda.ApiService.Domain.Entities.AndonUserSettings { UserId = userId };
+        db.AndonUserSettings.Add(settings);
+    }
+
+    settings.CarouselIntervalSeconds = model.CarouselIntervalSeconds;
+    settings.ShowClock = model.ShowClock;
+    settings.EnableSound = model.EnableSound;
+    settings.UpdatedAt = DateTime.UtcNow;
+
+    await db.SaveChangesAsync();
+    return Results.Ok(new { success = true });
+});
+
 app.MapDefaultEndpoints();
 
 app.Run();
@@ -665,3 +705,8 @@ record TenantSettingsUpdateModel(
 record AndonSettingsUpdateModel(
     int WarningMinutes,
     int CriticalMinutes);
+
+record AndonUserSettingsUpdateModel(
+    int CarouselIntervalSeconds,
+    bool ShowClock,
+    bool EnableSound);

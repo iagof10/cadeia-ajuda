@@ -105,6 +105,11 @@ builder.Services.AddHttpClient<AndonSettingsApiClient>(client =>
     client.BaseAddress = apiBaseUri;
 });
 
+builder.Services.AddHttpClient<AndonUserSettingsApiClient>(client =>
+{
+    client.BaseAddress = apiBaseUri;
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthStateService>();
 builder.Services.AddSignalR();
@@ -166,7 +171,7 @@ app.Use(async (context, next) =>
         "/register/help-request-types", "/register/reasons", "/register/sectors",
         "/register/plants", "/register/escalation-levels",
         "/user/users", "/user/roles",
-        "/andon",
+        "/andon", "/andon/settings",
         "/help-requests", "/help-requests/close",
         "/settings/company", "/settings/andon",
         "/tenants",
@@ -556,6 +561,17 @@ app.MapPut("/bff/andon-settings", async (HttpContext httpContext, AuthStateServi
     var json = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
     var resp = await http.PutAsync($"/api/andon-settings/{user.TenantId}", content);
+    var body = await resp.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
+}).DisableAntiforgery();
+
+// /bff/andon-user-settings
+app.MapGet("/bff/andon-user-settings", async (AuthStateService auth, IHttpClientFactory httpFactory) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    var http = httpFactory.CreateClient("ApiClient");
+    var resp = await http.GetAsync($"/api/andon-user-settings/{user.Id}");
     var body = await resp.Content.ReadAsStringAsync();
     return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
 }).DisableAntiforgery();
