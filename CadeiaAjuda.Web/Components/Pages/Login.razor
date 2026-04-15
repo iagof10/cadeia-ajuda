@@ -25,7 +25,7 @@
         <div class="auth-form-wrapper">
             <div class="auth-form-header">
                 <div class="auth-mobile-brand d-lg-none">
-                    <img src="app-assets/images/logo/AssistChain-logo.png" alt="AssistChain" class="brand-logo-mobile" />
+                    <img src="app-assets/images/logo/AssistChain-logo.png" alt="AssistChain" />
                 </div>
                 <h2>Bem-vindo de volta!</h2>
                 <p class="text-muted">Faça login para acessar sua conta</p>
@@ -113,12 +113,13 @@
         padding: 3rem;
         color: #fff;
         max-width: 480px;
+        text-align: center;
     }
 
     .auth-left-content .auth-brand {
         display: flex;
         align-items: center;
-        gap: 10px;
+        justify-content: center;
         margin-bottom: 2.5rem;
     }
 
@@ -126,7 +127,6 @@
         width: 220px;
         max-width: 100%;
         height: auto;
-        filter: none;
     }
 
     .auth-mobile-brand .brand-logo-mobile {
@@ -194,19 +194,31 @@
     .auth-mobile-brand {
         display: flex;
         align-items: center;
-        gap: 8px;
+        justify-content: center;
         margin-bottom: 1.5rem;
     }
 
-    .auth-mobile-brand img {
-        width: 30px;
-        height: 30px;
+    .auth-mobile-brand img,
+    .auth-mobile-brand .brand-logo-mobile {
+        max-width: 180px;
+        width: auto;
+        height: auto;
     }
 
-    .auth-mobile-brand span {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #f57c00;
+    .auth-desktop-brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .auth-desktop-brand img {
+        max-width: 200px;
+        height: auto;
+    }
+
+    .auth-form-header {
+        text-align: center;
     }
 
     .auth-form-header h2 {
