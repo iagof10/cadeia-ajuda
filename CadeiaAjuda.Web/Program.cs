@@ -140,7 +140,8 @@ app.Use(async (context, next) =>
         || path.StartsWith("/andon", StringComparison.OrdinalIgnoreCase)
         || path.StartsWith("/reports", StringComparison.OrdinalIgnoreCase)
         || path.StartsWith("/tenants", StringComparison.OrdinalIgnoreCase)
-        || path.StartsWith("/help-requests", StringComparison.OrdinalIgnoreCase))
+        || path.StartsWith("/help-requests", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/settings", StringComparison.OrdinalIgnoreCase))
     {
         var auth = context.RequestServices.GetRequiredService<AuthStateService>();
         var user = auth.GetCurrentUser();
@@ -214,6 +215,7 @@ static string? GetRequiredPermission(string path)
     if (path.StartsWith("/register/escalation", StringComparison.OrdinalIgnoreCase)) return "escalation.view";
     if (path.StartsWith("/help-requests/close", StringComparison.OrdinalIgnoreCase)) return "help_requests.close";
     if (path.StartsWith("/help-requests", StringComparison.OrdinalIgnoreCase)) return "help_requests.view";
+    if (path.StartsWith("/settings", StringComparison.OrdinalIgnoreCase)) return "company.view";
     return null;
 }
 

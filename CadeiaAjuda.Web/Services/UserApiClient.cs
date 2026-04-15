@@ -53,8 +53,6 @@ public class UserFormModel
     [Required(ErrorMessage = "Informe o nome do usuário.")]
     public string Name { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Informe o e-mail.")]
-    [EmailAddress(ErrorMessage = "Informe um e-mail válido.")]
     public string Email { get; set; } = string.Empty;
 
     public string Phone { get; set; } = string.Empty;

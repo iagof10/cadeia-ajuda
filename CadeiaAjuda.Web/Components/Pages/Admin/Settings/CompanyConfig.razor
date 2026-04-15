@@ -1,0 +1,197 @@
+@page "/settings/company"
+@inject TenantApiClient Api
+@inject AuthStateService Auth
+@inject NavigationManager Navigation
+
+<PageTitle>Configuração da Empresa - Cadeia Ajuda</PageTitle>
+
+<section>
+    <div class="row mb-2">
+        <div class="col-12">
+            <h4 class="content-header-title mb-0">Configuração da Empresa</h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-body">
+                        @if (isLoading)
+                        {
+                            <div class="text-center py-3">
+                                <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+                            </div>
+                        }
+                        else
+                        {
+                            @if (!string.IsNullOrEmpty(successMessage))
+                            {
+                                <div class="alert alert-success alert-dismissible mb-2" role="alert">
+                                    <button type="button" class="close" @onclick="() => successMessage = null"><span>&times;</span></button>
+                                    <i class="la la-check-circle"></i> @successMessage
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(errorMessage))
+                            {
+                                <div class="alert alert-danger alert-dismissible mb-2" role="alert">
+                                    <button type="button" class="close" @onclick="() => errorMessage = null"><span>&times;</span></button>
+                                    <i class="la la-warning"></i> @errorMessage
+                                </div>
+                            }
+
+                            <EditForm Model="model" OnValidSubmit="HandleSubmit" FormName="companyConfigForm">
+                                <DataAnnotationsValidator />
+
+                                <h5 class="mb-1"><i class="ft-briefcase mr-1"></i> Dados da Empresa</h5>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Nome da Empresa <span class="text-danger">*</span></label>
+                                            <InputText @bind-Value="model.Name" class="form-control" placeholder="Razão social" />
+                                            <ValidationMessage For="() => model.Name" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Nome Fantasia</label>
+                                            <InputText @bind-Value="model.TradeName" class="form-control" placeholder="Nome fantasia" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>CNPJ <span class="text-danger">*</span></label>
+                                            <InputText @bind-Value="model.Cnpj" class="form-control" placeholder="00.000.000/0000-00" data-mask="cnpj" />
+                                            <ValidationMessage For="() => model.Cnpj" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>E-mail <span class="text-danger">*</span></label>
+                                            <InputText @bind-Value="model.Email" class="form-control" type="email" placeholder="contato@empresa.com" />
+                                            <ValidationMessage For="() => model.Email" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Telefone</label>
+                                            <InputText @bind-Value="model.Phone" class="form-control" placeholder="(00) 00000-0000" data-mask="phone" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Identificador</label>
+                                            <InputText @bind-Value="model.Identifier" class="form-control" disabled="true" />
+                                            <small class="text-muted">O identificador não pode ser alterado.</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions text-right mt-2">
+                                    <button type="submit" class="btn btn-warning" disabled="@isSaving">
+                                        @if (isSaving)
+                                        {
+                                            <i class="la la-spinner la-spin"></i>
+                                        }
+                                        <i class="la la-check"></i> Salvar Alterações
+                                    </button>
+                                </div>
+                            </EditForm>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    [SupplyParameterFromForm]
+    private TenantFormModel model { get; set; } = new();
+
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+    private string? successMessage;
+    private Guid tenantId;
+    private string originalIdentifier = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = Auth.GetCurrentUser();
+        if (user is null) return;
+
+        tenantId = user.TenantId;
+
+        if (string.IsNullOrEmpty(model.Name))
+        {
+            var tenant = await Api.GetByIdAsync(tenantId);
+            if (tenant is not null)
+            {
+                model = new TenantFormModel
+                {
+                    Name = tenant.Name,
+                    TradeName = tenant.TradeName,
+                    Cnpj = tenant.Cnpj,
+                    Email = tenant.Email,
+                    Phone = tenant.Phone,
+                    Identifier = tenant.Identifier,
+                    ActiveValue = tenant.Active.ToString().ToLower(),
+                    StandardUserLimit = tenant.StandardUserLimit,
+                    AndonUserLimit = tenant.AndonUserLimit,
+                    ManagerUserLimit = tenant.ManagerUserLimit,
+                    AdministratorUserLimit = tenant.AdministratorUserLimit
+                };
+                originalIdentifier = tenant.Identifier;
+            }
+        }
+
+        isLoading = false;
+    }
+
+    private async Task HandleSubmit()
+    {
+        isSaving = true;
+        errorMessage = null;
+        successMessage = null;
+
+        model.Active = true;
+        model.Identifier = originalIdentifier;
+
+        var response = await Api.UpdateAsync(tenantId, model);
+
+        if (response.IsSuccessStatusCode)
+        {
+            successMessage = "Dados da empresa atualizados com sucesso.";
+        }
+        else
+        {
+            try
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                var error = System.Text.Json.JsonSerializer.Deserialize<ErrorResponse>(body,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                errorMessage = error?.Error ?? "Ocorreu um erro ao salvar.";
+            }
+            catch
+            {
+                errorMessage = "Ocorreu um erro ao salvar.";
+            }
+        }
+
+        isSaving = false;
+    }
+
+    private class ErrorResponse
+    {
+        public string? Error { get; set; }
+    }
+}

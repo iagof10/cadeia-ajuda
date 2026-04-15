@@ -193,6 +193,15 @@
                     </NavLink>
                 </li>
             }
+            @if (!isAndonUser && HasPermission("company.view"))
+            {
+                <li class="nav-item @(IsActive("/settings") ? "active" : "")">
+                    <NavLink href="/settings/company" Match="NavLinkMatch.Prefix">
+                        <i class="ft-settings"></i>
+                        <span class="menu-title">Configuração</span>
+                    </NavLink>
+                </li>
+            }
         </ul>
     </div>
 </div>

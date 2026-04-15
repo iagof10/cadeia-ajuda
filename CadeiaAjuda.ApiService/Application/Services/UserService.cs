@@ -40,7 +40,7 @@ public class UserService : IUserService
         if (await _repository.ExistsByLoginAsync(dto.TenantId, dto.Login))
             throw new InvalidOperationException("Já existe um usuário com este login nesta empresa.");
 
-        if (await _repository.ExistsByEmailAsync(dto.TenantId, dto.Email))
+        if (!string.IsNullOrWhiteSpace(dto.Email) && await _repository.ExistsByEmailAsync(dto.TenantId, dto.Email))
             throw new InvalidOperationException("Já existe um usuário com este e-mail nesta empresa.");
 
         await ValidateUserTypeLimitAsync(dto.TenantId, dto.UserType);
@@ -72,7 +72,7 @@ public class UserService : IUserService
         if (await _repository.ExistsByLoginAsync(dto.TenantId, dto.Login, dto.Id))
             throw new InvalidOperationException("Já existe um usuário com este login nesta empresa.");
 
-        if (await _repository.ExistsByEmailAsync(dto.TenantId, dto.Email, dto.Id))
+        if (!string.IsNullOrWhiteSpace(dto.Email) && await _repository.ExistsByEmailAsync(dto.TenantId, dto.Email, dto.Id))
             throw new InvalidOperationException("Já existe um usuário com este e-mail nesta empresa.");
 
         await ValidateUserTypeLimitAsync(dto.TenantId, dto.UserType, dto.Id);
