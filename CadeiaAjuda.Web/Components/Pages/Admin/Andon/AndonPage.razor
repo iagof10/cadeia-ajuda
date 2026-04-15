@@ -40,6 +40,28 @@
             backdrop-filter: blur(6px);
         }
 
+        .andon-exit-btn {
+            position: absolute;
+            left: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.08);
+            color: rgba(255,255,255,.35);
+            font-size: 1.1rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background .2s, color .2s;
+        }
+
+        .andon-exit-btn:hover {
+            background: rgba(255,255,255,.18);
+            color: rgba(255,255,255,.8);
+        }
+
         .andon-live-dot {
             display: inline-block;
             width: 14px;
@@ -242,10 +264,6 @@
 </head>
 <body>
 
-    <a href="/home" style="position:fixed;top:12px;left:12px;z-index:9999;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-size:20px;text-decoration:none;cursor:pointer;" onclick="window.location.href='/home';return false;">
-        &#x2302;
-    </a>
-
     <div class="andon-board-container">
         <div class="andon-board" id="andonBoard"></div>
         <div class="andon-empty" id="emptyState" style="display:none;">
@@ -258,6 +276,9 @@
     <div class="andon-page-indicator hidden" id="pageIndicator"></div>
 
     <div class="andon-clock-bar">
+        <a href="/home" class="andon-exit-btn" onclick="window.location.href='/home';return false;">
+            <i class="icon-logout"></i>
+        </a>
         <span class="andon-live-dot"></span>
         <span class="andon-clock" id="andonClock">--:--:--</span>
     </div>
