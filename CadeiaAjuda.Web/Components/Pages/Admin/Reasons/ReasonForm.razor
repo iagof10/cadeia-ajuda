@@ -91,6 +91,12 @@
         var currentUser = Auth.GetCurrentUser();
         if (currentUser is not null)
         {
+            var canManage = currentUser.UserType == UserType.Administrator || currentUser.Permissions.Contains("reasons.manage");
+            if (!canManage)
+            {
+                Navigation.NavigateTo("/register/reasons");
+                return;
+            }
             model.TenantId = currentUser.TenantId;
             model.SelectedTenantId = currentUser.TenantId.ToString();
         }
@@ -121,6 +127,13 @@
         if (currentUser is null)
         {
             errorMessage = "Sessão expirada. Faça login novamente.";
+            isSaving = false;
+            return;
+        }
+
+        if (currentUser.UserType != UserType.Administrator && !currentUser.Permissions.Contains("reasons.manage"))
+        {
+            errorMessage = "Sem permissão para gerenciar motivos.";
             isSaving = false;
             return;
         }

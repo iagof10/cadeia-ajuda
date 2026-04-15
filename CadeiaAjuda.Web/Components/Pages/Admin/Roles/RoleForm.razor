@@ -358,6 +358,12 @@
             // Load user
             try { currentUser = await fetchJson('/bff/me'); } catch (e) { currentUser = null; }
 
+            // Permission check
+            if (currentUser && currentUser.userType !== 3 && (!currentUser.permissions || currentUser.permissions.indexOf('roles.manage') < 0)) {
+                window.location.href = '/user/roles';
+                return;
+            }
+
             // Load permissions
             allPermissions = await fetchJson('/bff/permissions');
 

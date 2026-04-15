@@ -7,9 +7,12 @@
     <div class="row mb-2">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h4 class="content-header-title mb-0">Perfis</h4>
-            <NavLink href="/user/roles/new" class="btn btn-warning" title="Adicionar perfil" data-enhance-nav="false">
-                <i class="ft-plus"></i> Novo Perfil
-            </NavLink>
+            @if (canManage)
+            {
+                <NavLink href="/user/roles/new" class="btn btn-warning" title="Adicionar perfil" data-enhance-nav="false">
+                    <i class="ft-plus"></i> Novo Perfil
+                </NavLink>
+            }
         </div>
     </div>
 
@@ -75,6 +78,8 @@
                                             }
                                         </td>
                                         <td class="text-center">
+                                            @if (canManage)
+                                            {
                                             <div class="dropdown">
                                                 <button type="button" class="btn btn-sm btn-link p-0 text-secondary actions-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mais ações">
                                                     <i class="ft-more-vertical"></i>
@@ -89,6 +94,7 @@
                                                     </button>
                                                 </div>
                                             </div>
+                                            }
                                         </td>
                                     </tr>
                                 }
@@ -153,6 +159,7 @@
     private bool isLoading = true;
     private string? successMessage;
     private string? errorMessage;
+    private bool canManage;
 
     [Inject] RoleApiClient RoleApi { get; set; } = default!;
     [Inject] UserApiClient UserApi { get; set; } = default!;
@@ -163,6 +170,7 @@
         var currentUser = Auth.GetCurrentUser();
         if (currentUser is not null)
         {
+            canManage = currentUser.UserType == UserType.Administrator || currentUser.Permissions.Contains("roles.manage");
             roles = await RoleApi.GetByTenantIdAsync(currentUser.TenantId);
 
             // Count users per role

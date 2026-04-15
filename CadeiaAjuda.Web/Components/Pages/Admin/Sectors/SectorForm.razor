@@ -111,6 +111,17 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var currentUser = Auth.GetCurrentUser();
+        if (currentUser is not null)
+        {
+            var canManage = currentUser.UserType == UserType.Administrator || currentUser.Permissions.Contains("sectors.manage");
+            if (!canManage)
+            {
+                Navigation.NavigateTo("/register/sectors");
+                return;
+            }
+        }
+
         if (isEdit && string.IsNullOrEmpty(model.Name))
         {
             var sector = await Api.GetByIdAsync(Id!.Value);
@@ -136,6 +147,13 @@
         if (currentUser is null)
         {
             errorMessage = "Usu\u00e1rio n\u00e3o autenticado.";
+            isSaving = false;
+            return;
+        }
+
+        if (currentUser.UserType != UserType.Administrator && !currentUser.Permissions.Contains("sectors.manage"))
+        {
+            errorMessage = "Sem permiss\u00e3o para gerenciar setores.";
             isSaving = false;
             return;
         }

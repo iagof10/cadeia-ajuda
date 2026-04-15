@@ -146,6 +146,12 @@
         var currentUser = Auth.GetCurrentUser();
         if (currentUser is not null)
         {
+            var canManage = currentUser.UserType == UserType.Administrator || currentUser.Permissions.Contains("users.manage");
+            if (!canManage)
+            {
+                Navigation.NavigateTo("/user/users");
+                return;
+            }
             availableRoles = await RoleApi.GetByTenantIdAsync(currentUser.TenantId);
             availableRoles = availableRoles.Where(r => r.Active).ToList();
         }
@@ -179,6 +185,13 @@
         if (currentUser is null)
         {
             errorMessage = "Usu\u00e1rio n\u00e3o autenticado.";
+            isSaving = false;
+            return;
+        }
+
+        if (currentUser.UserType != UserType.Administrator && !currentUser.Permissions.Contains("users.manage"))
+        {
+            errorMessage = "Sem permiss\u00e3o para gerenciar usu\u00e1rios.";
             isSaving = false;
             return;
         }

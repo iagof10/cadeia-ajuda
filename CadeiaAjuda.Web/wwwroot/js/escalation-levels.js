@@ -9,6 +9,8 @@
     var editingId = null;
     var deletingId = null;
     var responsibles = [];
+    var currentUser = null;
+    var canManage = false;
 
     // ---- DOM refs ----
     var sectorList = document.getElementById('sectorList');
@@ -180,6 +182,18 @@
                 inactiveFooter = '<div class="card-footer py-1 bg-light"><span class="badge badge-danger">Inativo</span></div>';
             }
 
+            var actionsHtml = '';
+            if (canManage) {
+                actionsHtml =
+                    '<div class="dropdown">' +
+                    '<button type="button" class="btn btn-sm btn-link p-0 text-secondary esc-actions-toggle" data-toggle="dropdown"><i class="ft-more-vertical"></i></button>' +
+                    '<div class="dropdown-menu dropdown-menu-right">' +
+                    '<button class="dropdown-item btn-edit-level" data-id="' + level.id + '"><i class="ft-edit-2 mr-1"></i> Editar</button>' +
+                    '<button class="dropdown-item text-danger btn-delete-level" data-id="' + level.id + '"><i class="ft-trash-2 mr-1"></i> Excluir</button>' +
+                    '</div>' +
+                    '</div>';
+            }
+
             var html =
                 '<div class="col-md-4 mb-2">' +
                 '<div class="card ' + (!level.active ? 'border-danger' : '') + '">' +
@@ -188,13 +202,7 @@
                 '<span class="badge badge-pill ' + (level.active ? 'badge-primary' : 'badge-danger') + ' mr-1">Nível ' + level.order + '</span>' +
                 '<strong>' + escapeHtml(level.name) + '</strong>' +
                 '</div>' +
-                '<div class="dropdown">' +
-                '<button type="button" class="btn btn-sm btn-link p-0 text-secondary esc-actions-toggle" data-toggle="dropdown"><i class="ft-more-vertical"></i></button>' +
-                '<div class="dropdown-menu dropdown-menu-right">' +
-                '<button class="dropdown-item btn-edit-level" data-id="' + level.id + '"><i class="ft-edit-2 mr-1"></i> Editar</button>' +
-                '<button class="dropdown-item text-danger btn-delete-level" data-id="' + level.id + '"><i class="ft-trash-2 mr-1"></i> Excluir</button>' +
-                '</div>' +
-                '</div>' +
+                actionsHtml +
                 '</div>' +
                 '<div class="card-body pt-1 pb-2">' +
                 (level.description ? '<p class="text-muted small mb-1">' + escapeHtml(level.description) + '</p>' : '') +
@@ -500,6 +508,11 @@
     // ---- Init ----
     (async function init() {
         try {
+            try {
+                currentUser = await fetchJson('/bff/me');
+                canManage = currentUser && (currentUser.userType === 3 || (currentUser.permissions && currentUser.permissions.indexOf('escalation.manage') >= 0));
+            } catch (e) { currentUser = null; canManage = false; }
+            if (!canManage) { btnAddLevel.style.display = 'none'; }
             await Promise.all([loadSectors(), loadUsers()]);
         } catch (e) {
             showAlert('Erro ao carregar dados iniciais. Recarregue a página.', 'danger');

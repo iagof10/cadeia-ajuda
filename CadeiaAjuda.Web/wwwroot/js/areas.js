@@ -4,6 +4,7 @@
     // ---- State ----
     var areas = [];
     var currentUser = null;
+    var canManage = false;
     var editingId = null;
     var deletingId = null;
     var expandedNodes = {};
@@ -93,8 +94,10 @@
     async function loadCurrentUser() {
         try {
             currentUser = await fetchJson('/bff/me');
+            canManage = currentUser && (currentUser.userType === 3 || (currentUser.permissions && currentUser.permissions.indexOf('areas.manage') >= 0));
         } catch (e) {
             currentUser = null;
+            canManage = false;
         }
     }
 
@@ -180,37 +183,39 @@
         var actions = document.createElement('div');
         actions.className = 'area-tree-actions';
 
-        var btnAddChild = document.createElement('button');
-        btnAddChild.type = 'button';
-        btnAddChild.className = 'btn btn-sm btn-outline-primary';
-        btnAddChild.title = 'Adicionar sub-área';
-        btnAddChild.innerHTML = '<i class="ft-plus"></i>';
-        btnAddChild.addEventListener('click', function () { openAddModal(area.id); });
-        actions.appendChild(btnAddChild);
+        if (canManage) {
+            var btnAddChild = document.createElement('button');
+            btnAddChild.type = 'button';
+            btnAddChild.className = 'btn btn-sm btn-outline-primary';
+            btnAddChild.title = 'Adicionar sub-área';
+            btnAddChild.innerHTML = '<i class="ft-plus"></i>';
+            btnAddChild.addEventListener('click', function () { openAddModal(area.id); });
+            actions.appendChild(btnAddChild);
 
-        var btnEdit = document.createElement('button');
-        btnEdit.type = 'button';
-        btnEdit.className = 'btn btn-sm btn-outline-info';
-        btnEdit.title = 'Editar';
-        btnEdit.innerHTML = '<i class="ft-edit-2"></i>';
-        btnEdit.addEventListener('click', function () { openEditModal(area.id); });
-        actions.appendChild(btnEdit);
+            var btnEdit = document.createElement('button');
+            btnEdit.type = 'button';
+            btnEdit.className = 'btn btn-sm btn-outline-info';
+            btnEdit.title = 'Editar';
+            btnEdit.innerHTML = '<i class="ft-edit-2"></i>';
+            btnEdit.addEventListener('click', function () { openEditModal(area.id); });
+            actions.appendChild(btnEdit);
 
-        var btnToggle = document.createElement('button');
-        btnToggle.type = 'button';
-        btnToggle.className = 'btn btn-sm ' + (area.active ? 'btn-outline-warning' : 'btn-outline-success');
-        btnToggle.title = area.active ? 'Inativar' : 'Ativar';
-        btnToggle.innerHTML = '<i class="ft-power"></i>';
-        btnToggle.addEventListener('click', function () { toggleActive(area); });
-        actions.appendChild(btnToggle);
+            var btnToggle = document.createElement('button');
+            btnToggle.type = 'button';
+            btnToggle.className = 'btn btn-sm ' + (area.active ? 'btn-outline-warning' : 'btn-outline-success');
+            btnToggle.title = area.active ? 'Inativar' : 'Ativar';
+            btnToggle.innerHTML = '<i class="ft-power"></i>';
+            btnToggle.addEventListener('click', function () { toggleActive(area); });
+            actions.appendChild(btnToggle);
 
-        var btnDelete = document.createElement('button');
-        btnDelete.type = 'button';
-        btnDelete.className = 'btn btn-sm btn-outline-danger';
-        btnDelete.title = 'Excluir';
-        btnDelete.innerHTML = '<i class="ft-trash-2"></i>';
-        btnDelete.addEventListener('click', function () { openDeleteModal(area.id); });
-        actions.appendChild(btnDelete);
+            var btnDelete = document.createElement('button');
+            btnDelete.type = 'button';
+            btnDelete.className = 'btn btn-sm btn-outline-danger';
+            btnDelete.title = 'Excluir';
+            btnDelete.innerHTML = '<i class="ft-trash-2"></i>';
+            btnDelete.addEventListener('click', function () { openDeleteModal(area.id); });
+            actions.appendChild(btnDelete);
+        }
 
         header.appendChild(actions);
         node.appendChild(header);
@@ -454,6 +459,7 @@
     (async function init() {
         try {
             await loadCurrentUser();
+            if (!canManage) { btnAddRoot.style.display = 'none'; }
             await loadAreas();
         } catch (e) {
             showAlert('Erro ao carregar dados iniciais. Recarregue a página.', 'danger');

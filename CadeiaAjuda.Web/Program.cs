@@ -272,13 +272,41 @@ app.Use(async (context, next) =>
 static string? GetRequiredPermission(string path)
 {
     if (path.StartsWith("/dashboard", StringComparison.OrdinalIgnoreCase)) return "dashboard.view";
+
+    // Help Request Types - manage for new/edit
+    if (path.Contains("/help-request-types/new", StringComparison.OrdinalIgnoreCase)
+        || path.Contains("/help-request-types/edit", StringComparison.OrdinalIgnoreCase))
+        return "help_request_types.manage";
     if (path.StartsWith("/register/help-request-types", StringComparison.OrdinalIgnoreCase)) return "help_request_types.view";
+
+    // Reasons - manage for new/edit
+    if (path.Contains("/reasons/new", StringComparison.OrdinalIgnoreCase)
+        || path.Contains("/reasons/edit", StringComparison.OrdinalIgnoreCase))
+        return "reasons.manage";
     if (path.StartsWith("/register/reasons", StringComparison.OrdinalIgnoreCase)) return "reasons.view";
+
+    // Sectors - manage for new/edit
+    if (path.Contains("/sectors/new", StringComparison.OrdinalIgnoreCase)
+        || path.Contains("/sectors/edit", StringComparison.OrdinalIgnoreCase))
+        return "sectors.manage";
     if (path.StartsWith("/register/sectors", StringComparison.OrdinalIgnoreCase)) return "sectors.view";
+
+    // Areas/Plants
     if (path.StartsWith("/register/plants", StringComparison.OrdinalIgnoreCase)) return "areas.view";
     if (path.StartsWith("/register/areas", StringComparison.OrdinalIgnoreCase)) return "areas.view";
+
+    // Users - manage for new/edit
+    if (path.Contains("/users/new", StringComparison.OrdinalIgnoreCase)
+        || path.Contains("/users/edit", StringComparison.OrdinalIgnoreCase))
+        return "users.manage";
     if (path.StartsWith("/user/users", StringComparison.OrdinalIgnoreCase)) return "users.view";
+
+    // Roles - manage for new/edit
+    if (path.Contains("/roles/new", StringComparison.OrdinalIgnoreCase)
+        || path.Contains("/roles/edit", StringComparison.OrdinalIgnoreCase))
+        return "roles.manage";
     if (path.StartsWith("/user/roles", StringComparison.OrdinalIgnoreCase)) return "roles.view";
+
     if (path.StartsWith("/andon", StringComparison.OrdinalIgnoreCase)) return "andon.view";
     if (path.StartsWith("/reports", StringComparison.OrdinalIgnoreCase)) return "reports.view";
     if (path.StartsWith("/register/escalation", StringComparison.OrdinalIgnoreCase)) return "escalation.view";
@@ -485,6 +513,9 @@ app.MapPut("/bff/tenant-settings", async (HttpContext httpContext, AuthStateServ
 {
     var user = auth.GetCurrentUser();
     if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator)
+        return Results.Json(new { error = "Sem permissão para alterar configurações." }, statusCode: 403);
+
     var http = httpFactory.CreateClient("ApiClient");
     var json = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
@@ -519,22 +550,37 @@ bffEscalation.MapGet("/{id:guid}", async (Guid id, EscalationLevelApiClient api)
     return item is null ? Results.NotFound() : Results.Ok(item);
 });
 
-bffEscalation.MapPost("/", async (EscalationLevelSaveModel model, EscalationLevelApiClient api) =>
+bffEscalation.MapPost("/", async (EscalationLevelSaveModel model, EscalationLevelApiClient api, AuthStateService auth) =>
 {
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("escalation.manage"))
+        return Results.Json(new { error = "Sem permissão para gerenciar escalonamento." }, statusCode: 403);
+
     var response = await api.CreateAsync(model);
     var body = await response.Content.ReadAsStringAsync();
     return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
 });
 
-bffEscalation.MapPut("/{id:guid}", async (Guid id, EscalationLevelSaveModel model, EscalationLevelApiClient api) =>
+bffEscalation.MapPut("/{id:guid}", async (Guid id, EscalationLevelSaveModel model, EscalationLevelApiClient api, AuthStateService auth) =>
 {
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("escalation.manage"))
+        return Results.Json(new { error = "Sem permissão para gerenciar escalonamento." }, statusCode: 403);
+
     var response = await api.UpdateAsync(id, model);
     var body = await response.Content.ReadAsStringAsync();
     return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
 });
 
-bffEscalation.MapDelete("/{id:guid}", async (Guid id, EscalationLevelApiClient api) =>
+bffEscalation.MapDelete("/{id:guid}", async (Guid id, EscalationLevelApiClient api, AuthStateService auth) =>
 {
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("escalation.manage"))
+        return Results.Json(new { error = "Sem permissão para gerenciar escalonamento." }, statusCode: 403);
+
     var response = await api.DeleteAsync(id);
     return response.IsSuccessStatusCode ? Results.Ok() : Results.NotFound();
 });
@@ -555,28 +601,48 @@ bffAreas.MapGet("/{id:guid}", async (Guid id, AreaApiClient api) =>
     return item is null ? Results.NotFound() : Results.Ok(item);
 });
 
-bffAreas.MapPost("/", async (AreaFormModel model, AreaApiClient api) =>
+bffAreas.MapPost("/", async (AreaFormModel model, AreaApiClient api, AuthStateService auth) =>
 {
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("areas.manage"))
+        return Results.Json(new { error = "Sem permissão para gerenciar plantas/recursos." }, statusCode: 403);
+
     var response = await api.CreateAsync(model);
     var body = await response.Content.ReadAsStringAsync();
     return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
 });
 
-bffAreas.MapPut("/{id:guid}", async (Guid id, AreaFormModel model, AreaApiClient api) =>
+bffAreas.MapPut("/{id:guid}", async (Guid id, AreaFormModel model, AreaApiClient api, AuthStateService auth) =>
 {
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("areas.manage"))
+        return Results.Json(new { error = "Sem permissão para gerenciar plantas/recursos." }, statusCode: 403);
+
     var response = await api.UpdateAsync(id, model);
     var body = await response.Content.ReadAsStringAsync();
     return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
 });
 
-bffAreas.MapPatch("/{id:guid}/toggle-active", async (Guid id, AreaApiClient api) =>
+bffAreas.MapPatch("/{id:guid}/toggle-active", async (Guid id, AreaApiClient api, AuthStateService auth) =>
 {
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("areas.manage"))
+        return Results.Json(new { error = "Sem permissão para gerenciar plantas/recursos." }, statusCode: 403);
+
     var response = await api.ToggleActiveAsync(id);
     return response.IsSuccessStatusCode ? Results.Ok() : Results.NotFound();
 });
 
-bffAreas.MapDelete("/{id:guid}", async (Guid id, AreaApiClient api) =>
+bffAreas.MapDelete("/{id:guid}", async (Guid id, AreaApiClient api, AuthStateService auth) =>
 {
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("areas.manage"))
+        return Results.Json(new { error = "Sem permissão para gerenciar plantas/recursos." }, statusCode: 403);
+
     var response = await api.DeleteAsync(id);
     if (response.IsSuccessStatusCode) return Results.Ok();
     var body = await response.Content.ReadAsStringAsync();
@@ -629,6 +695,8 @@ bffHelpRequests.MapPatch("/{id:guid}/close", async (Guid id, HelpRequestApiClien
 {
     var user = auth.GetCurrentUser();
     if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("help_requests.close"))
+        return Results.Json(new { error = "Sem permissão para encerrar chamados." }, statusCode: 403);
 
     var response = await api.CloseAsync(id, new HelpRequestCloseModel { ClosedByUserId = user.Id });
     var body = await response.Content.ReadAsStringAsync();
@@ -687,6 +755,9 @@ bffRoles.MapPost("/", async (RoleSaveModel model, RoleApiClient api, AuthStateSe
 {
     var user = auth.GetCurrentUser();
     if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("roles.manage"))
+        return Results.Json(new { error = "Sem permissão para gerenciar perfis." }, statusCode: 403);
+
     model.TenantId = user.TenantId;
     var response = await api.CreateAsync(model);
     var body = await response.Content.ReadAsStringAsync();
@@ -697,14 +768,22 @@ bffRoles.MapPut("/{id:guid}", async (Guid id, RoleSaveModel model, RoleApiClient
 {
     var user = auth.GetCurrentUser();
     if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("roles.manage"))
+        return Results.Json(new { error = "Sem permissão para gerenciar perfis." }, statusCode: 403);
+
     model.TenantId = user.TenantId;
     var response = await api.UpdateAsync(id, model);
     var body = await response.Content.ReadAsStringAsync();
     return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
 });
 
-bffRoles.MapDelete("/{id:guid}", async (Guid id, RoleApiClient api) =>
+bffRoles.MapDelete("/{id:guid}", async (Guid id, RoleApiClient api, AuthStateService auth) =>
 {
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("roles.manage"))
+        return Results.Json(new { error = "Sem permissão para gerenciar perfis." }, statusCode: 403);
+
     var response = await api.DeleteAsync(id);
     if (response.IsSuccessStatusCode) return Results.Ok();
     var body = await response.Content.ReadAsStringAsync();
