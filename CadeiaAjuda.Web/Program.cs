@@ -608,8 +608,13 @@ bffHelpRequests.MapGet("/{id:guid}", async (Guid id, HelpRequestApiClient api) =
     return item is null ? Results.NotFound() : Results.Ok(item);
 });
 
-bffHelpRequests.MapPost("/", async (HelpRequestCreateModel model, HelpRequestApiClient api, IHubContext<HelpRequestHub> hub) =>
+bffHelpRequests.MapPost("/", async (HelpRequestCreateModel model, HelpRequestApiClient api, IHubContext<HelpRequestHub> hub, AuthStateService auth) =>
 {
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("help_requests.create"))
+        return Results.Json(new { error = "Sem permissão para abrir chamados." }, statusCode: 403);
+
     var response = await api.CreateAsync(model);
     var body = await response.Content.ReadAsStringAsync();
     if (response.IsSuccessStatusCode)

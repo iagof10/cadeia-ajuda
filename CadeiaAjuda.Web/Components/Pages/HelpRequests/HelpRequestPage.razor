@@ -283,6 +283,8 @@
         var selectedTypeId = null;
         var selectedAreaId = null;
         var closingRequestId = null;
+        var canCreate = false;
+        var canClose = false;
 
         // ---- Helpers ----
         function $(id) { return document.getElementById(id); }
@@ -363,7 +365,9 @@
                 var isClosed = r.status === 4 || r.status === 3;
                 var actionHtml = isClosed
                     ? '<span class="text-muted"><i class="la la-check-circle"></i> Encerrado</span>'
-                    : '<button type="button" class="btn btn-sm btn-outline-danger btn-close-auth" data-id="' + r.id + '" data-code="' + escapeHtml(r.code) + '"><i class="la la-times-circle"></i> Encerrar</button>';
+                    : canClose
+                        ? '<button type="button" class="btn btn-sm btn-outline-danger btn-close-auth" data-id="' + r.id + '" data-code="' + escapeHtml(r.code) + '"><i class="la la-times-circle"></i> Encerrar</button>'
+                        : '';
 
                 tr.innerHTML =
                     '<td><span class="help-request-code">' + escapeHtml(r.code) + '</span></td>' +
@@ -668,6 +672,16 @@
         (async function init() {
             try {
                 await loadCurrentUser();
+
+                var isAdmin = currentUser && currentUser.userType === 3;
+                var perms = (currentUser && currentUser.permissions) || [];
+                canCreate = isAdmin || perms.indexOf('help_requests.create') >= 0;
+                canClose = isAdmin || perms.indexOf('help_requests.close') >= 0;
+
+                if (!canCreate) {
+                    $('btnNewRequest').style.display = 'none';
+                }
+
                 await Promise.all([loadRequests(), loadSectors(), loadHelpRequestTypes(), loadAreas()]);
             } catch (e) {
                 showAlert('alertList', 'Erro ao carregar dados iniciais. Recarregue a página.', 'danger');
