@@ -260,20 +260,11 @@
 
     async function loadAndonSettings() {
         try {
-            var r = await fetch('/bff/andon-settings');
+            var r = await fetch('/bff/andon-user-settings');
             if (r.ok) {
                 var data = await r.json();
                 if (typeof data.warningMinutes === 'number' && data.warningMinutes > 0) WARNING_MINUTES = data.warningMinutes;
                 if (typeof data.criticalMinutes === 'number' && data.criticalMinutes > 0) CRITICAL_MINUTES = data.criticalMinutes;
-            }
-        } catch (e) { }
-    }
-
-    async function loadUserSettings() {
-        try {
-            var r = await fetch('/bff/andon-user-settings');
-            if (r.ok) {
-                var data = await r.json();
                 if (typeof data.carouselIntervalSeconds === 'number' && data.carouselIntervalSeconds > 0) {
                     CAROUSEL_INTERVAL = data.carouselIntervalSeconds * 1000;
                 }
@@ -293,7 +284,6 @@
 
     (async function () {
         await loadAndonSettings();
-        await loadUserSettings();
         await load();
         startCarousel();
         await connectSignalR();

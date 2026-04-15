@@ -23,7 +23,6 @@ public class AppDbContext : DbContext
     public DbSet<UserSession> UserSessions => Set<UserSession>();
     public DbSet<Permission> Permissions => Set<Permission>();
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
-    public DbSet<AndonSettings> AndonSettings => Set<AndonSettings>();
     public DbSet<AndonUserSettings> AndonUserSettings => Set<AndonUserSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

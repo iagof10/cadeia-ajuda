@@ -100,11 +100,6 @@ builder.Services.AddHttpClient<RoleApiClient>(client =>
     client.BaseAddress = apiBaseUri;
 });
 
-builder.Services.AddHttpClient<AndonSettingsApiClient>(client =>
-{
-    client.BaseAddress = apiBaseUri;
-});
-
 builder.Services.AddHttpClient<AndonUserSettingsApiClient>(client =>
 {
     client.BaseAddress = apiBaseUri;
@@ -507,7 +502,8 @@ bffAuth.MapGet("/session", async (AuthStateService auth, SessionApiClient sessio
 app.MapGet("/bff/me", (AuthStateService auth) =>
 {
     var user = auth.GetCurrentUser();
-    return user is null ? Results.Unauthorized() : Results.Ok(user);
+    if (user is null) return Results.Unauthorized();
+    return Results.Ok(new { user.Id, user.Name, user.UserType, UserTypeValue = (int)user.UserType });
 }).DisableAntiforgery();
 
 var bffTenants = app.MapGroup("/bff/tenants").DisableAntiforgery();
@@ -539,32 +535,6 @@ app.MapPut("/bff/tenant-settings", async (HttpContext httpContext, AuthStateServ
     return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
 }).DisableAntiforgery();
 
-// /bff/andon-settings
-app.MapGet("/bff/andon-settings", async (AuthStateService auth, IHttpClientFactory httpFactory) =>
-{
-    var user = auth.GetCurrentUser();
-    if (user is null) return Results.Unauthorized();
-    var http = httpFactory.CreateClient("ApiClient");
-    var resp = await http.GetAsync($"/api/andon-settings/{user.TenantId}");
-    var body = await resp.Content.ReadAsStringAsync();
-    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
-}).DisableAntiforgery();
-
-app.MapPut("/bff/andon-settings", async (HttpContext httpContext, AuthStateService auth, IHttpClientFactory httpFactory) =>
-{
-    var user = auth.GetCurrentUser();
-    if (user is null) return Results.Unauthorized();
-    if (user.UserType != UserType.Administrator)
-        return Results.Json(new { error = "Sem permissão para alterar configurações." }, statusCode: 403);
-
-    var http = httpFactory.CreateClient("ApiClient");
-    var json = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
-    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-    var resp = await http.PutAsync($"/api/andon-settings/{user.TenantId}", content);
-    var body = await resp.Content.ReadAsStringAsync();
-    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
-}).DisableAntiforgery();
-
 // /bff/andon-user-settings
 app.MapGet("/bff/andon-user-settings", async (AuthStateService auth, IHttpClientFactory httpFactory) =>
 {
@@ -572,6 +542,44 @@ app.MapGet("/bff/andon-user-settings", async (AuthStateService auth, IHttpClient
     if (user is null) return Results.Unauthorized();
     var http = httpFactory.CreateClient("ApiClient");
     var resp = await http.GetAsync($"/api/andon-user-settings/{user.Id}");
+    var body = await resp.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
+}).DisableAntiforgery();
+
+app.MapPut("/bff/andon-user-settings", async (HttpContext httpContext, AuthStateService auth, IHttpClientFactory httpFactory) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    var http = httpFactory.CreateClient("ApiClient");
+    var json = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
+    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+    var resp = await http.PutAsync($"/api/andon-user-settings/{user.Id}", content);
+    var body = await resp.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
+}).DisableAntiforgery();
+
+app.MapGet("/bff/andon-user-settings/{userId:guid}", async (Guid userId, AuthStateService auth, IHttpClientFactory httpFactory) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator)
+        return Results.Json(new { error = "Sem permissão." }, statusCode: 403);
+    var http = httpFactory.CreateClient("ApiClient");
+    var resp = await http.GetAsync($"/api/andon-user-settings/{userId}");
+    var body = await resp.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
+}).DisableAntiforgery();
+
+app.MapPut("/bff/andon-user-settings/{userId:guid}", async (Guid userId, HttpContext httpContext, AuthStateService auth, IHttpClientFactory httpFactory) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator)
+        return Results.Json(new { error = "Sem permissão." }, statusCode: 403);
+    var http = httpFactory.CreateClient("ApiClient");
+    var json = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
+    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+    var resp = await http.PutAsync($"/api/andon-user-settings/{userId}", content);
     var body = await resp.Content.ReadAsStringAsync();
     return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
 }).DisableAntiforgery();

@@ -607,44 +607,6 @@ tenantSettings.MapPut("/{tenantId:guid}", async (Guid tenantId, TenantSettingsUp
     return Results.Ok(new { success = true });
 });
 
-// --- Andon Settings ---
-var andonSettings = app.MapGroup("/api/andon-settings");
-
-andonSettings.MapGet("/{tenantId:guid}", async (Guid tenantId, AppDbContext db) =>
-{
-    var settings = await db.AndonSettings.FirstOrDefaultAsync(s => s.TenantId == tenantId);
-    if (settings is null)
-    {
-        settings = new CadeiaAjuda.ApiService.Domain.Entities.AndonSettings { TenantId = tenantId };
-        db.AndonSettings.Add(settings);
-        await db.SaveChangesAsync();
-    }
-    return Results.Ok(new
-    {
-        settings.Id,
-        settings.TenantId,
-        settings.WarningMinutes,
-        settings.CriticalMinutes
-    });
-});
-
-andonSettings.MapPut("/{tenantId:guid}", async (Guid tenantId, AndonSettingsUpdateModel model, AppDbContext db) =>
-{
-    var settings = await db.AndonSettings.FirstOrDefaultAsync(s => s.TenantId == tenantId);
-    if (settings is null)
-    {
-        settings = new CadeiaAjuda.ApiService.Domain.Entities.AndonSettings { TenantId = tenantId };
-        db.AndonSettings.Add(settings);
-    }
-
-    settings.WarningMinutes = model.WarningMinutes;
-    settings.CriticalMinutes = model.CriticalMinutes;
-    settings.UpdatedAt = DateTime.UtcNow;
-
-    await db.SaveChangesAsync();
-    return Results.Ok(new { success = true });
-});
-
 // --- Andon User Settings (per user) ---
 var andonUserSettings = app.MapGroup("/api/andon-user-settings");
 
@@ -661,6 +623,8 @@ andonUserSettings.MapGet("/{userId:guid}", async (Guid userId, AppDbContext db) 
     {
         settings.Id,
         settings.UserId,
+        settings.WarningMinutes,
+        settings.CriticalMinutes,
         settings.CarouselIntervalSeconds,
         settings.ShowClock,
         settings.EnableSound
@@ -676,6 +640,8 @@ andonUserSettings.MapPut("/{userId:guid}", async (Guid userId, AndonUserSettings
         db.AndonUserSettings.Add(settings);
     }
 
+    settings.WarningMinutes = model.WarningMinutes;
+    settings.CriticalMinutes = model.CriticalMinutes;
     settings.CarouselIntervalSeconds = model.CarouselIntervalSeconds;
     settings.ShowClock = model.ShowClock;
     settings.EnableSound = model.EnableSound;
@@ -702,11 +668,9 @@ record TenantSettingsUpdateModel(
     string TimeZone,
     string Language);
 
-record AndonSettingsUpdateModel(
-    int WarningMinutes,
-    int CriticalMinutes);
-
 record AndonUserSettingsUpdateModel(
+    int WarningMinutes,
+    int CriticalMinutes,
     int CarouselIntervalSeconds,
     bool ShowClock,
     bool EnableSound);

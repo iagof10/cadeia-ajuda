@@ -156,7 +156,7 @@
                     </NavLink>
                 </li>
                 <li class="nav-item @(IsActive("/andon/settings") ? "active" : "")">
-                    <NavLink href="/andon/settings" Match="NavLinkMatch.Prefix">
+                    <NavLink href="/andon/settings" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
                         <i class="ft-settings"></i>
                         <span class="menu-title">Configuração</span>
                     </NavLink>
@@ -215,7 +215,7 @@
                             </NavLink>
                         </li>
                         <li class="@(IsActive("/settings/andon") ? "active" : "")">
-                            <NavLink class="menu-item" href="/settings/andon" Match="NavLinkMatch.Prefix">
+                            <NavLink class="menu-item" href="/settings/andon" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
                                 <i class="ft-monitor"></i>
                                 <span>Andon</span>
                             </NavLink>

@@ -22,6 +22,8 @@ public class AndonUserSettingsViewModel
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
+    public int WarningMinutes { get; set; }
+    public int CriticalMinutes { get; set; }
     public int CarouselIntervalSeconds { get; set; }
     public bool ShowClock { get; set; }
     public bool EnableSound { get; set; }
@@ -29,6 +31,8 @@ public class AndonUserSettingsViewModel
 
 public class AndonUserSettingsFormModel
 {
+    public int WarningMinutes { get; set; } = 30;
+    public int CriticalMinutes { get; set; } = 60;
     public int CarouselIntervalSeconds { get; set; } = 5;
     public bool ShowClock { get; set; } = true;
     public bool EnableSound { get; set; }
