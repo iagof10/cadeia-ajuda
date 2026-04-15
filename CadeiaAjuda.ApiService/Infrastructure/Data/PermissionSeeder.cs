@@ -65,8 +65,8 @@ public static class PermissionSeeder
         new("reports.view", "Visualizar Relatórios", "Relatórios", 600),
 
         // Escalation
-        new("escalation.view", "Visualizar Escalação", "Cadastro", 240),
-        new("escalation.manage", "Gerenciar Escalação", "Cadastro", 241),
+        new("escalation.view", "Visualizar Escalonamento", "Cadastro", 240),
+        new("escalation.manage", "Gerenciar Escalonamento", "Cadastro", 241),
     ];
 
     public record PermissionDefinition(string Key, string Name, string Group, int SortOrder);

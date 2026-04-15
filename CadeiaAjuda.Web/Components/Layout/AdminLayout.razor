@@ -56,7 +56,7 @@
             {
                 <li class="nav-item @(IsActive("/dashboard") ? "active" : "")">
                     <NavLink href="/dashboard">
-                        <i class="la la-home"></i>
+                        <i class="ft-pie-chart"></i>
                         <span class="menu-title">Dashboard</span>
                     </NavLink>
                 </li>
@@ -65,7 +65,7 @@
             {
                 <li class="nav-item @(IsActive("/register/help-request-types") || IsActive("/register/reasons") || IsActive("/register/sectors") || IsActive("/register/plants") || IsActive("/register/escalation") ? "active" : "")">
                     <a href="javascript:void(0)">
-                        <i class="la la-clipboard"></i>
+                        <i class="ft-file-plus"></i>
                         <span class="menu-title">Cadastro</span>
                     </a>
                     <ul class="menu-content">
@@ -73,7 +73,7 @@
                         {
                             <li class="@(IsActive("/register/help-request-types") ? "active" : "")">
                                 <NavLink class="menu-item" href="/register/help-request-types" Match="NavLinkMatch.Prefix">
-                                    <i class="la la-question-circle"></i>
+                                    <i class="ft-flag"></i>
                                     <span>Tipo de Ajuda</span>
                                 </NavLink>
                             </li>
@@ -82,7 +82,7 @@
                         {
                             <li class="@(IsActive("/register/reasons") ? "active" : "")">
                                 <NavLink class="menu-item" href="/register/reasons" Match="NavLinkMatch.Prefix">
-                                    <i class="la la-list"></i>
+                                    <i class="ft-tag"></i>
                                     <span>Motivo</span>
                                 </NavLink>
                             </li>
@@ -91,7 +91,7 @@
                         {
                             <li class="@(IsActive("/register/sectors") ? "active" : "")">
                                 <NavLink class="menu-item" href="/register/sectors" Match="NavLinkMatch.Prefix">
-                                    <i class="la la-sitemap"></i>
+                                    <i class="ft-compass"></i>
                                     <span>Setor</span>
                                 </NavLink>
                             </li>
@@ -100,7 +100,7 @@
                         {
                             <li class="@(IsActive("/register/plants") ? "active" : "")">
                                 <NavLink class="menu-item" href="/register/plants" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
-                                    <i class="la la-map"></i>
+                                    <i class="la la-sitemap"></i>
                                     <span>Planta</span>
                                 </NavLink>
                             </li>
@@ -109,8 +109,8 @@
                         {
                             <li class="@(IsActive("/register/escalation") ? "active" : "")">
                                 <NavLink class="menu-item" href="/register/escalation-levels" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
-                                    <i class="la la-level-up"></i>
-                                    <span>Escalação</span>
+                                    <i class="ft-award"></i>
+                                    <span>Escalonamento</span>
                                 </NavLink>
                             </li>
                         }
@@ -121,7 +121,7 @@
             {
                 <li class="nav-item @(IsActive("/help-requests") ? "active" : "")">
                     <a href="javascript:void(0)">
-                        <i class="la la-life-ring"></i>
+                        <i class="ft-phone"></i>
                         <span class="menu-title">Chamado</span>
                     </a>
                     <ul class="menu-content">
@@ -129,7 +129,7 @@
                         {
                             <li class="@((IsActive("/help-requests") && !IsActive("/help-requests/close")) ? "active" : "")">
                                 <NavLink class="menu-item" href="/help-requests" Match="NavLinkMatch.All" data-enhance-nav="false">
-                                    <i class="la la-life-ring"></i>
+                                    <i class="ft-phone-forwarded"></i>
                                     <span>Cadeia de Ajuda</span>
                                 </NavLink>
                             </li>
@@ -138,7 +138,7 @@
                         {
                             <li class="@(IsActive("/help-requests/close") ? "active" : "")">
                                 <NavLink class="menu-item" href="/help-requests/close" Match="NavLinkMatch.All" data-enhance-nav="false">
-                                    <i class="la la-times-circle"></i>
+                                    <i class="ft-phone-missed"></i>
                                     <span>Encerrar Ajuda</span>
                                 </NavLink>
                             </li>
@@ -150,7 +150,7 @@
             {
                 <li class="nav-item @(IsActive("/andon") ? "active" : "")">
                     <NavLink href="/andon" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
-                        <i class="la la-bell"></i>
+                        <i class="ft-monitor"></i>
                         <span class="menu-title">Andon</span>
                     </NavLink>
                 </li>
@@ -167,7 +167,7 @@
                         {
                             <li class="@(IsActive("/user/users") ? "active" : "")">
                                 <NavLink class="menu-item" href="/user/users" Match="NavLinkMatch.Prefix">
-                                    <i class="la la-user"></i>
+                                    <i class="ft-users"></i>
                                     <span>Usuário</span>
                                 </NavLink>
                             </li>
@@ -176,7 +176,7 @@
                         {
                             <li class="@(IsActive("/user/roles") ? "active" : "")">
                                 <NavLink class="menu-item" href="/user/roles" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
-                                    <i class="la la-shield"></i>
+                                    <i class="ft-pocket"></i>
                                     <span>Perfil</span>
                                 </NavLink>
                             </li>
@@ -188,7 +188,7 @@
             {
                 <li class="nav-item @(IsActive("/reports") ? "active" : "")">
                     <NavLink href="/reports" Match="NavLinkMatch.Prefix">
-                        <i class="la la-bar-chart"></i>
+                        <i class="ft-bar-chart-2"></i>
                         <span class="menu-title">Relatório</span>
                     </NavLink>
                 </li>
