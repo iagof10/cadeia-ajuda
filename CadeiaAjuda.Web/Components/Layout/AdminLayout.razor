@@ -12,7 +12,7 @@
                     <a class="nav-link nav-menu-main menu-toggle hidden-xs" href="javascript:void(0)"><i class="ft-menu font-large-1"></i></a>
                 </li>
                 <li class="nav-item">
-                    <NavLink class="navbar-brand" href="/dashboard">
+                    <NavLink class="navbar-brand" href="/home">
                         <img class="brand-logo" alt="Cadeia Ajuda logo" src="app-assets/images/logo/AssistChain-logo.png">
                     </NavLink>
                 </li>
@@ -193,7 +193,7 @@
                     </NavLink>
                 </li>
             }
-            @if (!isAndonUser && HasPermission("company.view"))
+            @if (isAdmin)
             {
                 <li class="nav-item @(IsActive("/settings") ? "active" : "")">
                     <NavLink href="/settings/company" Match="NavLinkMatch.Prefix">

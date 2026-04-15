@@ -1,0 +1,82 @@
+@page "/home"
+@inject AuthStateService Auth
+
+<PageTitle>Início - Cadeia Ajuda</PageTitle>
+
+<section>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-body text-center py-5">
+                        <i class="@greetingIcon font-large-5 text-warning d-block mb-2"></i>
+                        <h2 class="text-warning mb-1">@greeting, @userName!</h2>
+                        <p class="text-muted font-medium-2 mb-2" id="currentDateTime">@currentDate</p>
+                        <p class="text-muted" id="currentTime" style="font-size:2.5rem;font-weight:700;letter-spacing:2px;">@currentTime</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script suppress-error="BL9992">
+    (function () {
+        function updateClock() {
+            var now = new Date();
+            var days = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+            var months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            var dateStr = days[now.getDay()] + ', ' + now.getDate() + ' de ' + months[now.getMonth()] + ' de ' + now.getFullYear();
+            var timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            var dateEl = document.getElementById('currentDateTime');
+            var timeEl = document.getElementById('currentTime');
+            if (dateEl) dateEl.textContent = dateStr;
+            if (timeEl) timeEl.textContent = timeStr;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+    })();
+</script>
+
+@code {
+    private string userName = "";
+    private string greeting = "";
+    private string greetingIcon = "";
+    private string currentDate = "";
+    private string currentTime = "";
+
+    protected override void OnInitialized()
+    {
+        var user = Auth.GetCurrentUser();
+        if (user is not null)
+        {
+            userName = user.Name.Split(' ')[0];
+        }
+
+        var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+            TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time"));
+
+        var hour = now.Hour;
+        if (hour >= 5 && hour < 12)
+        {
+            greeting = "Bom dia";
+            greetingIcon = "ft-sun";
+        }
+        else if (hour >= 12 && hour < 18)
+        {
+            greeting = "Boa tarde";
+            greetingIcon = "ft-sunset";
+        }
+        else
+        {
+            greeting = "Boa noite";
+            greetingIcon = "ft-moon";
+        }
+
+        var culture = new System.Globalization.CultureInfo("pt-BR");
+        currentDate = now.ToString("dddd, d 'de' MMMM 'de' yyyy", culture);
+        currentDate = char.ToUpper(currentDate[0]) + currentDate[1..];
+        currentTime = now.ToString("HH:mm:ss");
+    }
+}

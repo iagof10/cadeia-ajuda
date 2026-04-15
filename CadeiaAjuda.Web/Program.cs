@@ -133,13 +133,70 @@ app.MapRazorComponents<App>()
 
 app.MapHub<HelpRequestHub>("/hubs/help-requests");
 
+// --- Redirect unknown pages to /not-found ---
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value ?? "";
+
+    // Skip static files, API, BFF, hubs, framework resources
+    if (string.IsNullOrEmpty(path)
+        || path == "/"
+        || path.StartsWith("/not-found", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/_", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/bff/", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/hubs/", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/app-assets/", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/js/", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/css/", StringComparison.OrdinalIgnoreCase)
+        || path.Contains('.'))
+    {
+        await next();
+        return;
+    }
+
+    var knownRoutes = new[]
+    {
+        "/home",
+        "/dashboard",
+        "/register/help-request-types", "/register/reasons", "/register/sectors",
+        "/register/plants", "/register/escalation-levels",
+        "/user/users", "/user/roles",
+        "/andon",
+        "/help-requests", "/help-requests/close",
+        "/settings/company",
+        "/tenants",
+        "/login",
+        "/auth",
+        "/continue-to-login",
+        "/counter", "/weather", "/Error"
+    };
+
+    var isKnown = knownRoutes.Any(r => path.StartsWith(r, StringComparison.OrdinalIgnoreCase));
+
+    if (!isKnown)
+    {
+        var auth = context.RequestServices.GetRequiredService<AuthStateService>();
+        var user = auth.GetCurrentUser();
+        if (user is null)
+        {
+            context.Response.Redirect("/");
+            return;
+        }
+        context.Response.Redirect("/not-found");
+        return;
+    }
+
+    await next();
+});
+
 // --- Auth guard: redirect to login if not authenticated ---
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path.Value ?? "";
 
     // Protected routes
-    if (path.StartsWith("/dashboard", StringComparison.OrdinalIgnoreCase)
+    if (path.StartsWith("/home", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/dashboard", StringComparison.OrdinalIgnoreCase)
         || path.StartsWith("/register", StringComparison.OrdinalIgnoreCase)
         || path.StartsWith("/user", StringComparison.OrdinalIgnoreCase)
         || path.StartsWith("/andon", StringComparison.OrdinalIgnoreCase)
@@ -167,7 +224,14 @@ app.Use(async (context, next) =>
         // Non-Andon users cannot access /andon
         if (user.UserType != UserType.Andon && path.StartsWith("/andon", StringComparison.OrdinalIgnoreCase))
         {
-            context.Response.Redirect("/dashboard");
+            context.Response.Redirect("/home");
+            return;
+        }
+
+        // Only Administrator can access /settings
+        if (path.StartsWith("/settings", StringComparison.OrdinalIgnoreCase) && user.UserType != UserType.Administrator)
+        {
+            context.Response.Redirect("/dashboard?error=forbidden");
             return;
         }
 
@@ -220,7 +284,6 @@ static string? GetRequiredPermission(string path)
     if (path.StartsWith("/register/escalation", StringComparison.OrdinalIgnoreCase)) return "escalation.view";
     if (path.StartsWith("/help-requests/close", StringComparison.OrdinalIgnoreCase)) return "help_requests.close";
     if (path.StartsWith("/help-requests", StringComparison.OrdinalIgnoreCase)) return "help_requests.view";
-    if (path.StartsWith("/settings", StringComparison.OrdinalIgnoreCase)) return "company.view";
     return null;
 }
 
@@ -303,7 +366,7 @@ app.MapPost("/auth/do-login", async (HttpContext httpContext, AuthApiClient auth
     }
 
     // Andon users can only access /andon
-    var redirectUrl = result.User.UserType == UserType.Andon ? "/andon" : "/dashboard";
+    var redirectUrl = result.User.UserType == UserType.Andon ? "/andon" : "/home";
     return Results.Redirect(redirectUrl);
 }).DisableAntiforgery();
 

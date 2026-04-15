@@ -283,7 +283,7 @@
         var user = Auth.GetCurrentUser();
         if (user is not null)
         {
-            var url = user.UserType == UserType.Andon ? "/andon" : "/dashboard";
+            var url = user.UserType == UserType.Andon ? "/andon" : "/home";
             Navigation.NavigateTo(url, forceLoad: true);
         }
     }
