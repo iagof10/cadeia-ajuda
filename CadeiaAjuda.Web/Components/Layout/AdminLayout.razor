@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject AuthStateService AuthState
+@inject IJSRuntime JS
 @implements IDisposable
 
 <!-- BEGIN: Header-->
@@ -335,6 +336,11 @@ protected override void OnInitialized()
         isAndonUser = user.UserType == UserType.Andon;
         isAdmin = user.UserType == UserType.Administrator;
     }
+}
+
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+    await JS.InvokeVoidAsync("initTemplateMenu");
 }
 
 private bool HasPermission(string key)
