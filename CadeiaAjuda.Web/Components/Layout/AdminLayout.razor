@@ -197,10 +197,24 @@
             @if (isAdmin)
             {
                 <li class="nav-item @(IsActive("/settings") ? "active" : "")">
-                    <NavLink href="/settings/company" Match="NavLinkMatch.Prefix">
+                    <a href="javascript:void(0)">
                         <i class="ft-settings"></i>
                         <span class="menu-title">Configuração</span>
-                    </NavLink>
+                    </a>
+                    <ul class="menu-content">
+                        <li class="@(IsActive("/settings/company") ? "active" : "")">
+                            <NavLink class="menu-item" href="/settings/company" Match="NavLinkMatch.Prefix">
+                                <i class="ft-briefcase"></i>
+                                <span>Empresa</span>
+                            </NavLink>
+                        </li>
+                        <li class="@(IsActive("/settings/andon") ? "active" : "")">
+                            <NavLink class="menu-item" href="/settings/andon" Match="NavLinkMatch.Prefix">
+                                <i class="ft-monitor"></i>
+                                <span>Andon</span>
+                            </NavLink>
+                        </li>
+                    </ul>
                 </li>
             }
         </ul>

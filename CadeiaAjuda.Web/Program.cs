@@ -100,6 +100,11 @@ builder.Services.AddHttpClient<RoleApiClient>(client =>
     client.BaseAddress = apiBaseUri;
 });
 
+builder.Services.AddHttpClient<AndonSettingsApiClient>(client =>
+{
+    client.BaseAddress = apiBaseUri;
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthStateService>();
 builder.Services.AddSignalR();
@@ -163,7 +168,7 @@ app.Use(async (context, next) =>
         "/user/users", "/user/roles",
         "/andon",
         "/help-requests", "/help-requests/close",
-        "/settings/company",
+        "/settings/company", "/settings/andon",
         "/tenants",
         "/login",
         "/auth",
@@ -525,6 +530,32 @@ app.MapPut("/bff/tenant-settings", async (HttpContext httpContext, AuthStateServ
     var json = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
     var resp = await http.PutAsync($"/api/tenant-settings/{user.TenantId}", content);
+    var body = await resp.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
+}).DisableAntiforgery();
+
+// /bff/andon-settings
+app.MapGet("/bff/andon-settings", async (AuthStateService auth, IHttpClientFactory httpFactory) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    var http = httpFactory.CreateClient("ApiClient");
+    var resp = await http.GetAsync($"/api/andon-settings/{user.TenantId}");
+    var body = await resp.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
+}).DisableAntiforgery();
+
+app.MapPut("/bff/andon-settings", async (HttpContext httpContext, AuthStateService auth, IHttpClientFactory httpFactory) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator)
+        return Results.Json(new { error = "Sem permissão para alterar configurações." }, statusCode: 403);
+
+    var http = httpFactory.CreateClient("ApiClient");
+    var json = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
+    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+    var resp = await http.PutAsync($"/api/andon-settings/{user.TenantId}", content);
     var body = await resp.Content.ReadAsStringAsync();
     return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
 }).DisableAntiforgery();

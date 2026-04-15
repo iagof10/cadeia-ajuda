@@ -1,0 +1,185 @@
+@page "/settings/andon"
+@using System.ComponentModel.DataAnnotations
+@inject AndonSettingsApiClient Api
+@inject AuthStateService Auth
+
+<PageTitle>Configuração - Andon - Cadeia Ajuda</PageTitle>
+
+<section>
+    <div class="row mb-2">
+        <div class="col-12">
+            <h4 class="content-header-title mb-0">Configuração do Andon</h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-body">
+                        @if (isLoading)
+                        {
+                            <div class="text-center py-3">
+                                <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+                            </div>
+                        }
+                        else
+                        {
+                            @if (!string.IsNullOrEmpty(successMessage))
+                            {
+                                <div class="alert alert-success alert-dismissible mb-2" role="alert">
+                                    <button type="button" class="close" @onclick="() => successMessage = null"><span>&times;</span></button>
+                                    <i class="la la-check-circle"></i> @successMessage
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(errorMessage))
+                            {
+                                <div class="alert alert-danger alert-dismissible mb-2" role="alert">
+                                    <button type="button" class="close" @onclick="() => errorMessage = null"><span>&times;</span></button>
+                                    <i class="la la-warning"></i> @errorMessage
+                                </div>
+                            }
+
+                            <EditForm Model="model" OnValidSubmit="HandleSubmit" FormName="andonConfigForm">
+                                <DataAnnotationsValidator />
+
+                                <p class="text-muted mb-2">
+                                    Configure os tempos de alerta visual dos cards no painel Andon. Quando um chamado atinge o tempo configurado,
+                                    o card muda de cor para indicar urgência.
+                                </p>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label><i class="la la-exclamation-triangle text-warning"></i> Alerta Amarelo (minutos) <span class="text-danger">*</span></label>
+                                            <InputNumber @bind-Value="model.WarningMinutes" class="form-control" />
+                                            <small class="text-muted">Tempo em minutos para o card ficar com borda amarela/laranja.</small>
+                                            <ValidationMessage For="() => model.WarningMinutes" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label><i class="la la-exclamation-circle text-danger"></i> Alerta Vermelho (minutos) <span class="text-danger">*</span></label>
+                                            <InputNumber @bind-Value="model.CriticalMinutes" class="form-control" />
+                                            <small class="text-muted">Tempo em minutos para o card ficar vermelho piscante.</small>
+                                            <ValidationMessage For="() => model.CriticalMinutes" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-1">
+                                    <div class="col-12">
+                                        <div class="card bg-light border-0">
+                                            <div class="card-body py-2 px-3">
+                                                <small class="text-muted">
+                                                    <strong>Pré-visualização:</strong><br />
+                                                    <span style="color:#ff9800;">&#9632;</span> Após <strong>@model.WarningMinutes min</strong> — borda amarela/laranja<br />
+                                                    <span style="color:#f44336;">&#9632;</span> Após <strong>@model.CriticalMinutes min</strong> — borda vermelha piscante
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions text-right mt-2">
+                                    <button type="submit" class="btn btn-warning" disabled="@isSaving">
+                                        @if (isSaving)
+                                        {
+                                            <i class="la la-spinner la-spin"></i>
+                                        }
+                                        <i class="la la-check"></i> Salvar Configuração
+                                    </button>
+                                </div>
+                            </EditForm>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    [SupplyParameterFromForm]
+    private AndonFormModel model { get; set; } = new();
+
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+    private string? successMessage;
+    private Guid tenantId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = Auth.GetCurrentUser();
+        if (user is null) return;
+
+        tenantId = user.TenantId;
+
+        if (model.WarningMinutes == 30 && model.CriticalMinutes == 60)
+        {
+            var data = await Api.GetByTenantIdAsync(tenantId);
+            if (data is not null)
+            {
+                model = new AndonFormModel
+                {
+                    WarningMinutes = data.WarningMinutes,
+                    CriticalMinutes = data.CriticalMinutes
+                };
+            }
+        }
+
+        isLoading = false;
+    }
+
+    private async Task HandleSubmit()
+    {
+        isSaving = true;
+        errorMessage = null;
+        successMessage = null;
+
+        var response = await Api.UpdateAsync(tenantId, new AndonSettingsFormModel
+        {
+            WarningMinutes = model.WarningMinutes,
+            CriticalMinutes = model.CriticalMinutes
+        });
+
+        if (response.IsSuccessStatusCode)
+        {
+            successMessage = "Configuração do Andon atualizada com sucesso.";
+        }
+        else
+        {
+            try
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                var error = System.Text.Json.JsonSerializer.Deserialize<ErrorResponse>(body,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                errorMessage = error?.Error ?? "Ocorreu um erro ao salvar.";
+            }
+            catch
+            {
+                errorMessage = "Ocorreu um erro ao salvar.";
+            }
+        }
+
+        isSaving = false;
+    }
+
+    private class ErrorResponse
+    {
+        public string? Error { get; set; }
+    }
+
+    private class AndonFormModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Informe o tempo de alerta amarelo.")]
+        [System.ComponentModel.DataAnnotations.Range(1, 1440, ErrorMessage = "O valor deve ser entre 1 e 1440 minutos.")]
+        public int WarningMinutes { get; set; } = 30;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Informe o tempo de alerta vermelho.")]
+        [System.ComponentModel.DataAnnotations.Range(1, 1440, ErrorMessage = "O valor deve ser entre 1 e 1440 minutos.")]
+        public int CriticalMinutes { get; set; } = 60;
+    }
+}

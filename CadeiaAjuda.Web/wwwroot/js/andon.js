@@ -4,6 +4,8 @@
     var CAROUSEL_INTERVAL = 5000;
     var ANIM_MS = 600;
     var FALLBACK_POLL = 30000;
+    var WARNING_MINUTES = 30;
+    var CRITICAL_MINUTES = 60;
     var requests = [];
     var sortedCards = [];
     var visibleStart = 0;
@@ -37,8 +39,8 @@
     function urgencyCls(iso) {
         if (!iso) return '';
         var m = Math.floor((new Date() - new Date(iso)) / 60000);
-        if (m >= 60) return 'urgency-critical';
-        if (m >= 30) return 'urgency-warning';
+        if (m >= CRITICAL_MINUTES) return 'urgency-critical';
+        if (m >= WARNING_MINUTES) return 'urgency-warning';
         return '';
     }
 
@@ -213,6 +215,15 @@
             var iso = el.getAttribute('data-created');
             if (iso) el.textContent = timeSince(iso);
         });
+        // Update urgency classes on cards
+        document.querySelectorAll('.andon-card').forEach(function (card) {
+            var el = card.querySelector('.andon-time-value');
+            if (!el) return;
+            var iso = el.getAttribute('data-created');
+            card.classList.remove('urgency-warning', 'urgency-critical');
+            var cls = urgencyCls(iso);
+            if (cls) card.classList.add(cls);
+        });
     }
 
     function startCarousel() {
@@ -245,7 +256,19 @@
     setInterval(updateClock, 1000);
     setInterval(tickTimers, 1000);
 
+    async function loadAndonSettings() {
+        try {
+            var r = await fetch('/bff/andon-settings');
+            if (r.ok) {
+                var data = await r.json();
+                if (typeof data.warningMinutes === 'number' && data.warningMinutes > 0) WARNING_MINUTES = data.warningMinutes;
+                if (typeof data.criticalMinutes === 'number' && data.criticalMinutes > 0) CRITICAL_MINUTES = data.criticalMinutes;
+            }
+        } catch (e) { }
+    }
+
     (async function () {
+        await loadAndonSettings();
         await load();
         startCarousel();
         await connectSignalR();
