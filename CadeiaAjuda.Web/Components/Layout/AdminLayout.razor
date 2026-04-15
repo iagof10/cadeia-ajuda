@@ -147,7 +147,7 @@
                     </ul>
                 </li>
             }
-            @if (isAndonUser && HasPermission("andon.view"))
+            @if (isAndonUser)
             {
                 <li class="nav-item @(IsActive("/andon") ? "active" : "")">
                     <NavLink href="/andon" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
@@ -314,6 +314,7 @@
 
 @code {
 private string currentUrl = string.Empty;
+private string previousUrl = string.Empty;
 private string currentUserName = "";
 private string userInitials = "";
 private string tenantIdentifier = "";
@@ -324,6 +325,7 @@ private bool isAdmin;
 protected override void OnInitialized()
 {
     currentUrl = GetRelativePath();
+    previousUrl = "";
     Navigation.LocationChanged += OnLocationChanged;
 
     var user = AuthState.GetCurrentUser();
@@ -340,7 +342,11 @@ protected override void OnInitialized()
 
 protected override async Task OnAfterRenderAsync(bool firstRender)
 {
-    await JS.InvokeVoidAsync("initTemplateMenu");
+    if (firstRender || currentUrl != previousUrl)
+    {
+        previousUrl = currentUrl;
+        await JS.InvokeVoidAsync("initTemplateMenu");
+    }
 }
 
 private bool HasPermission(string key)

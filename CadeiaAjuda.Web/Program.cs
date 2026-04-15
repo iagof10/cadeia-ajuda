@@ -214,8 +214,10 @@ app.Use(async (context, next) =>
             return;
         }
 
-        // Andon users can only access /andon
-        if (user.UserType == UserType.Andon && !path.StartsWith("/andon", StringComparison.OrdinalIgnoreCase))
+        // Andon users can only access /andon and /home
+        if (user.UserType == UserType.Andon
+            && !path.StartsWith("/andon", StringComparison.OrdinalIgnoreCase)
+            && !path.StartsWith("/home", StringComparison.OrdinalIgnoreCase))
         {
             context.Response.Redirect("/andon");
             return;
@@ -231,7 +233,7 @@ app.Use(async (context, next) =>
         // Only Administrator can access /settings
         if (path.StartsWith("/settings", StringComparison.OrdinalIgnoreCase) && user.UserType != UserType.Administrator)
         {
-            context.Response.Redirect("/dashboard?error=forbidden");
+            context.Response.Redirect("/home?error=forbidden");
             return;
         }
 
@@ -257,10 +259,13 @@ app.Use(async (context, next) =>
         var requiredPermission = GetRequiredPermission(path);
         if (requiredPermission is not null)
         {
-            // Administrator has full access (andon already blocked above)
-            if (user.UserType != UserType.Administrator && !user.Permissions.Contains(requiredPermission))
+            // Administrator has full access
+            // Andon users always have access to /andon
+            if (user.UserType == UserType.Administrator) { }
+            else if (user.UserType == UserType.Andon && path.StartsWith("/andon", StringComparison.OrdinalIgnoreCase)) { }
+            else if (!user.Permissions.Contains(requiredPermission))
             {
-                context.Response.Redirect("/dashboard?error=forbidden");
+                context.Response.Redirect("/home?error=forbidden");
                 return;
             }
         }
