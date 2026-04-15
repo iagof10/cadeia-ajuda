@@ -556,9 +556,70 @@ roles.MapDelete("/{id:guid}", async (Guid id, IRoleService service) =>
 app.MapGet("/api/permissions", async (IRoleService service) =>
     Results.Ok(await service.GetAllPermissionsAsync()));
 
+// --- Tenant Settings ---
+var tenantSettings = app.MapGroup("/api/tenant-settings");
+
+tenantSettings.MapGet("/{tenantId:guid}", async (Guid tenantId, AppDbContext db) =>
+{
+    var settings = await db.TenantSettings.FirstOrDefaultAsync(s => s.TenantId == tenantId);
+    if (settings is null)
+    {
+        settings = new CadeiaAjuda.ApiService.Domain.Entities.TenantSettings { TenantId = tenantId };
+        db.TenantSettings.Add(settings);
+        await db.SaveChangesAsync();
+    }
+    return Results.Ok(new
+    {
+        settings.Id,
+        settings.TenantId,
+        settings.DisplayName,
+        settings.LogoUrl,
+        settings.PrimaryColor,
+        settings.DefaultSlaMinutes,
+        settings.EnableNotifications,
+        settings.EnableAutoEscalation,
+        settings.EnableAndonPanel,
+        settings.TimeZone,
+        settings.Language
+    });
+});
+
+tenantSettings.MapPut("/{tenantId:guid}", async (Guid tenantId, TenantSettingsUpdateModel model, AppDbContext db) =>
+{
+    var settings = await db.TenantSettings.FirstOrDefaultAsync(s => s.TenantId == tenantId);
+    if (settings is null)
+    {
+        settings = new CadeiaAjuda.ApiService.Domain.Entities.TenantSettings { TenantId = tenantId };
+        db.TenantSettings.Add(settings);
+    }
+
+    settings.DisplayName = model.DisplayName;
+    settings.PrimaryColor = model.PrimaryColor;
+    settings.DefaultSlaMinutes = model.DefaultSlaMinutes;
+    settings.EnableNotifications = model.EnableNotifications;
+    settings.EnableAutoEscalation = model.EnableAutoEscalation;
+    settings.EnableAndonPanel = model.EnableAndonPanel;
+    settings.TimeZone = model.TimeZone;
+    settings.Language = model.Language;
+    settings.UpdatedAt = DateTime.UtcNow;
+
+    await db.SaveChangesAsync();
+    return Results.Ok(new { success = true });
+});
+
 app.MapDefaultEndpoints();
 
 app.Run();
 
 
 record CreateSessionRequest(Guid UserId, Guid TenantId, string? IpAddress, string? UserAgent);
+
+record TenantSettingsUpdateModel(
+    string DisplayName,
+    string PrimaryColor,
+    int DefaultSlaMinutes,
+    bool EnableNotifications,
+    bool EnableAutoEscalation,
+    bool EnableAndonPanel,
+    string TimeZone,
+    string Language);

@@ -1,14 +1,14 @@
-@page "/settings/company"
+﻿@page "/settings/company"
 @inject TenantApiClient Api
 @inject AuthStateService Auth
 @inject NavigationManager Navigation
 
-<PageTitle>Configuração da Empresa - Cadeia Ajuda</PageTitle>
+<PageTitle>Configuração - Cadeia Ajuda</PageTitle>
 
 <section>
     <div class="row mb-2">
         <div class="col-12">
-            <h4 class="content-header-title mb-0">Configuração da Empresa</h4>
+            <h4 class="content-header-title mb-0">Configuração</h4>
         </div>
     </div>
 
@@ -41,70 +41,97 @@
                                 </div>
                             }
 
-                            <EditForm Model="model" OnValidSubmit="HandleSubmit" FormName="companyConfigForm">
-                                <DataAnnotationsValidator />
+                            <ul class="nav nav-tabs nav-justified nav-underline" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link @(activeTab == "empresa" ? "active" : "")" href="#" @onclick='() => activeTab = "empresa"' @onclick:preventDefault>
+                                        <i class="ft-briefcase"></i> Empresa
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(activeTab == "andon" ? "active" : "")" href="#" @onclick='() => activeTab = "andon"' @onclick:preventDefault>
+                                        <i class="ft-monitor"></i> Andon
+                                    </a>
+                                </li>
+                            </ul>
 
-                                <h5 class="mb-1"><i class="ft-briefcase mr-1"></i> Dados da Empresa</h5>
+                            <div class="tab-content pt-2">
+                                @* ===== ABA EMPRESA ===== *@
+                                @if (activeTab == "empresa")
+                                {
+                                    <EditForm Model="model" OnValidSubmit="HandleSubmitCompany" FormName="companyConfigForm">
+                                        <DataAnnotationsValidator />
 
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Nome da Empresa <span class="text-danger">*</span></label>
-                                            <InputText @bind-Value="model.Name" class="form-control" placeholder="Razão social" />
-                                            <ValidationMessage For="() => model.Name" />
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Nome da Empresa <span class="text-danger">*</span></label>
+                                                    <InputText @bind-Value="model.Name" class="form-control" placeholder="Razão social" />
+                                                    <ValidationMessage For="() => model.Name" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Nome Fantasia</label>
+                                                    <InputText @bind-Value="model.TradeName" class="form-control" placeholder="Nome fantasia" />
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Nome Fantasia</label>
-                                            <InputText @bind-Value="model.TradeName" class="form-control" placeholder="Nome fantasia" />
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>CNPJ <span class="text-danger">*</span></label>
-                                            <InputText @bind-Value="model.Cnpj" class="form-control" placeholder="00.000.000/0000-00" data-mask="cnpj" />
-                                            <ValidationMessage For="() => model.Cnpj" />
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>CNPJ <span class="text-danger">*</span></label>
+                                                    <InputText @bind-Value="model.Cnpj" class="form-control" placeholder="00.000.000/0000-00" data-mask="cnpj" />
+                                                    <ValidationMessage For="() => model.Cnpj" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>E-mail <span class="text-danger">*</span></label>
+                                                    <InputText @bind-Value="model.Email" class="form-control" type="email" placeholder="contato@empresa.com" />
+                                                    <ValidationMessage For="() => model.Email" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Telefone</label>
+                                                    <InputText @bind-Value="model.Phone" class="form-control" placeholder="(00) 00000-0000" data-mask="phone" />
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>E-mail <span class="text-danger">*</span></label>
-                                            <InputText @bind-Value="model.Email" class="form-control" type="email" placeholder="contato@empresa.com" />
-                                            <ValidationMessage For="() => model.Email" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Telefone</label>
-                                            <InputText @bind-Value="model.Phone" class="form-control" placeholder="(00) 00000-0000" data-mask="phone" />
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Identificador</label>
-                                            <InputText @bind-Value="model.Identifier" class="form-control" disabled="true" />
-                                            <small class="text-muted">O identificador não pode ser alterado.</small>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Identificador</label>
+                                                    <InputText @bind-Value="model.Identifier" class="form-control" disabled="true" />
+                                                    <small class="text-muted">O identificador não pode ser alterado.</small>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
 
-                                <div class="form-actions text-right mt-2">
-                                    <button type="submit" class="btn btn-warning" disabled="@isSaving">
-                                        @if (isSaving)
-                                        {
-                                            <i class="la la-spinner la-spin"></i>
-                                        }
-                                        <i class="la la-check"></i> Salvar Alterações
-                                    </button>
-                                </div>
-                            </EditForm>
+                                        <div class="form-actions text-right mt-2">
+                                            <button type="submit" class="btn btn-warning" disabled="@isSaving">
+                                                @if (isSaving)
+                                                {
+                                                    <i class="la la-spinner la-spin"></i>
+                                                }
+                                                <i class="la la-check"></i> Salvar Alterações
+                                            </button>
+                                        </div>
+                                    </EditForm>
+                                }
+
+                                @* ===== ABA ANDON ===== *@
+                                @if (activeTab == "andon")
+                                {
+                                    <div class="text-center py-5 text-muted">
+                                        <i class="ft-monitor font-large-3 d-block mb-1"></i>
+                                        <h5>Em breve</h5>
+                                        <p>As configurações do Andon estarão disponíveis em uma próxima atualização.</p>
+                                    </div>
+                                }
+                            </div>
                         }
                     </div>
                 </div>
@@ -113,10 +140,35 @@
     </div>
 </section>
 
+<style>
+    .nav.nav-tabs.nav-underline {
+        border-bottom-color: #f57c00;
+    }
+
+    .nav.nav-tabs.nav-underline .nav-item a.nav-link {
+        color: #f57c00;
+    }
+
+    .nav.nav-tabs.nav-underline .nav-item a.nav-link:hover,
+    .nav.nav-tabs.nav-underline .nav-item a.nav-link:focus {
+        color: #f57c00;
+    }
+
+    .nav.nav-tabs.nav-underline .nav-item a.nav-link:before {
+        background: #f57c00;
+    }
+
+    .nav.nav-tabs.nav-underline .nav-item a.nav-link.active:focus,
+    .nav.nav-tabs.nav-underline .nav-item a.nav-link.active:hover {
+        color: #f57c00;
+    }
+</style>
+
 @code {
     [SupplyParameterFromForm]
     private TenantFormModel model { get; set; } = new();
 
+    private string activeTab = "empresa";
     private bool isLoading = true;
     private bool isSaving;
     private string? errorMessage;
@@ -157,7 +209,7 @@
         isLoading = false;
     }
 
-    private async Task HandleSubmit()
+    private async Task HandleSubmitCompany()
     {
         isSaving = true;
         errorMessage = null;

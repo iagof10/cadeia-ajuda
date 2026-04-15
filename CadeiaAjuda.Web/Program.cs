@@ -90,6 +90,11 @@ builder.Services.AddHttpClient<SessionApiClient>(client =>
     client.BaseAddress = apiBaseUri;
 });
 
+builder.Services.AddHttpClient("ApiClient", client =>
+{
+    client.BaseAddress = apiBaseUri;
+});
+
 builder.Services.AddHttpClient<RoleApiClient>(client =>
 {
     client.BaseAddress = apiBaseUri;
@@ -401,6 +406,29 @@ app.MapGet("/bff/me", (AuthStateService auth) =>
 
 var bffTenants = app.MapGroup("/bff/tenants").DisableAntiforgery();
 bffTenants.MapGet("/", async (TenantApiClient api) => Results.Ok(await api.GetAllAsync()));
+
+// /bff/tenant-settings
+app.MapGet("/bff/tenant-settings", async (AuthStateService auth, IHttpClientFactory httpFactory) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    var http = httpFactory.CreateClient("ApiClient");
+    var resp = await http.GetAsync($"/api/tenant-settings/{user.TenantId}");
+    var body = await resp.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
+}).DisableAntiforgery();
+
+app.MapPut("/bff/tenant-settings", async (HttpContext httpContext, AuthStateService auth, IHttpClientFactory httpFactory) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    var http = httpFactory.CreateClient("ApiClient");
+    var json = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
+    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+    var resp = await http.PutAsync($"/api/tenant-settings/{user.TenantId}", content);
+    var body = await resp.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
+}).DisableAntiforgery();
 
 var bffSectors = app.MapGroup("/bff/sectors").DisableAntiforgery();
 bffSectors.MapGet("/", async (SectorApiClient api, AuthStateService auth) =>
