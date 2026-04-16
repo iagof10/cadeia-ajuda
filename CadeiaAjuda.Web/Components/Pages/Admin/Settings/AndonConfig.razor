@@ -74,6 +74,22 @@
                             </div>
 
                             <div id="settingsForm" style="display:none;">
+                                <h6 class="text-muted text-uppercase mt-2 mb-1"><i class="la la-map-marker"></i> Posição na Planta</h6>
+                                <hr class="mt-0" />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <div class="custom-control custom-switch mb-2">
+                                                <input type="checkbox" class="custom-control-input" id="ignoreArea" />
+                                                <label class="custom-control-label" for="ignoreArea" id="ignoreAreaLabel">Não</label>
+                                            </div>
+                                            <small class="text-muted d-block mb-2">Quando ativado, o Andon exibirá chamados de todas as plantas/posições.</small>
+                                            <div id="areaSelectorsContainer"></div>
+                                            <small class="text-muted" id="areaHint">Ao selecionar um nível, o Andon exibirá chamados desse nível e de todos os subníveis abaixo.</small>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <h6 class="text-muted text-uppercase mt-2 mb-1"><i class="la la-bell"></i> Alertas de Urgência</h6>
                                 <hr class="mt-0" />
 
@@ -163,10 +179,13 @@
         var allSectors = [];
         var selectedSectorIds = {};
         var currentUserData = null;
+        var allAreas = [];
+        var selectedAreaId = null;
 
         var userSelect = document.getElementById('userSelect');
         var showClockEl = document.getElementById('showClock');
         var enableSoundEl = document.getElementById('enableSound');
+        var ignoreAreaEl = document.getElementById('ignoreArea');
         var saveBtn = document.getElementById('saveBtn');
 
         showClockEl.addEventListener('change', function () {
@@ -174,6 +193,18 @@
         });
         enableSoundEl.addEventListener('change', function () {
             document.getElementById('enableSoundLabel').textContent = enableSoundEl.checked ? 'Sim' : 'Não';
+        });
+        ignoreAreaEl.addEventListener('change', function () {
+            document.getElementById('ignoreAreaLabel').textContent = ignoreAreaEl.checked ? 'Sim' : 'Não';
+            if (ignoreAreaEl.checked) {
+                selectedAreaId = null;
+                document.getElementById('areaSelectorsContainer').style.display = 'none';
+                document.getElementById('areaHint').style.display = 'none';
+            } else {
+                document.getElementById('areaSelectorsContainer').style.display = '';
+                document.getElementById('areaHint').style.display = '';
+                renderAreaSelectors(selectedAreaId);
+            }
         });
 
         // 1) Descobrir quem é o usuário logado
@@ -183,16 +214,15 @@
                 currentUserId = me.id;
                 isAdmin = me.userTypeValue === 3; // Administrator
 
-                // Load sectors
-                fetch('/bff/sectors')
-                    .then(function (r) { return r.json(); })
-                    .then(function (sectors) {
-                        allSectors = sectors.filter(function (s) { return s.active; });
-                        if (isAdmin) {
-                            initAdmin();
-                        } else {
-                            initAndonUser();
-                        }
+                // Load sectors and areas
+                var sectorsPromise = fetch('/bff/sectors').then(function (r) { return r.json(); });
+                var areasPromise = fetch('/bff/areas').then(function (r) { return r.json(); });
+
+                Promise.all([sectorsPromise, areasPromise])
+                    .then(function (results) {
+                        allSectors = results[0].filter(function (s) { return s.active; });
+                        allAreas = results[1].filter(function (a) { return a.active; });
+                        if (isAdmin) { initAdmin(); } else { initAndonUser(); }
                     })
                     .catch(function () {
                         if (isAdmin) { initAdmin(); } else { initAndonUser(); }
@@ -288,6 +318,19 @@
                         });
                     }
 
+                    // Load area selection
+                    selectedAreaId = data.areaId || null;
+                    ignoreAreaEl.checked = !selectedAreaId;
+                    document.getElementById('ignoreAreaLabel').textContent = ignoreAreaEl.checked ? 'Sim' : 'Não';
+                    if (ignoreAreaEl.checked) {
+                        document.getElementById('areaSelectorsContainer').style.display = 'none';
+                        document.getElementById('areaHint').style.display = 'none';
+                    } else {
+                        document.getElementById('areaSelectorsContainer').style.display = '';
+                        document.getElementById('areaHint').style.display = '';
+                    }
+                    renderAreaSelectors(selectedAreaId);
+
                     renderSectors();
 
                     document.getElementById('settingsLoading').style.display = 'none';
@@ -310,6 +353,66 @@
             if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
             var r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
             return (r * 299 + g * 587 + b * 114) / 1000 > 155;
+        }
+
+        // --- Area hierarchy selectors ---
+        // --- Area tree select ---
+        function buildAreaTree(parentId, depth) {
+            var items = [];
+            var children = allAreas.filter(function (a) { return a.parentId === parentId; });
+            children.forEach(function (a) {
+                var prefix = '';
+                for (var i = 0; i < depth; i++) prefix += '\u00A0\u00A0\u00A0\u00A0';
+                if (depth > 0) prefix += '└ ';
+                items.push({ id: a.id, label: prefix + a.name, depth: depth });
+                var sub = buildAreaTree(a.id, depth + 1);
+                items = items.concat(sub);
+            });
+            return items;
+        }
+
+        function renderAreaSelectors(currentAreaId) {
+            var container = document.getElementById('areaSelectorsContainer');
+            container.innerHTML = '';
+
+            var select = document.createElement('select');
+            select.className = 'form-control';
+
+            var emptyOpt = document.createElement('option');
+            emptyOpt.value = '';
+            emptyOpt.textContent = '-- Todos os chamados --';
+            select.appendChild(emptyOpt);
+
+            var tree = buildAreaTree(null, 0);
+            tree.forEach(function (item) {
+                var opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = item.label;
+                if (item.id === currentAreaId) opt.selected = true;
+                select.appendChild(opt);
+            });
+
+            select.addEventListener('change', function () {
+                selectedAreaId = select.value || null;
+            });
+
+            container.appendChild(select);
+
+            if (currentAreaId) {
+                var selectedArea = allAreas.find(function (a) { return a.id === currentAreaId; });
+                if (selectedArea) {
+                    var hasChildren = allAreas.some(function (a) { return a.parentId === currentAreaId; });
+                    var hint = document.createElement('small');
+                    hint.className = 'text-info d-block mt-1';
+                    hint.innerHTML = '<i class="la la-info-circle"></i> ';
+                    if (hasChildren) {
+                        hint.innerHTML += 'Exibirá chamados de <strong>' + escapeHtml(selectedArea.name) + '</strong> e todos os seus subníveis.';
+                    } else {
+                        hint.innerHTML += 'Exibirá apenas chamados de <strong>' + escapeHtml(selectedArea.name) + '</strong>.';
+                    }
+                    container.appendChild(hint);
+                }
+            }
         }
 
         function renderSectors() {
@@ -390,7 +493,8 @@
                     criticalMinutes: c,
                     carouselIntervalSeconds: ci,
                     showClock: showClockEl.checked,
-                    enableSound: enableSoundEl.checked
+                    enableSound: enableSoundEl.checked,
+                    areaId: selectedAreaId || null
                 })
             })
             .then(function (r) {

@@ -633,7 +633,8 @@ andonUserSettings.MapGet("/{userId:guid}", async (Guid userId, AppDbContext db) 
         settings.CriticalMinutes,
         settings.CarouselIntervalSeconds,
         settings.ShowClock,
-        settings.EnableSound
+        settings.EnableSound,
+        settings.AreaId
     });
 });
 
@@ -651,6 +652,7 @@ andonUserSettings.MapPut("/{userId:guid}", async (Guid userId, AndonUserSettings
     settings.CarouselIntervalSeconds = model.CarouselIntervalSeconds;
     settings.ShowClock = model.ShowClock;
     settings.EnableSound = model.EnableSound;
+    settings.AreaId = model.AreaId;
     settings.UpdatedAt = DateTime.UtcNow;
 
     await db.SaveChangesAsync();
@@ -679,4 +681,5 @@ record AndonUserSettingsUpdateModel(
     int CriticalMinutes,
     int CarouselIntervalSeconds,
     bool ShowClock,
-    bool EnableSound);
+    bool EnableSound,
+    Guid? AreaId);
