@@ -13,7 +13,7 @@
                     <a class="nav-link nav-menu-main menu-toggle hidden-xs" href="javascript:void(0)"><i class="ft-menu font-large-1"></i></a>
                 </li>
                 <li class="nav-item">
-                    <NavLink class="navbar-brand" href="/home">
+                    <NavLink class="navbar-brand" href="/home" data-enhance-nav="false">
                         <img class="brand-logo" alt="Cadeia Ajuda logo" src="app-assets/images/logo/AssistChain-logo.png">
                     </NavLink>
                 </li>
@@ -56,7 +56,7 @@
             @if (!isAndonUser && HasPermission("dashboard.view"))
             {
                 <li class="nav-item @(IsActive("/dashboard") ? "active" : "")">
-                    <NavLink href="/dashboard">
+                    <NavLink href="/dashboard" data-enhance-nav="false">
                         <i class="ft-pie-chart"></i>
                         <span class="menu-title">Dashboard</span>
                     </NavLink>
@@ -73,7 +73,7 @@
                         @if (HasPermission("help_request_types.view"))
                         {
                             <li class="@(IsActive("/register/help-request-types") ? "active" : "")">
-                                <NavLink class="menu-item" href="/register/help-request-types" Match="NavLinkMatch.Prefix">
+                                <NavLink class="menu-item" href="/register/help-request-types" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
                                     <i class="ft-flag"></i>
                                     <span>Tipo de Ajuda</span>
                                 </NavLink>
@@ -82,7 +82,7 @@
                         @if (HasPermission("reasons.view"))
                         {
                             <li class="@(IsActive("/register/reasons") ? "active" : "")">
-                                <NavLink class="menu-item" href="/register/reasons" Match="NavLinkMatch.Prefix">
+                                <NavLink class="menu-item" href="/register/reasons" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
                                     <i class="ft-tag"></i>
                                     <span>Motivo</span>
                                 </NavLink>
@@ -91,7 +91,7 @@
                         @if (HasPermission("sectors.view"))
                         {
                             <li class="@(IsActive("/register/sectors") ? "active" : "")">
-                                <NavLink class="menu-item" href="/register/sectors" Match="NavLinkMatch.Prefix">
+                                <NavLink class="menu-item" href="/register/sectors" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
                                     <i class="ft-compass"></i>
                                     <span>Setor</span>
                                 </NavLink>
@@ -173,7 +173,7 @@
                         @if (HasPermission("users.view"))
                         {
                             <li class="@(IsActive("/user/users") ? "active" : "")">
-                                <NavLink class="menu-item" href="/user/users" Match="NavLinkMatch.Prefix">
+                                <NavLink class="menu-item" href="/user/users" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
                                     <i class="ft-users"></i>
                                     <span>Usuário</span>
                                 </NavLink>
@@ -209,7 +209,7 @@
                     </a>
                     <ul class="menu-content">
                         <li class="@(IsActive("/settings/company") ? "active" : "")">
-                            <NavLink class="menu-item" href="/settings/company" Match="NavLinkMatch.Prefix">
+                            <NavLink class="menu-item" href="/settings/company" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
                                 <i class="ft-briefcase"></i>
                                 <span>Empresa</span>
                             </NavLink>
@@ -362,7 +362,7 @@ protected override void OnInitialized()
 
 protected override async Task OnAfterRenderAsync(bool firstRender)
 {
-    if (firstRender || currentUrl != previousUrl)
+    if (firstRender)
     {
         previousUrl = currentUrl;
         await JS.InvokeVoidAsync("initTemplateMenu");

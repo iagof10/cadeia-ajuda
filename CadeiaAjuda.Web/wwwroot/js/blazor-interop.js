@@ -16,20 +16,19 @@ window.initTemplateMenu = function () {
     $(".main-menu-content").children("a.menu-title").remove();
     $(".main-menu-content").children("ul.menu-content").remove();
 
-    // Refresh $.app.nav references and rebind events so the compact-menu
-    // hover flyout works reliably after Blazor enhanced navigation.
+    // Completely unbind and rebind menu events
     if (typeof $.app !== 'undefined' && typeof $.app.nav !== 'undefined') {
-        // Unbind ALL stale delegated events that bind_events will re-add
-        $(".navigation-main").off("mouseenter.app.menu mouseleave.app.menu active.app.menu deactive.app.menu open.app.menu close.app.menu click.app.menu");
-        $(".main-menu-content").off("mouseleave");
-        $(".navigation-main li.has-sub > a").off("click");
-        $("ul.menu-content").off("click");
+        // Remove ALL menu-related events
+        $(".navigation-main").off();
+        $(".main-menu-content").off();
+        $(".navigation-main li a").off();
+        $("ul.menu-content").off();
 
-        // Refresh the cached container / navItem references
+        // Refresh cached references
         $.app.nav.container = $(".navigation-main");
         $.app.nav.navItem = $(".navigation-main").find("li").not(".navigation-category");
 
-        // Rebind events cleanly
+        // Rebind cleanly
         $.app.nav.bind_events();
     }
 };
