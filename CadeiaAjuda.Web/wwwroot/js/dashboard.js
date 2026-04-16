@@ -2,6 +2,7 @@
     'use strict';
 
     var dashData = null;
+    var chartInstances = {};
 
     function esc(str) {
         var d = document.createElement('div');
@@ -45,6 +46,12 @@
         }
     }
 
+    var palette = ['#f57c00','#1e9ff2','#4caf50','#f44336','#9c27b0','#00bcd4','#ff5722','#607d8b','#e91e63','#8bc34a','#3f51b5','#ffc107'];
+
+    function destroyChart(id) {
+        if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+    }
+
     // ---- Load data ----
     async function loadDashboard() {
         try {
@@ -60,11 +67,14 @@
             renderKPIs();
             renderPeriodChart('week');
             renderStatusChart();
+            renderSectorPieChart();
+            renderTypePieChart();
+            renderPeakHoursChart();
             renderSectorRanking();
             renderTypeRanking();
             renderRequesterRanking();
-            renderPeakHours();
             renderMonthCompare();
+            renderMonthCompareChart();
             renderRecentTable();
             bindPeriodButtons();
         } catch (e) {
@@ -78,59 +88,49 @@
         var d = dashData;
         document.getElementById('kpiOpen').textContent = d.openCount;
         document.getElementById('kpiClosedToday').textContent = d.closedTodayCount;
-        document.getElementById('kpiEscalated').textContent = d.escalatedCount;
         document.getElementById('kpiAvgTime').textContent = fmtDuration(d.avgCloseTimeMinutes);
         document.getElementById('kpiTotal').textContent = d.totalCount;
         document.getElementById('kpiUsers').textContent = d.activeUsersCount;
         document.getElementById('kpiOldest').textContent = d.openCount > 0 ? fmtDuration(d.oldestOpenMinutes) : '\u2014';
 
-        // Month compare KPI
-        var kpiMonth = document.getElementById('kpiMonthCompare');
-        var kpiTrend = document.getElementById('kpiMonthTrend');
-        var kpiIcon = document.getElementById('kpiMonthIcon');
-        kpiMonth.textContent = d.currentMonthCount;
-
-        var pct = d.monthOverMonthChangePercent;
-        if (pct > 0) {
-            kpiMonth.className = 'danger';
-            kpiIcon.className = 'la la-arrow-up danger font-large-2 float-right';
-            kpiTrend.innerHTML = '<span class="trend-up"><i class="la la-arrow-up"></i> +' + pct + '% vs mês anterior</span>';
-        } else if (pct < 0) {
-            kpiMonth.className = 'success';
-            kpiIcon.className = 'la la-arrow-down success font-large-2 float-right';
-            kpiTrend.innerHTML = '<span class="trend-down"><i class="la la-arrow-down"></i> ' + pct + '% vs mês anterior</span>';
-        } else {
-            kpiMonth.className = 'info';
-            kpiIcon.className = 'la la-calendar info font-large-2 float-right';
-            kpiTrend.innerHTML = '<span class="trend-neutral">Sem variação vs mês anterior</span>';
-        }
+        document.getElementById('kpiMonthCompare').textContent = d.currentMonthCount;
+        document.getElementById('kpiPrevMonth').textContent = d.previousMonthCount;
     }
 
-    // ---- Period Chart ----
+    // ---- Period Chart (Bar) ----
     function renderPeriodChart(period) {
         var data;
         if (period === 'week') data = dashData.last7Days;
         else if (period === 'month') data = dashData.last4Weeks;
         else data = dashData.last6Months;
 
-        var area = document.getElementById('periodChartArea');
-        if (!data || data.length === 0) {
-            area.innerHTML = '<span class="text-muted">Sem dados</span>';
-            return;
-        }
+        destroyChart('periodChart');
+        var ctx = document.getElementById('periodChart');
+        if (!data || data.length === 0) return;
 
-        var max = Math.max.apply(null, data.map(function (d) { return d.count; }));
-        if (max === 0) max = 1;
-
-        var html = '';
-        data.forEach(function (item) {
-            var pct = Math.max(6, Math.round((item.count / max) * 100));
-            html += '<div class="dash-bar-row">' +
-                '<span class="dash-bar-label">' + esc(item.label) + '</span>' +
-                '<div class="dash-bar-track"><div class="dash-bar-fill" style="width:' + pct + '%;background:#1e9ff2;">' + item.count + '</div></div>' +
-                '</div>';
+        chartInstances['periodChart'] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(function (d) { return d.label; }),
+                datasets: [{
+                    label: 'Chamados',
+                    data: data.map(function (d) { return d.count; }),
+                    backgroundColor: 'rgba(30,159,242,0.7)',
+                    borderColor: '#1e9ff2',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }
+                }
+            }
         });
-        area.innerHTML = html;
     }
 
     function bindPeriodButtons() {
@@ -144,28 +144,167 @@
         });
     }
 
-    // ---- Status Chart ----
+    // ---- Status Chart (Pie) ----
     function renderStatusChart() {
-        var area = document.getElementById('statusChartArea');
+        destroyChart('statusChart');
+        var ctx = document.getElementById('statusChart');
         var data = dashData.statusDistribution || [];
-        var max = Math.max.apply(null, data.map(function (d) { return d.count; }));
-        if (max === 0) {
-            area.innerHTML = '<span class="text-muted">Sem dados</span>';
-            return;
-        }
+        if (data.length === 0) return;
 
-        var html = '';
-        data.forEach(function (item) {
-            var pct = Math.max(6, Math.round((item.count / max) * 100));
-            html += '<div class="dash-bar-row">' +
-                '<span class="dash-bar-label">' + esc(item.name) + '</span>' +
-                '<div class="dash-bar-track"><div class="dash-bar-fill" style="width:' + pct + '%;background:' + statusColor(item.status) + ';">' + item.count + '</div></div>' +
-                '</div>';
+        chartInstances['statusChart'] = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: data.map(function (d) { return d.name; }),
+                datasets: [{
+                    data: data.map(function (d) { return d.count; }),
+                    backgroundColor: data.map(function (d) { return statusColor(d.status); }),
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, pointStyle: 'circle' } }
+                }
+            }
         });
-        area.innerHTML = html;
     }
 
-    // ---- Sector Ranking ----
+    // ---- Sector Pie Chart ----
+    function renderSectorPieChart() {
+        destroyChart('sectorPieChart');
+        var ctx = document.getElementById('sectorPieChart');
+        var data = dashData.sectorRanking || [];
+        if (data.length === 0) return;
+
+        chartInstances['sectorPieChart'] = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: data.map(function (d) { return d.name; }),
+                datasets: [{
+                    data: data.map(function (d) { return d.totalCount; }),
+                    backgroundColor: data.map(function (d, i) { return d.color || palette[i % palette.length]; }),
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, pointStyle: 'circle' } }
+                }
+            }
+        });
+    }
+
+    // ---- Type Doughnut Chart ----
+    function renderTypePieChart() {
+        destroyChart('typePieChart');
+        var ctx = document.getElementById('typePieChart');
+        var data = dashData.typeRanking || [];
+        if (data.length === 0) return;
+
+        chartInstances['typePieChart'] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.map(function (d) { return d.name; }),
+                datasets: [{
+                    data: data.map(function (d) { return d.count; }),
+                    backgroundColor: data.map(function (d, i) { return palette[i % palette.length]; }),
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, pointStyle: 'circle' } }
+                }
+            }
+        });
+    }
+
+    // ---- Peak Hours Chart (Bar) ----
+    function renderPeakHoursChart() {
+        destroyChart('peakHoursChart');
+        var ctx = document.getElementById('peakHoursChart');
+        var data = dashData.peakHours || [];
+        if (data.length === 0) return;
+
+        var max = Math.max.apply(null, data.map(function (h) { return h.count; }));
+
+        chartInstances['peakHoursChart'] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(function (h) { return (h.hour < 10 ? '0' : '') + h.hour + 'h'; }),
+                datasets: [{
+                    label: 'Chamados',
+                    data: data.map(function (h) { return h.count; }),
+                    backgroundColor: data.map(function (h) {
+                        var intensity = max > 0 ? h.count / max : 0;
+                        return intensity > 0.7 ? '#f44336' : intensity > 0.4 ? '#ffc107' : '#1e9ff2';
+                    }),
+                    borderRadius: 4,
+                    barPercentage: 0.7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } },
+                    x: { ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+    }
+
+    // ---- Month Compare Chart (Grouped Bar) ----
+    function renderMonthCompareChart() {
+        destroyChart('monthCompareChart');
+        var ctx = document.getElementById('monthCompareChart');
+        var d = dashData;
+
+        chartInstances['monthCompareChart'] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Abertos', 'Encerrados'],
+                datasets: [
+                    {
+                        label: 'Mês Atual',
+                        data: [d.currentMonthCount, d.currentMonthClosedCount],
+                        backgroundColor: 'rgba(245,124,0,0.8)',
+                        borderRadius: 6,
+                        barPercentage: 0.5
+                    },
+                    {
+                        label: 'Mês Anterior',
+                        data: [d.previousMonthCount, d.previousMonthClosedCount],
+                        backgroundColor: 'rgba(158,158,158,0.5)',
+                        borderRadius: 6,
+                        barPercentage: 0.5
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle' } }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }
+                }
+            }
+        });
+    }
+
+    // ---- Sector Ranking (Table) ----
     function renderSectorRanking() {
         var body = document.getElementById('sectorRankBody');
         var data = dashData.sectorRanking || [];
@@ -185,7 +324,7 @@
         body.innerHTML = html;
     }
 
-    // ---- Type Ranking ----
+    // ---- Type Ranking (List) ----
     function renderTypeRanking() {
         var area = document.getElementById('typeRankArea');
         var data = dashData.typeRanking || [];
@@ -223,35 +362,7 @@
         area.innerHTML = html;
     }
 
-    // ---- Peak Hours ----
-    function renderPeakHours() {
-        var area = document.getElementById('peakHoursArea');
-        var data = dashData.peakHours || [];
-        if (data.length === 0) {
-            area.innerHTML = '<span class="text-muted">Sem dados</span>';
-            return;
-        }
-        var max = Math.max.apply(null, data.map(function (h) { return h.count; }));
-        if (max === 0) {
-            area.innerHTML = '<span class="text-muted">Sem dados suficientes</span>';
-            return;
-        }
-
-        var html = '<div class="hour-bar-wrap">';
-        data.forEach(function (h) {
-            var pct = Math.max(2, Math.round((h.count / max) * 100));
-            var intensity = h.count / max;
-            var color = intensity > 0.7 ? '#f44336' : intensity > 0.4 ? '#ffc107' : '#1e9ff2';
-            html += '<div class="hour-bar-col">' +
-                '<div class="hour-bar" style="height:' + pct + '%;background:' + color + ';" title="' + h.count + ' chamados"></div>' +
-                '<span class="hour-bar-label">' + (h.hour < 10 ? '0' : '') + h.hour + '</span>' +
-                '</div>';
-        });
-        html += '</div>';
-        area.innerHTML = html;
-    }
-
-    // ---- Month Compare ----
+    // ---- Month Compare (Text) ----
     function renderMonthCompare() {
         var area = document.getElementById('monthCompareArea');
         var d = dashData;
@@ -274,8 +385,8 @@
             html += '<div class="compare-row">' +
                 '<span class="compare-label">' + esc(r.label) + '</span>' +
                 '<div class="compare-values">' +
-                '<span class="compare-current">' + (r.raw ? r.current : r.current) + ' ' + trendHtml + '</span><br/>' +
-                '<span class="compare-prev">Mês anterior: ' + (r.raw ? r.prev : r.prev) + '</span>' +
+                '<span class="compare-current">' + r.current + ' ' + trendHtml + '</span><br/>' +
+                '<span class="compare-prev">Mês anterior: ' + r.prev + '</span>' +
                 '</div>' +
                 '</div>';
         });

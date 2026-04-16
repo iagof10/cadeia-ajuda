@@ -57,75 +57,10 @@
                     <div class="card-body">
                         <div class="media d-flex">
                             <div class="media-body text-left">
-                                <h3 class="danger" id="kpiEscalated">0</h3>
-                                <h6>Escalados</h6>
-                            </div>
-                            <div><i class="la la-arrow-circle-up danger font-large-2 float-right"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-12">
-            <div class="card pull-up">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="media-body text-left">
                                 <h3 class="info" id="kpiAvgTime">—</h3>
                                 <h6>Tempo Médio Resolução</h6>
                             </div>
                             <div><i class="la la-clock-o info font-large-2 float-right"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- KPIs Secundários -->
-    <div class="row">
-        <div class="col-xl-3 col-lg-6 col-12">
-            <div class="card pull-up">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="media-body text-left">
-                                <h3 class="info" id="kpiTotal">0</h3>
-                                <h6>Total de Chamados</h6>
-                            </div>
-                            <div><i class="la la-list info font-large-2 float-right"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-12">
-            <div class="card pull-up">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="media-body text-left">
-                                <h3 id="kpiMonthCompare">0</h3>
-                                <h6>Chamados Este Mês</h6>
-                                <small class="text-muted" id="kpiMonthTrend"></small>
-                            </div>
-                            <div><i class="la la-calendar font-large-2 float-right" id="kpiMonthIcon"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-12">
-            <div class="card pull-up">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="media-body text-left">
-                                <h3 class="success" id="kpiUsers">0</h3>
-                                <h6>Usuários Ativos</h6>
-                            </div>
-                            <div><i class="la la-users success font-large-2 float-right"></i></div>
                         </div>
                     </div>
                 </div>
@@ -148,6 +83,70 @@
         </div>
     </div>
 
+    <!-- KPIs Secundários -->
+    <div class="row">
+        <div class="col-xl-3 col-lg-6 col-12">
+            <div class="card pull-up">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body text-left">
+                                <h3 id="kpiMonthCompare">0</h3>
+                                <h6>Chamados Este Mês</h6>
+                            </div>
+                            <div><i class="la la-calendar font-large-2 float-right" id="kpiMonthIcon"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-12">
+            <div class="card pull-up">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body text-left">
+                                <h3 class="text-muted" id="kpiPrevMonth">0</h3>
+                                <h6>Chamados Mês Anterior</h6>
+                            </div>
+                            <div><i class="la la-calendar-o text-muted font-large-2 float-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-12">
+            <div class="card pull-up">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body text-left">
+                                <h3 class="info" id="kpiTotal">0</h3>
+                                <h6>Total de Chamados</h6>
+                            </div>
+                            <div><i class="la la-list info font-large-2 float-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-12">
+            <div class="card pull-up">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="media d-flex">
+                            <div class="media-body text-left">
+                                <h3 class="success" id="kpiUsers">0</h3>
+                                <h6>Usuários Ativos</h6>
+                            </div>
+                            <div><i class="la la-users success font-large-2 float-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Gráficos de Período -->
     <div class="row">
         <div class="col-xl-8 col-12">
@@ -162,7 +161,7 @@
                 </div>
                 <div class="card-content">
                     <div class="card-body">
-                        <div id="periodChartArea" style="min-height:220px;"></div>
+                        <canvas id="periodChart" height="220"></canvas>
                     </div>
                 </div>
             </div>
@@ -174,14 +173,54 @@
                 </div>
                 <div class="card-content">
                     <div class="card-body">
-                        <div id="statusChartArea" style="min-height:220px;"></div>
+                        <canvas id="statusChart" height="220"></canvas>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Ranking Setores + Tipos -->
+    <!-- Gráficos: Setores (pizza) + Tipos (doughnut) -->
+    <div class="row">
+        <div class="col-xl-4 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title"><i class="la la-pie-chart"></i> Chamados por Setor</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <canvas id="sectorPieChart" height="260"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title"><i class="la la-tags"></i> Chamados por Tipo</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <canvas id="typePieChart" height="260"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title"><i class="la la-clock-o"></i> Horários de Pico</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <canvas id="peakHoursChart" height="260"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ranking Setores + Top Solicitantes -->
     <div class="row">
         <div class="col-xl-6 col-12">
             <div class="card">
@@ -233,21 +272,9 @@
         </div>
     </div>
 
-    <!-- Horários de Pico + Comparação Mensal -->
+    <!-- Comparação Mensal -->
     <div class="row">
-        <div class="col-xl-8 col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title"><i class="la la-clock-o"></i> Horários de Pico</h4>
-                </div>
-                <div class="card-content">
-                    <div class="card-body">
-                        <div id="peakHoursArea" style="min-height:180px;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-4 col-12">
+        <div class="col-xl-6 col-12">
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title"><i class="la la-exchange"></i> Comparação Mensal</h4>
@@ -255,6 +282,18 @@
                 <div class="card-content">
                     <div class="card-body">
                         <div id="monthCompareArea"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title"><i class="la la-bar-chart"></i> Comparação Mensal (Gráfico)</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <canvas id="monthCompareChart" height="200"></canvas>
                     </div>
                 </div>
             </div>
@@ -325,11 +364,6 @@
     .trend-up { color:#f44336; }
     .trend-down { color:#4caf50; }
     .trend-neutral { color:#999; }
-
-    .hour-bar-wrap { display:flex; align-items:flex-end; gap:3px; height:140px; }
-    .hour-bar-col { flex:1; display:flex; flex-direction:column; align-items:center; }
-    .hour-bar { width:100%; border-radius:3px 3px 0 0; background:#1e9ff2; transition:height .4s ease; min-height:2px; }
-    .hour-bar-label { font-size:.65rem; color:#999; margin-top:3px; }
 </style>
 
 <script src="js/dashboard.js"></script>
