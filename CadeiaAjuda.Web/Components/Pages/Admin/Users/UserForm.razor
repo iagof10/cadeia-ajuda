@@ -134,6 +134,14 @@
                                 <div class="col-12">
                                     <div class="form-group">
                                         <label>Setores</label>
+                                        <div class="mb-1">
+                                            <button type="button" class="btn btn-sm btn-outline-primary mr-1" id="btnSelectAllSectors">
+                                                <i class="ft-check-square"></i> Marcar Todos
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnDeselectAllSectors">
+                                                <i class="ft-square"></i> Desmarcar Todos
+                                            </button>
+                                        </div>
                                         <div class="sector-list" id="sectorList">
                                             <small class="text-muted">Carregando setores...</small>
                                         </div>
@@ -241,6 +249,16 @@
             container.appendChild(label);
         });
     }
+
+    // ---- Select/Deselect All Sectors ----
+    $('btnSelectAllSectors').addEventListener('click', function () {
+        allSectors.forEach(function (s) { selectedSectorIds[s.id] = true; });
+        renderSectors();
+    });
+    $('btnDeselectAllSectors').addEventListener('click', function () {
+        selectedSectorIds = {};
+        renderSectors();
+    });
 
     // ---- Save ----
     $('btnSave').addEventListener('click', async function () {

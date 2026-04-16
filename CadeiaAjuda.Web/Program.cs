@@ -655,6 +655,24 @@ bffUsers.MapPatch("/{id:guid}/toggle-active", async (Guid id, UserApiClient api,
     return resp.IsSuccessStatusCode ? Results.Ok() : Results.StatusCode((int)resp.StatusCode);
 });
 
+bffUsers.MapPut("/{id:guid}/sectors", async (Guid id, List<Guid> sectorIds, IHttpClientFactory httpFactory, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+
+    // Andon user can only update their own sectors
+    var isAdmin = user.UserType == UserType.Administrator || user.Permissions.Contains("users.manage");
+    var isOwnAndon = user.UserType == UserType.Andon && user.Id == id;
+
+    if (!isAdmin && !isOwnAndon)
+        return Results.Json(new { error = "Sem permissão." }, statusCode: 403);
+
+    var http = httpFactory.CreateClient("ApiClient");
+    var resp = await http.PutAsJsonAsync($"/api/users/{id}/sectors", sectorIds);
+    var body = await resp.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
+});
+
 var bffEscalation = app.MapGroup("/bff/escalation-levels").DisableAntiforgery();
 bffEscalation.MapGet("/by-sector/{sectorId:guid}", async (Guid sectorId, EscalationLevelApiClient api) =>
     Results.Ok(await api.GetBySectorIdAsync(sectorId)));

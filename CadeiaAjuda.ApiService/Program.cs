@@ -160,6 +160,12 @@ users.MapPatch("/{id:guid}/toggle-active", async (Guid id, IUserService service)
     return result ? Results.Ok() : Results.NotFound();
 });
 
+users.MapPut("/{id:guid}/sectors", async (Guid id, List<Guid> sectorIds, IUserService service) =>
+{
+    var result = await service.UpdateUserSectorsAsync(id, sectorIds);
+    return result is null ? Results.NotFound() : Results.Ok(result);
+});
+
 // --- Sectors ---
 var sectors = app.MapGroup("/api/sectors");
 

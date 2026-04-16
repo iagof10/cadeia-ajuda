@@ -3,6 +3,15 @@
 
 <PageTitle>Configuração do Andon - Cadeia Ajuda</PageTitle>
 
+<style>
+    .sector-list { display: flex; flex-wrap: wrap; gap: 10px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fafafa; margin-bottom: 5px; }
+    .sector-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #fff; border: 2px solid #e5e7eb; border-radius: 6px; cursor: pointer; font-size: .9rem; transition: all .15s; user-select: none; }
+    .sector-chip:hover { border-color: #f57c00; background: #fff8f0; }
+    .sector-chip.selected { border-color: #f57c00; background: #fff3e0; }
+    .sector-chip input[type="checkbox"] { accent-color: #f57c00; }
+    .sector-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+</style>
+
 <section>
     <div class="row mb-2">
         <div class="col-12">
@@ -116,6 +125,21 @@
                                     </div>
                                 </div>
 
+                                <h6 class="text-muted text-uppercase mt-2 mb-1"><i class="la la-sitemap"></i> Setores Vinculados</h6>
+                                <hr class="mt-0" />
+                                <div class="mb-1">
+                                    <button type="button" class="btn btn-sm btn-outline-primary mr-1" id="btnSelectAllSectors">
+                                        <i class="ft-check-square"></i> Marcar Todos
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btnDeselectAllSectors">
+                                        <i class="ft-square"></i> Desmarcar Todos
+                                    </button>
+                                </div>
+                                <div class="sector-list" id="sectorList">
+                                    <small class="text-muted">Carregando setores...</small>
+                                </div>
+                                <small class="text-muted">Selecione os setores que este usuário pode acessar no Andon.</small>
+
                                 <div class="form-actions text-right mt-2">
                                     <button type="button" class="btn btn-warning" id="saveBtn">
                                         <i class="la la-check"></i> Salvar Configuração
@@ -136,6 +160,9 @@
         var isAdmin = false;
         var currentUserId = '';
         var selectedUserId = '';
+        var allSectors = [];
+        var selectedSectorIds = {};
+        var currentUserData = null;
 
         var userSelect = document.getElementById('userSelect');
         var showClockEl = document.getElementById('showClock');
@@ -156,11 +183,20 @@
                 currentUserId = me.id;
                 isAdmin = me.userTypeValue === 3; // Administrator
 
-                if (isAdmin) {
-                    initAdmin();
-                } else {
-                    initAndonUser();
-                }
+                // Load sectors
+                fetch('/bff/sectors')
+                    .then(function (r) { return r.json(); })
+                    .then(function (sectors) {
+                        allSectors = sectors.filter(function (s) { return s.active; });
+                        if (isAdmin) {
+                            initAdmin();
+                        } else {
+                            initAndonUser();
+                        }
+                    })
+                    .catch(function () {
+                        if (isAdmin) { initAdmin(); } else { initAndonUser(); }
+                    });
             })
             .catch(function () {
                 document.getElementById('loadingState').style.display = 'none';
@@ -226,10 +262,17 @@
         function loadSettings(url) {
             document.getElementById('settingsLoading').style.display = '';
             document.getElementById('settingsForm').style.display = 'none';
+            selectedSectorIds = {};
 
-            fetch(url)
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
+            // Load settings and user data in parallel
+            var settingsPromise = fetch(url).then(function (r) { return r.json(); });
+            var userPromise = fetch('/bff/users/' + selectedUserId).then(function (r) { return r.json(); });
+
+            Promise.all([settingsPromise, userPromise])
+                .then(function (results) {
+                    var data = results[0];
+                    currentUserData = results[1];
+
                     document.getElementById('warningMinutes').value = data.warningMinutes || 30;
                     document.getElementById('criticalMinutes').value = data.criticalMinutes || 60;
                     document.getElementById('carouselInterval').value = data.carouselIntervalSeconds || 5;
@@ -237,6 +280,15 @@
                     enableSoundEl.checked = !!data.enableSound;
                     document.getElementById('showClockLabel').textContent = showClockEl.checked ? 'Sim' : 'Não';
                     document.getElementById('enableSoundLabel').textContent = enableSoundEl.checked ? 'Sim' : 'Não';
+
+                    // Load user's current sectors
+                    if (currentUserData.sectors && currentUserData.sectors.length) {
+                        currentUserData.sectors.forEach(function (s) {
+                            selectedSectorIds[s.sectorId] = true;
+                        });
+                    }
+
+                    renderSectors();
 
                     document.getElementById('settingsLoading').style.display = 'none';
                     document.getElementById('settingsForm').style.display = '';
@@ -246,6 +298,69 @@
                     showError('Erro ao carregar configuração.');
                 });
         }
+
+        function escapeHtml(str) {
+            var div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        function isLightColor(hex) {
+            hex = (hex || '').replace('#', '');
+            if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+            var r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
+            return (r * 299 + g * 587 + b * 114) / 1000 > 155;
+        }
+
+        function renderSectors() {
+            var container = document.getElementById('sectorList');
+            container.innerHTML = '';
+
+            if (allSectors.length === 0) {
+                container.innerHTML = '<small class="text-muted">Nenhum setor cadastrado.</small>';
+                return;
+            }
+
+            allSectors.forEach(function (sector) {
+                var isSel = !!selectedSectorIds[sector.id];
+
+                var label = document.createElement('label');
+                label.className = 'sector-chip' + (isSel ? ' selected' : '');
+
+                var cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = isSel;
+
+                var dot = document.createElement('span');
+                dot.className = 'sector-dot';
+                dot.style.backgroundColor = sector.color || '#ccc';
+
+                var nameSpan = document.createElement('span');
+                nameSpan.textContent = sector.name;
+
+                label.appendChild(cb);
+                label.appendChild(dot);
+                label.appendChild(nameSpan);
+
+                cb.addEventListener('change', function () {
+                    if (cb.checked) { selectedSectorIds[sector.id] = true; }
+                    else { delete selectedSectorIds[sector.id]; }
+                    renderSectors();
+                });
+
+                container.appendChild(label);
+            });
+        }
+
+        // --- Marcar/Desmarcar todos os setores ---
+        document.getElementById('btnSelectAllSectors').addEventListener('click', function () {
+            allSectors.forEach(function (s) { selectedSectorIds[s.id] = true; });
+            renderSectors();
+        });
+        document.getElementById('btnDeselectAllSectors').addEventListener('click', function () {
+            selectedSectorIds = {};
+            renderSectors();
+        });
 
         // --- Salvar ---
         saveBtn.addEventListener('click', function () {
@@ -279,14 +394,26 @@
                 })
             })
             .then(function (r) {
-                if (r.ok) {
-                    var msg = isAdmin
-                        ? 'Configuração de ' + userSelect.options[userSelect.selectedIndex].textContent + ' salva com sucesso.'
-                        : 'Configuração salva com sucesso.';
-                    showSuccess(msg);
-                } else {
-                    return r.json().then(function (d) { showError(d.error || 'Erro ao salvar.'); });
+                if (!r.ok) {
+                    return r.json().then(function (d) { showError(d.error || 'Erro ao salvar.'); throw new Error(); });
                 }
+
+                // Save sectors via dedicated endpoint
+                var sectorIds = Object.keys(selectedSectorIds);
+                return fetch('/bff/users/' + selectedUserId + '/sectors', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(sectorIds)
+                });
+            })
+            .then(function (r) {
+                if (r && !r.ok) {
+                    return r.json().then(function (d) { showError(d.error || 'Erro ao salvar setores.'); });
+                }
+                var msg = isAdmin
+                    ? 'Configuração de ' + userSelect.options[userSelect.selectedIndex].textContent + ' salva com sucesso.'
+                    : 'Configuração salva com sucesso.';
+                showSuccess(msg);
             })
             .catch(function () { showError('Erro ao salvar configuração.'); })
             .finally(function () {

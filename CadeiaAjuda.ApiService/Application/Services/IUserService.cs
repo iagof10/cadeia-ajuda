@@ -11,4 +11,5 @@ public interface IUserService
     Task<UserDto?> UpdateAsync(UserUpdateDto dto);
     Task<bool> ToggleActiveAsync(Guid id);
     Task<UserDto?> AuthenticateAsync(LoginDto dto);
+    Task<UserDto?> UpdateUserSectorsAsync(Guid userId, List<Guid> sectorIds);
 }

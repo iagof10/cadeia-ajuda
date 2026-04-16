@@ -117,6 +117,17 @@ public class UserService : IUserService
         return true;
     }
 
+    public async Task<UserDto?> UpdateUserSectorsAsync(Guid userId, List<Guid> sectorIds)
+    {
+        var user = await _repository.GetByIdWithIncludesAsync(userId);
+        if (user is null) return null;
+
+        await _repository.SetUserSectorsAsync(userId, sectorIds ?? []);
+
+        var updated = await _repository.GetByIdWithIncludesAsync(userId);
+        return MapToDto(updated!);
+    }
+
     public async Task<UserDto?> AuthenticateAsync(LoginDto dto)
     {
         var tenant = await _tenantRepository.GetByIdentifierAsync(dto.TenantIdentifier);
