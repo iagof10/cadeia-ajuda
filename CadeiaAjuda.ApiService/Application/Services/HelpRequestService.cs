@@ -81,9 +81,6 @@ public class HelpRequestService : IHelpRequestService
     private static string StatusName(HelpRequestStatus status) => status switch
     {
         HelpRequestStatus.Open => "Aberto",
-        HelpRequestStatus.InProgress => "Em Andamento",
-        HelpRequestStatus.Escalated => "Escalonado",
-        HelpRequestStatus.Resolved => "Resolvido",
         HelpRequestStatus.Closed => "Fechado",
         _ => "Desconhecido"
     };

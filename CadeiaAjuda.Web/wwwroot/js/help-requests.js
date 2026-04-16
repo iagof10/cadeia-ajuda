@@ -77,9 +77,6 @@
     function statusClass(status) {
         switch (status) {
             case 0: return 'status-open';
-            case 1: return 'status-inprogress';
-            case 2: return 'status-escalated';
-            case 3: return 'status-resolved';
             case 4: return 'status-closed';
             default: return '';
         }

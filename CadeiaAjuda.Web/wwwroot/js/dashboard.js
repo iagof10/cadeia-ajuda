@@ -27,9 +27,6 @@
     function statusClass(s) {
         switch (s) {
             case 0: return 'status-open';
-            case 1: return 'status-inprogress';
-            case 2: return 'status-escalated';
-            case 3: return 'status-resolved';
             case 4: return 'status-closed';
             default: return '';
         }
@@ -38,9 +35,6 @@
     function statusColor(s) {
         switch (s) {
             case 0: return '#ffc107';
-            case 1: return '#1e9ff2';
-            case 2: return '#f44336';
-            case 3: return '#4caf50';
             case 4: return '#9e9e9e';
             default: return '#ccc';
         }

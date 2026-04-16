@@ -38,10 +38,9 @@ public class DashboardService : IDashboardService
             .OrderByDescending(h => h.CreatedAt)
             .ToListAsync();
 
-        var open = requests.Where(r => r.Status <= HelpRequestStatus.Escalated).ToList();
-        var escalated = requests.Where(r => r.Status == HelpRequestStatus.Escalated).ToList();
+        var open = requests.Where(r => r.Status == HelpRequestStatus.Open).ToList();
         var closedToday = requests.Where(r =>
-            (r.Status == HelpRequestStatus.Closed || r.Status == HelpRequestStatus.Resolved)
+            r.Status == HelpRequestStatus.Closed
             && r.ClosedAt.HasValue && r.ClosedAt.Value >= todayStart).ToList();
 
         // Avg close time (all closed requests that have both dates)
@@ -188,7 +187,7 @@ public class DashboardService : IDashboardService
         {
             OpenCount = open.Count,
             ClosedTodayCount = closedToday.Count,
-            EscalatedCount = escalated.Count,
+            EscalatedCount = 0,
             AvgCloseTimeMinutes = Math.Round(avgCloseTime, 1),
             TotalCount = requests.Count,
             ActiveUsersCount = activeUsers,
@@ -216,10 +215,7 @@ public class DashboardService : IDashboardService
     private static string StatusName(HelpRequestStatus status) => status switch
     {
         HelpRequestStatus.Open => "Aberto",
-        HelpRequestStatus.InProgress => "Em Andamento",
-        HelpRequestStatus.Escalated => "Escalado",
-        HelpRequestStatus.Resolved => "Resolvido",
-        HelpRequestStatus.Closed => "Encerrado",
+        HelpRequestStatus.Closed => "Fechado",
         _ => "Desconhecido"
     };
 }

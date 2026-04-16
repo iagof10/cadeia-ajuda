@@ -104,10 +104,7 @@
                         <select class="form-control form-control-sm" id="filterStatus">
                             <option value="">Todos</option>
                             <option value="0">Aberto</option>
-                            <option value="1">Em Progresso</option>
-                            <option value="2">Escalado</option>
-                            <option value="3">Resolvido</option>
-                            <option value="4">Encerrado</option>
+                            <option value="4">Fechado</option>
                         </select>
                     </div>
                 </div>
@@ -455,7 +452,7 @@
         }
 
         function statusBadge(status) {
-            var map = { 0:'status-open', 1:'status-inprogress', 2:'status-escalated', 3:'status-resolved', 4:'status-closed' };
+            var map = { 0:'status-open', 4:'status-closed' };
             return map[status] || '';
         }
 
@@ -611,7 +608,7 @@
             pageItems.forEach(function (r) {
                 var tr = document.createElement('tr');
                 tr.style.cursor = 'pointer';
-                var isClosed = r.status === 4 || r.status === 3;
+                var isClosed = r.status === 4;
                 var actionHtml = isClosed
                     ? '<span class="text-muted"><i class="la la-check-circle"></i> Encerrado</span>'
                     : canClose

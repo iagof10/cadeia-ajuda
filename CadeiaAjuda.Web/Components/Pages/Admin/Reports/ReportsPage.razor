@@ -15,6 +15,7 @@
         .app-content { margin-left:0 !important; padding:0 !important; }
         .content-wrapper { padding:0 !important; }
         .card { break-inside:avoid; box-shadow:none !important; border:1px solid #ddd !important; }
+        .card-body canvas { display:block; margin:0 auto; }
         .report-kpi h2 { font-size:1.4rem; }
         body { background:#fff !important; }
     }
@@ -63,10 +64,7 @@
                 <select class="form-control form-control-sm" id="filterStatus">
                     <option value="">Todos</option>
                     <option value="0">Aberto</option>
-                    <option value="1">Em Progresso</option>
-                    <option value="2">Escalado</option>
-                    <option value="3">Resolvido</option>
-                    <option value="4">Encerrado</option>
+                    <option value="4">Fechado</option>
                 </select>
             </div>
         </div>
@@ -266,13 +264,13 @@
     }
 
     function statusName(s) {
-        return { 0:'Aberto', 1:'Em Progresso', 2:'Escalado', 3:'Resolvido', 4:'Encerrado' }[s] || '';
+        return { 0:'Aberto', 4:'Fechado' }[s] || '';
     }
     function statusColor(s) {
-        return { 0:'#ffc107', 1:'#1e9ff2', 2:'#f44336', 3:'#4caf50', 4:'#9e9e9e' }[s] || '#ccc';
+        return { 0:'#ffc107', 4:'#9e9e9e' }[s] || '#ccc';
     }
     function statusBadge(s) {
-        return { 0:'status-open', 1:'status-inprogress', 2:'status-escalated', 3:'status-resolved', 4:'status-closed' }[s] || '';
+        return { 0:'status-open', 4:'status-closed' }[s] || '';
     }
 
     function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }

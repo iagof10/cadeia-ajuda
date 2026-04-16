@@ -55,7 +55,7 @@
 
     function makeCard(r) {
         var el = document.createElement('div');
-        el.className = 'andon-card' + (r.status === 2 ? ' andon-status-escalated' : '') + ' ' + urgencyCls(r.createdAt);
+        el.className = 'andon-card ' + urgencyCls(r.createdAt);
         el.innerHTML =
             '<div class="andon-card-header" style="background-color:' + esc(r.sectorColor || '#666') + '">' +
                 '<span class="andon-code">' + esc(r.sectorName) + '</span>' +
@@ -209,7 +209,7 @@
             var r = await fetch('/bff/help-requests');
             if (!r.ok) return;
             var all = await r.json();
-            var active = all.filter(function (x) { return x.status <= 2; });
+            var active = all.filter(function (x) { return x.status === 0; });
             requests = filterByConfig(active);
         } catch (e) { }
         sortReqs();
