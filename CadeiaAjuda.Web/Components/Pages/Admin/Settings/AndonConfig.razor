@@ -79,13 +79,8 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <div class="custom-control custom-switch mb-2">
-                                                <input type="checkbox" class="custom-control-input" id="ignoreArea" />
-                                                <label class="custom-control-label" for="ignoreArea" id="ignoreAreaLabel">Não</label>
-                                            </div>
-                                            <small class="text-muted d-block mb-2">Quando ativado, o Andon exibirá chamados de todas as plantas/posições.</small>
                                             <div id="areaSelectorsContainer"></div>
-                                            <small class="text-muted" id="areaHint">Ao selecionar um nível, o Andon exibirá chamados desse nível e de todos os subníveis abaixo.</small>
+                                            <small class="text-muted" id="areaHint">Selecione "Todos os chamados" para exibir tudo, ou escolha um nível para filtrar por ele e seus subníveis.</small>
                                         </div>
                                     </div>
                                 </div>
@@ -185,7 +180,6 @@
         var userSelect = document.getElementById('userSelect');
         var showClockEl = document.getElementById('showClock');
         var enableSoundEl = document.getElementById('enableSound');
-        var ignoreAreaEl = document.getElementById('ignoreArea');
         var saveBtn = document.getElementById('saveBtn');
 
         showClockEl.addEventListener('change', function () {
@@ -193,18 +187,6 @@
         });
         enableSoundEl.addEventListener('change', function () {
             document.getElementById('enableSoundLabel').textContent = enableSoundEl.checked ? 'Sim' : 'Não';
-        });
-        ignoreAreaEl.addEventListener('change', function () {
-            document.getElementById('ignoreAreaLabel').textContent = ignoreAreaEl.checked ? 'Sim' : 'Não';
-            if (ignoreAreaEl.checked) {
-                selectedAreaId = null;
-                document.getElementById('areaSelectorsContainer').style.display = 'none';
-                document.getElementById('areaHint').style.display = 'none';
-            } else {
-                document.getElementById('areaSelectorsContainer').style.display = '';
-                document.getElementById('areaHint').style.display = '';
-                renderAreaSelectors(selectedAreaId);
-            }
         });
 
         // 1) Descobrir quem é o usuário logado
@@ -320,15 +302,6 @@
 
                     // Load area selection
                     selectedAreaId = data.areaId || null;
-                    ignoreAreaEl.checked = !selectedAreaId;
-                    document.getElementById('ignoreAreaLabel').textContent = ignoreAreaEl.checked ? 'Sim' : 'Não';
-                    if (ignoreAreaEl.checked) {
-                        document.getElementById('areaSelectorsContainer').style.display = 'none';
-                        document.getElementById('areaHint').style.display = 'none';
-                    } else {
-                        document.getElementById('areaSelectorsContainer').style.display = '';
-                        document.getElementById('areaHint').style.display = '';
-                    }
                     renderAreaSelectors(selectedAreaId);
 
                     renderSectors();
