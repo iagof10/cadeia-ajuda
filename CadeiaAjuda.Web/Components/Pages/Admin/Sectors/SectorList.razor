@@ -106,7 +106,13 @@
 
 <style>
     .sectors-list-table .table-responsive {
-        overflow: visible;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .sectors-list-table .dropdown-menu {
+        position: absolute;
+        z-index: 1050;
     }
 
     .sector-color-badge {
