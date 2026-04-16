@@ -27,8 +27,5 @@ public class HelpRequest : TenantEntityBase
 public enum HelpRequestStatus
 {
     Open = 0,
-    InProgress = 1,
-    Escalated = 2,
-    Resolved = 3,
     Closed = 4
 }

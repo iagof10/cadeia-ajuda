@@ -134,7 +134,7 @@ public class DashboardService : IDashboardService
                     Name = g.Key.Name ?? "",
                     Color = g.Key.Color ?? "#999",
                     TotalCount = g.Count(),
-                    OpenCount = g.Count(r => r.Status <= HelpRequestStatus.Escalated),
+                    OpenCount = g.Count(r => r.Status == HelpRequestStatus.Open),
                     AvgCloseTimeMinutes = closed.Count > 0
                         ? Math.Round(closed.Average(r => (r.ClosedAt!.Value - r.CreatedAt).TotalMinutes), 1)
                         : 0

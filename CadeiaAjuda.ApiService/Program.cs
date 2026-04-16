@@ -63,6 +63,11 @@ if (app.Environment.IsDevelopment())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
     //await DataSeeder.SeedAsync(db);
+
+    // Migrate legacy status values (InProgress=1, Escalated=2, Resolved=3) to Open(0) or Closed(4)
+    await db.Database.ExecuteSqlRawAsync(
+        "UPDATE \"HelpRequests\" SET \"Status\" = 0 WHERE \"Status\" IN (1, 2); " +
+        "UPDATE \"HelpRequests\" SET \"Status\" = 4 WHERE \"Status\" = 3;");
 }
 
 // ============ API Endpoints ============

@@ -48,7 +48,7 @@ public class HelpRequestRepository : Repository<HelpRequest>, IHelpRequestReposi
             h.TenantId == tenantId &&
             h.SectorId == sectorId &&
             h.AreaId == areaId &&
-            h.Status != HelpRequestStatus.Closed);
+            h.Status == HelpRequestStatus.Open);
 
     public void Remove(HelpRequest entity)
         => _dbSet.Remove(entity);
