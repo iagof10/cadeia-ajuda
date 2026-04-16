@@ -86,6 +86,57 @@
 
     <div id="alertList"></div>
 
+    <!-- Filtros -->
+    <div class="card mb-2" id="filterCard" style="display:none;">
+        <div class="card-body py-2">
+            <div class="row align-items-end">
+                <div class="col-md-3 col-6">
+                    <div class="form-group mb-md-0 mb-1">
+                        <label class="small mb-0">Setor</label>
+                        <select class="form-control form-control-sm" id="filterSector">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6">
+                    <div class="form-group mb-md-0 mb-1">
+                        <label class="small mb-0">Status</label>
+                        <select class="form-control form-control-sm" id="filterStatus">
+                            <option value="">Todos</option>
+                            <option value="0">Aberto</option>
+                            <option value="1">Em Progresso</option>
+                            <option value="2">Escalado</option>
+                            <option value="3">Resolvido</option>
+                            <option value="4">Encerrado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="form-group mb-md-0 mb-1">
+                        <label class="small mb-0">Buscar</label>
+                        <input type="text" class="form-control form-control-sm" id="filterSearch" placeholder="Código, tipo, recurso, solicitante..." />
+                    </div>
+                </div>
+                <div class="col-md-2 col-6">
+                    <div class="form-group mb-md-0 mb-1">
+                        <label class="small mb-0">Itens por página</label>
+                        <select class="form-control form-control-sm" id="filterPageSize">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6">
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-block" id="btnClearFilters">
+                        <i class="ft-x"></i> Limpar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="loadingList" class="text-center py-3">
         <i class="la la-spinner la-spin font-large-1"></i> Carregando...
     </div>
@@ -118,6 +169,13 @@
                         </thead>
                         <tbody id="listBody"></tbody>
                     </table>
+                </div>
+                <!-- Paginação -->
+                <div class="d-flex justify-content-between align-items-center mt-2 px-1" id="paginationArea" style="display:none !important;">
+                    <small class="text-muted" id="paginationInfo"></small>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0" id="paginationButtons"></ul>
+                    </nav>
                 </div>
             </div>
         </div>
@@ -287,6 +345,11 @@
         var canCreate = false;
         var canClose = false;
 
+        // Filter/pagination state
+        var currentPage = 1;
+        var pageSize = 10;
+        var filteredRequests = [];
+
         // ---- Helpers ----
         function $(id) { return document.getElementById(id); }
 
@@ -347,21 +410,81 @@
             try { areas = await fetchJson('/bff/areas'); } catch (e) { areas = []; }
         }
 
+        // ---- Filters ----
+        function populateFilterSectors() {
+            var sel = $('filterSector');
+            var active = sectors.filter(function (s) { return s.active; });
+            active.forEach(function (s) {
+                var opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.name;
+                sel.appendChild(opt);
+            });
+        }
+
+        function getFilteredRequests() {
+            var sectorFilter = $('filterSector').value;
+            var statusFilter = $('filterStatus').value;
+            var search = ($('filterSearch').value || '').toLowerCase().trim();
+
+            return requests.filter(function (r) {
+                if (sectorFilter && r.sectorId !== sectorFilter) return false;
+                if (statusFilter !== '' && String(r.status) !== statusFilter) return false;
+                if (search) {
+                    var haystack = [r.code, r.helpRequestTypeName, r.areaName, r.requestedByUserName, r.sectorName]
+                        .join(' ').toLowerCase();
+                    if (haystack.indexOf(search) < 0) return false;
+                }
+                return true;
+            });
+        }
+
+        function applyFilters() {
+            currentPage = 1;
+            renderList();
+        }
+
+        $('filterSector').addEventListener('change', applyFilters);
+        $('filterStatus').addEventListener('change', applyFilters);
+        $('filterSearch').addEventListener('input', applyFilters);
+        $('filterPageSize').addEventListener('change', function () {
+            pageSize = parseInt($('filterPageSize').value) || 10;
+            currentPage = 1;
+            renderList();
+        });
+        $('btnClearFilters').addEventListener('click', function () {
+            $('filterSector').value = '';
+            $('filterStatus').value = '';
+            $('filterSearch').value = '';
+            $('filterPageSize').value = '10';
+            pageSize = 10;
+            applyFilters();
+        });
+
         // ---- List ----
         function renderList() {
             var body = $('listBody');
             body.innerHTML = '';
 
-            if (requests.length === 0) {
+            filteredRequests = getFilteredRequests();
+
+            if (filteredRequests.length === 0) {
                 $('emptyList').style.display = '';
                 $('listCard').style.display = 'none';
+                $('paginationArea').style.display = 'none';
                 return;
             }
 
             $('emptyList').style.display = 'none';
             $('listCard').style.display = '';
 
-            requests.forEach(function (r) {
+            // Pagination
+            var totalPages = Math.ceil(filteredRequests.length / pageSize);
+            if (currentPage > totalPages) currentPage = totalPages;
+            var start = (currentPage - 1) * pageSize;
+            var pageItems = filteredRequests.slice(start, start + pageSize);
+
+            pageItems.forEach(function (r) {
                 var tr = document.createElement('tr');
                 var isClosed = r.status === 4 || r.status === 3;
                 var actionHtml = isClosed
@@ -392,6 +515,49 @@
                     jQuery('#closeAuthModal').modal('show');
                 });
             });
+
+            // Pagination info & buttons
+            $('paginationInfo').textContent = 'Mostrando ' + (start + 1) + '-' + Math.min(start + pageSize, filteredRequests.length) + ' de ' + filteredRequests.length;
+
+            var pagBtns = $('paginationButtons');
+            pagBtns.innerHTML = '';
+
+            if (totalPages > 1) {
+                $('paginationArea').style.display = '';
+                $('paginationArea').style.cssText = '';
+
+                // Prev
+                var prevLi = document.createElement('li');
+                prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+                prevLi.innerHTML = '<a class="page-link" href="javascript:void(0)">&laquo;</a>';
+                prevLi.addEventListener('click', function () { if (currentPage > 1) { currentPage--; renderList(); } });
+                pagBtns.appendChild(prevLi);
+
+                // Page numbers (max 7 visible)
+                var startPage = Math.max(1, currentPage - 3);
+                var endPage = Math.min(totalPages, startPage + 6);
+                if (endPage - startPage < 6) startPage = Math.max(1, endPage - 6);
+
+                for (var p = startPage; p <= endPage; p++) {
+                    (function (page) {
+                        var li = document.createElement('li');
+                        li.className = 'page-item' + (page === currentPage ? ' active' : '');
+                        li.innerHTML = '<a class="page-link" href="javascript:void(0)">' + page + '</a>';
+                        li.addEventListener('click', function () { currentPage = page; renderList(); });
+                        pagBtns.appendChild(li);
+                    })(p);
+                }
+
+                // Next
+                var nextLi = document.createElement('li');
+                nextLi.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
+                nextLi.innerHTML = '<a class="page-link" href="javascript:void(0)">&raquo;</a>';
+                nextLi.addEventListener('click', function () { if (currentPage < totalPages) { currentPage++; renderList(); } });
+                pagBtns.appendChild(nextLi);
+            } else {
+                $('paginationArea').style.display = '';
+                $('paginationArea').style.cssText = '';
+            }
         }
 
         // ---- View switching ----
@@ -696,6 +862,8 @@
                 } catch (e) { currentUserData = null; }
 
                 await Promise.all([loadRequests(), loadSectors(), loadHelpRequestTypes(), loadAreas()]);
+                populateFilterSectors();
+                $('filterCard').style.display = '';
             } catch (e) {
                 showAlert('alertList', 'Erro ao carregar dados iniciais. Recarregue a página.', 'danger');
             }
