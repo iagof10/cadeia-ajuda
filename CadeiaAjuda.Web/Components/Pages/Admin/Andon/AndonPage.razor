@@ -40,26 +40,34 @@
             backdrop-filter: blur(6px);
         }
 
+        /* ---- Top Exit Button ---- */
         .andon-exit-btn {
-            position: absolute;
+            position: fixed;
+            top: 12px;
             left: 14px;
+            z-index: 200;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: rgba(255,255,255,.08);
-            color: rgba(255,255,255,.35);
-            font-size: 1.1rem;
+            background: rgba(244,67,54,.6);
+            color: #fff;
+            font-size: 1.2rem;
             text-decoration: none;
             cursor: pointer;
-            transition: background .2s, color .2s;
+            transition: background .2s, color .2s, opacity .4s;
+            opacity: 0;
+        }
+
+        body.mouse-active .andon-exit-btn {
+            opacity: 1;
         }
 
         .andon-exit-btn:hover {
-            background: rgba(255,255,255,.18);
-            color: rgba(255,255,255,.8);
+            background: rgba(244,67,54,.9);
+            color: #fff;
         }
 
         .andon-live-dot {
@@ -264,6 +272,10 @@
 </head>
 <body>
 
+    <a href="/home" class="andon-exit-btn" onclick="window.location.href='/home';return false;">
+        <i class="icon-logout"></i>
+    </a>
+
     <div class="andon-board-container">
         <div class="andon-board" id="andonBoard"></div>
         <div class="andon-empty" id="emptyState" style="display:none;">
@@ -276,13 +288,19 @@
     <div class="andon-page-indicator hidden" id="pageIndicator"></div>
 
     <div class="andon-clock-bar">
-        <a href="/home" class="andon-exit-btn" onclick="window.location.href='/home';return false;">
-            <i class="icon-logout"></i>
-        </a>
         <span class="andon-live-dot"></span>
         <span class="andon-clock" id="andonClock">--:--:--</span>
     </div>
 
+    <script>
+        (function(){
+            var timer;
+            function showMouse(){ document.body.classList.add('mouse-active'); clearTimeout(timer); timer=setTimeout(function(){ document.body.classList.remove('mouse-active'); },3000); }
+            document.addEventListener('mousemove',showMouse);
+            document.addEventListener('mousedown',showMouse);
+            showMouse();
+        })();
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
     <script src="js/andon.js"></script>
 </body>
