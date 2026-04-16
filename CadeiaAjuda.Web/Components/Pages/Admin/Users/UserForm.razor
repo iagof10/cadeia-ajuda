@@ -1,45 +1,78 @@
 @page "/user/users/new"
 @page "/user/users/edit/{Id:guid}"
-@inject UserApiClient Api
-@inject RoleApiClient RoleApi
-@inject AuthStateService Auth
-@inject NavigationManager Navigation
+@layout AdminLayout
 
-<PageTitle>@(isEdit ? "Editar Usuário" : "Novo Usuário") - Cadeia Ajuda</PageTitle>
+<PageTitle>Usuário - Cadeia Ajuda</PageTitle>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+}
+
+<style>
+    .sector-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: #fff;
+        border: 2px solid #e5e7eb;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: .9rem;
+        transition: all .15s;
+        user-select: none;
+        margin: 0;
+    }
+    .sector-chip:hover { border-color: #f57c00; background: #fff8f0; }
+    .sector-chip.selected { border-color: #f57c00; background: #fff3e0; }
+    .sector-chip input[type="checkbox"] { accent-color: #f57c00; }
+    .sector-dot {
+        display: inline-block;
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .sector-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fafafa;
+        margin-bottom: 5px;
+    }
+</style>
 
 <section>
     <div class="row">
-        <div class="col-12">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">@(isEdit ? "Editar Usuário" : "Novo Usuário")</h4>
+                    <h4 class="card-title" id="pageTitle">Novo Usuário</h4>
                 </div>
                 <div class="card-content">
                     <div class="card-body">
-                        @if (!string.IsNullOrEmpty(errorMessage))
-                        {
-                            <div class="alert alert-danger alert-dismissible mb-2" role="alert">
-                                <button type="button" class="close" @onclick="() => errorMessage = null"><span>&times;</span></button>
-                                <i class="la la-warning"></i> @errorMessage
-                            </div>
-                        }
 
-                        <EditForm Model="model" OnValidSubmit="HandleSubmit" FormName="userForm">
-                            <DataAnnotationsValidator />
+                        <div id="loadingArea" class="text-center py-3">
+                            <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+                        </div>
+
+                        <div id="formArea" style="display:none;">
+                            <div id="alertArea"></div>
 
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Nome <span class="text-danger">*</span></label>
-                                        <InputText @bind-Value="model.Name" class="form-control" placeholder="Nome completo" />
-                                        <ValidationMessage For="() => model.Name" />
+                                        <input type="text" class="form-control" id="userName" placeholder="Nome completo" />
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>E-mail</label>
-                                        <InputText @bind-Value="model.Email" class="form-control" type="email" placeholder="usuario@empresa.com" />
-                                        <ValidationMessage For="() => model.Email" />
+                                        <input type="email" class="form-control" id="userEmail" placeholder="usuario@empresa.com" />
                                     </div>
                                 </div>
                             </div>
@@ -48,25 +81,19 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Login <span class="text-danger">*</span></label>
-                                        <InputText @bind-Value="model.Login" class="form-control" placeholder="login.usuario" />
-                                        <ValidationMessage For="() => model.Login" />
+                                        <input type="text" class="form-control" id="userLogin" placeholder="login.usuario" />
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>Senha @(isEdit ? "" : "*")</label>
-                                        <InputText @bind-Value="model.Password" class="form-control" type="password"
-                                                   placeholder="@(isEdit ? "Deixe vazio para manter a atual" : "Senha de acesso")" />
-                                        @if (!isEdit)
-                                        {
-                                            <ValidationMessage For="() => model.Password" />
-                                        }
+                                        <label id="passwordLabel">Senha <span class="text-danger">*</span></label>
+                                        <input type="password" class="form-control" id="userPassword" placeholder="Senha de acesso" />
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Telefone</label>
-                                        <InputText @bind-Value="model.Phone" class="form-control" placeholder="(00) 00000-0000" data-mask="phone" />
+                                        <input type="text" class="form-control" id="userPhone" placeholder="(00) 00000-0000" data-mask="phone" />
                                     </div>
                                 </div>
                             </div>
@@ -75,54 +102,58 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Perfil</label>
-                                        <InputSelect @bind-Value="model.SelectedRoleId" class="form-control">
+                                        <select class="form-control" id="userRole">
                                             <option value="">— Sem perfil —</option>
-                                            @foreach (var role in availableRoles)
-                                            {
-                                                <option value="@role.Id">@role.Name</option>
-                                            }
-                                        </InputSelect>
+                                        </select>
                                         <small class="text-muted">Define as permissões de acesso do usuário</small>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Tipo de Usuário</label>
-                                        <InputSelect @bind-Value="model.UserType" class="form-control">
-                                            <option value="@UserType.Standard">Padrão</option>
-                                            <option value="@UserType.Andon">Andon</option>
-                                            <option value="@UserType.Manager">Gestor</option>
-                                            <option value="@UserType.Administrator">Administrator</option>
-                                        </InputSelect>
+                                        <select class="form-control" id="userType">
+                                            <option value="0">Padrão</option>
+                                            <option value="1">Andon</option>
+                                            <option value="2">Gestor</option>
+                                            <option value="3">Administrador</option>
+                                        </select>
                                     </div>
                                 </div>
-                                @if (isEdit)
-                                {
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Status</label>
-                                            <InputSelect @bind-Value="model.ActiveValue" class="form-control">
-                                                <option value="true">Ativo</option>
-                                                <option value="false">Inativo</option>
-                                            </InputSelect>
-                                        </div>
+                                <div class="col-md-4" id="statusRow" style="display:none;">
+                                    <div class="form-group">
+                                        <label>Status</label>
+                                        <select class="form-control" id="userActive">
+                                            <option value="true">Ativo</option>
+                                            <option value="false">Inativo</option>
+                                        </select>
                                     </div>
-                                }
+                                </div>
                             </div>
 
-                            <div class="form-actions text-right mt-2">
-                                <NavLink href="/user/users" class="btn btn-secondary mr-1">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label>Setores</label>
+                                        <div class="sector-list" id="sectorList">
+                                            <small class="text-muted">Carregando setores...</small>
+                                        </div>
+                                        <small class="text-muted">Selecione os setores que este usuário pode acessar</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+
+                            <div class="form-actions text-right">
+                                <a href="/user/users" class="btn btn-secondary mr-1">
                                     <i class="ft-x"></i> Cancelar
-                                </NavLink>
-                                <button type="submit" class="btn btn-warning" disabled="@isSaving">
-                                    @if (isSaving)
-                                    {
-                                        <i class="la la-spinner la-spin"></i>
-                                    }
-                                    <i class="la la-check"></i> @(isEdit ? "Salvar Alterações" : "Cadastrar")
+                                </a>
+                                <button type="button" class="btn btn-warning" id="btnSave">
+                                    <i class="la la-check"></i> Cadastrar
                                 </button>
                             </div>
-                        </EditForm>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -130,119 +161,240 @@
     </div>
 </section>
 
-@code {
-    [Parameter]
-    public Guid? Id { get; set; }
+<script suppress-error="BL9992">
+(function () {
+    'use strict';
 
-    [SupplyParameterFromForm]
-    private UserFormModel model { get; set; } = new();
-    private bool isEdit => Id.HasValue;
-    private bool isSaving;
-    private string? errorMessage;
-    private List<RoleViewModel> availableRoles = [];
+    // ---- Route ----
+    var pathParts = window.location.pathname.split('/');
+    var isEdit = pathParts.length >= 4 && pathParts[2] === 'users' && pathParts[3] === 'edit';
+    var userId = isEdit && pathParts.length >= 5 ? pathParts[4] : null;
 
-    protected override async Task OnInitializedAsync()
-    {
-        var currentUser = Auth.GetCurrentUser();
-        if (currentUser is not null)
-        {
-            var canManage = currentUser.UserType == UserType.Administrator || currentUser.Permissions.Contains("users.manage");
-            if (!canManage)
-            {
-                Navigation.NavigateTo("/user/users");
+    // ---- State ----
+    var currentUser = null;
+    var allSectors = [];
+    var selectedSectorIds = {};
+
+    // ---- DOM helpers ----
+    function $(id) { return document.getElementById(id); }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
+    function showAlert(msg, type) {
+        $('alertArea').innerHTML =
+            '<div class="alert alert-' + type + ' alert-dismissible mb-2" role="alert">' +
+            '<button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>' +
+            '<i class="la la-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i> ' + escapeHtml(msg) +
+            '</div>';
+    }
+
+    async function fetchJson(url) {
+        var resp = await fetch(url);
+        if (!resp.ok) throw new Error('Erro ao carregar');
+        return await resp.json();
+    }
+
+    // ---- Render Sectors ----
+    function renderSectors() {
+        var container = $('sectorList');
+        container.innerHTML = '';
+
+        if (allSectors.length === 0) {
+            container.innerHTML = '<small class="text-muted">Nenhum setor cadastrado.</small>';
+            return;
+        }
+
+        allSectors.forEach(function (sector) {
+            var isSelected = !!selectedSectorIds[sector.id];
+
+            var label = document.createElement('label');
+            label.className = 'sector-chip' + (isSelected ? ' selected' : '');
+
+            var cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = isSelected;
+
+            var dot = document.createElement('span');
+            dot.className = 'sector-dot';
+            dot.style.backgroundColor = sector.color || '#ccc';
+
+            var nameSpan = document.createElement('span');
+            nameSpan.textContent = sector.name;
+
+            label.appendChild(cb);
+            label.appendChild(dot);
+            label.appendChild(nameSpan);
+
+            cb.addEventListener('change', function () {
+                if (cb.checked) {
+                    selectedSectorIds[sector.id] = true;
+                } else {
+                    delete selectedSectorIds[sector.id];
+                }
+                renderSectors();
+            });
+
+            container.appendChild(label);
+        });
+    }
+
+    // ---- Save ----
+    $('btnSave').addEventListener('click', async function () {
+        var name = $('userName').value.trim();
+        var login = $('userLogin').value.trim();
+        var password = $('userPassword').value;
+        var email = $('userEmail').value.trim();
+        var phone = $('userPhone').value.trim();
+        var roleId = $('userRole').value || null;
+        var userType = parseInt($('userType').value, 10);
+        var active = $('userActive').value === 'true';
+
+        $('alertArea').innerHTML = '';
+
+        if (!name) { showAlert('Informe o nome do usuário.', 'danger'); return; }
+        if (!login) { showAlert('Informe o login.', 'danger'); return; }
+        if (!isEdit && !password) { showAlert('Informe a senha.', 'danger'); return; }
+        if (!currentUser) { showAlert('Sessão expirada. Faça login novamente.', 'danger'); return; }
+
+        var sectorIds = Object.keys(selectedSectorIds);
+
+        var payload = {
+            name: name,
+            email: email,
+            phone: phone,
+            login: login,
+            tenantId: currentUser.tenantId,
+            roleId: roleId,
+            userType: userType,
+            sectorIds: sectorIds
+        };
+
+        if (isEdit) {
+            payload.id = userId;
+            payload.active = active;
+            if (password) payload.password = password;
+        } else {
+            payload.password = password;
+        }
+
+        var btn = $('btnSave');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="la la-spinner la-spin"></i> Salvando...';
+
+        try {
+            var url = isEdit ? '/bff/users/' + userId : '/bff/users';
+            var method = isEdit ? 'PUT' : 'POST';
+
+            var resp = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (resp.ok) {
+                window.location.href = '/user/users';
+            } else {
+                var body = {};
+                try { body = await resp.json(); } catch (e) { }
+                showAlert(body.error || 'Erro ao salvar o usuário.', 'danger');
+            }
+        } catch (e) {
+            showAlert('Erro de conexão.', 'danger');
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="la la-check"></i> ' + (isEdit ? 'Salvar Alterações' : 'Cadastrar');
+    });
+
+    // ---- Init ----
+    (async function init() {
+        try {
+            // Reset UI
+            $('pageTitle').textContent = 'Novo Usuário';
+            $('statusRow').style.display = 'none';
+            $('userName').value = '';
+            $('userEmail').value = '';
+            $('userLogin').value = '';
+            $('userPassword').value = '';
+            $('userPhone').value = '';
+            $('userRole').value = '';
+            $('userType').value = '0';
+            $('userActive').value = 'true';
+            $('alertArea').innerHTML = '';
+            $('loadingArea').style.display = '';
+            $('formArea').style.display = 'none';
+            $('btnSave').innerHTML = '<i class="la la-check"></i> Cadastrar';
+            $('passwordLabel').innerHTML = 'Senha <span class="text-danger">*</span>';
+            $('userPassword').placeholder = 'Senha de acesso';
+
+            // Load current user
+            try { currentUser = await fetchJson('/bff/me'); } catch (e) { currentUser = null; }
+
+            if (!currentUser) {
+                $('loadingArea').innerHTML = '<div class="alert alert-danger">Sessão expirada.</div>';
                 return;
             }
-            availableRoles = await RoleApi.GetByTenantIdAsync(currentUser.TenantId);
-            availableRoles = availableRoles.Where(r => r.Active).ToList();
-        }
 
-        if (isEdit && string.IsNullOrEmpty(model.Name))
-        {
-            var user = await Api.GetByIdAsync(Id!.Value);
-            if (user is not null)
-            {
-                model = new UserFormModel
-                {
-                    Name = user.Name,
-                    Email = user.Email,
-                    Phone = user.Phone,
-                    Login = user.Login,
-                    SelectedTenantId = user.TenantId.ToString(),
-                    ActiveValue = user.Active.ToString().ToLower(),
-                    SelectedRoleId = user.RoleId?.ToString() ?? "",
-                    UserType = user.UserType
-                };
+            // Permission check
+            if (currentUser.userTypeValue !== 3 && (!currentUser.permissions || currentUser.permissions.indexOf('users.manage') < 0)) {
+                window.location.href = '/user/users';
+                return;
             }
-        }
-    }
 
-    private async Task HandleSubmit()
-    {
-        isSaving = true;
-        errorMessage = null;
+            // Load roles and sectors in parallel
+            var rolesPromise = fetchJson('/bff/roles');
+            var sectorsPromise = fetchJson('/bff/sectors');
 
-        var currentUser = Auth.GetCurrentUser();
-        if (currentUser is null)
-        {
-            errorMessage = "Usu\u00e1rio n\u00e3o autenticado.";
-            isSaving = false;
-            return;
-        }
+            var roles = await rolesPromise;
+            allSectors = (await sectorsPromise).filter(function (s) { return s.active; });
 
-        if (currentUser.UserType != UserType.Administrator && !currentUser.Permissions.Contains("users.manage"))
-        {
-            errorMessage = "Sem permiss\u00e3o para gerenciar usu\u00e1rios.";
-            isSaving = false;
-            return;
-        }
+            // Populate role dropdown
+            var roleSelect = $('userRole');
+            roleSelect.innerHTML = '<option value="">— Sem perfil —</option>';
+            roles.filter(function (r) { return r.active; }).forEach(function (r) {
+                var opt = document.createElement('option');
+                opt.value = r.id;
+                opt.textContent = r.name;
+                roleSelect.appendChild(opt);
+            });
 
-        if (!isEdit && string.IsNullOrWhiteSpace(model.Password))
-        {
-            errorMessage = "Informe a senha.";
-            isSaving = false;
-            return;
-        }
+            // If editing, load user data
+            if (isEdit && userId) {
+                $('pageTitle').textContent = 'Editar Usuário';
+                $('statusRow').style.display = '';
+                $('btnSave').innerHTML = '<i class="la la-check"></i> Salvar Alterações';
+                $('passwordLabel').innerHTML = 'Senha';
+                $('userPassword').placeholder = 'Deixe vazio para manter a atual';
 
-        model.TenantId = currentUser.TenantId;
-        model.SelectedTenantId = currentUser.TenantId.ToString();
-        model.Active = bool.TryParse(model.ActiveValue, out var active) ? active : true;
-        model.RoleId = Guid.TryParse(model.SelectedRoleId, out var roleId) ? roleId : null;
+                var user = await fetchJson('/bff/users/' + userId);
+                $('userName').value = user.name || '';
+                $('userEmail').value = user.email || '';
+                $('userLogin').value = user.login || '';
+                $('userPhone').value = user.phone || '';
+                $('userRole').value = user.roleId || '';
+                $('userType').value = (user.userType != null ? user.userType : 0).toString();
+                $('userActive').value = user.active ? 'true' : 'false';
 
-        HttpResponseMessage response;
-
-        if (isEdit)
-        {
-            response = await Api.UpdateAsync(Id!.Value, model);
-        }
-        else
-        {
-            response = await Api.CreateAsync(model);
-        }
-
-        if (response.IsSuccessStatusCode)
-        {
-            Navigation.NavigateTo("/user/users");
-        }
-        else
-        {
-            try
-            {
-                var body = await response.Content.ReadAsStringAsync();
-                var error = System.Text.Json.JsonSerializer.Deserialize<ErrorResponse>(body,
-                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                errorMessage = error?.Error ?? "Ocorreu um erro ao salvar.";
+                // Load selected sectors
+                if (user.sectors && user.sectors.length) {
+                    user.sectors.forEach(function (s) {
+                        selectedSectorIds[s.sectorId] = true;
+                    });
+                }
             }
-            catch
-            {
-                errorMessage = "Ocorreu um erro ao salvar.";
-            }
+
+            renderSectors();
+
+            $('loadingArea').style.display = 'none';
+            $('formArea').style.display = '';
+        } catch (e) {
+            $('loadingArea').innerHTML =
+                '<div class="alert alert-danger"><i class="la la-exclamation-circle"></i> Erro ao carregar dados. Recarregue a página.</div>';
         }
-
-        isSaving = false;
-    }
-
-    private class ErrorResponse
-    {
-        public string? Error { get; set; }
-    }
-}
+    })();
+})();
+</script>

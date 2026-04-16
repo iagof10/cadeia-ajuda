@@ -1,29 +1,69 @@
 @page "/user/users"
-@inject UserApiClient Api
-@inject AuthStateService Auth
+@layout AdminLayout
 
 <PageTitle>Usuários - Cadeia Ajuda</PageTitle>
+
+<style>
+    .users-list-table .table-responsive { overflow: visible; }
+    .user-actions-toggle {
+        box-shadow: none !important; background: transparent !important;
+        border: 0 !important; text-decoration: none !important; padding: 0;
+    }
+    .user-actions-toggle:hover, .user-actions-toggle:focus { color: #404e67 !important; }
+    .user-actions-toggle i { font-size: 1.1rem; }
+
+    /* Modal */
+    .umodal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.45); display: flex; align-items: center;
+        justify-content: center; z-index: 9999;
+    }
+    .umodal {
+        background: #fff; border-radius: 16px; width: 95%; max-width: 520px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.18); overflow: hidden;
+    }
+    .umodal-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 1rem 1.5rem; border-bottom: 1px solid #f0f0f0;
+    }
+    .umodal-header h5 { margin: 0; font-weight: 700; font-size: 1.05rem; color: #2c3e50; }
+    .umodal-close { background: none; border: none; font-size: 1.5rem; color: #999; cursor: pointer; }
+    .umodal-close:hover { color: #333; }
+    .umodal-body { padding: 1.5rem; text-align: center; }
+    .umodal-avatar {
+        width: 64px; height: 64px; border-radius: 50%;
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: #fff; font-size: 1.6rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 0.75rem;
+    }
+    .umodal-name { font-size: 1.2rem; font-weight: 700; color: #2c3e50; margin-bottom: 0.25rem; }
+    .umodal-details { text-align: left; margin-top: 1.25rem; }
+    .umodal-row {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        padding: 0.6rem 0; border-bottom: 1px solid #f5f5f5;
+    }
+    .umodal-row:last-child { border-bottom: none; }
+    .umodal-label { color: #6b7280; font-size: 0.85rem; font-weight: 600; min-width: 110px; flex-shrink: 0; }
+    .umodal-label i { width: 18px; text-align: center; margin-right: 4px; }
+    .umodal-value { color: #2c3e50; font-size: 0.9rem; text-align: right; word-break: break-word; }
+    .umodal-footer {
+        display: flex; justify-content: flex-end; gap: 8px;
+        padding: 1rem 1.5rem; border-top: 1px solid #f0f0f0;
+    }
+</style>
 
 <section class="users-list-wrapper">
     <div class="row mb-2">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h4 class="content-header-title mb-0">Usuários</h4>
-            @if (canManage)
-            {
-                <NavLink href="/user/users/new" class="btn btn-warning" title="Adicionar usuário">
-                    <i class="ft-plus"></i> Novo Usuário
-                </NavLink>
-            }
+            <a href="/user/users/new" data-enhance-nav="false" class="btn btn-warning" id="btnNew" style="display:none;">
+                <i class="ft-plus"></i> Novo Usuário
+            </a>
         </div>
     </div>
 
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <div class="alert alert-success alert-dismissible mb-2" role="alert">
-            <button type="button" class="close" @onclick="() => successMessage = null"><span>&times;</span></button>
-            <i class="la la-check-circle"></i> @successMessage
-        </div>
-    }
+    <div id="alertArea"></div>
 
     <div class="users-list-table">
         <div class="card">
@@ -34,71 +74,20 @@
                             <thead>
                                 <tr>
                                     <th>Nome</th>
-                                    <th>E-mail</th>
                                     <th>Login</th>
                                     <th>Telefone</th>
                                     <th>Tipo</th>
+                                    <th>Setores</th>
                                     <th>Status</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @if (isLoading)
-                                {
-                                    <tr>
-                                        <td colspan="7" class="text-center py-3">
-                                            <i class="la la-spinner la-spin font-large-1"></i> Carregando...
-                                        </td>
-                                    </tr>
-                                }
-                                else if (!users.Any())
-                                {
-                                    <tr>
-                                        <td colspan="7" class="text-center py-3 text-muted">Nenhum usuário encontrado.</td>
-                                    </tr>
-                                }
-                                else
-                                {
-                                    @foreach (var user in users)
-                                    {
-                                        <tr>
-                                            <td>@user.Name</td>
-                                            <td>@user.Email</td>
-                                            <td><code>@user.Login</code></td>
-                                            <td>@user.Phone</td>
-                                            <td>@user.UserTypeName</td>
-                                            <td>
-                                                @if (user.Active)
-                                                {
-                                                    <span class="badge badge-success">Ativo</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge badge-danger">Inativo</span>
-                                                }
-                                            </td>
-                                            <td class="text-center">
-                                                @if (canManage)
-                                                {
-                                                <div class="dropdown">
-                                                    <button type="button" class="btn btn-sm btn-link p-0 text-secondary user-actions-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mais ações">
-                                                        <i class="ft-more-vertical"></i>
-                                                    </button>
-                                                    <div class="dropdown-menu dropdown-menu-right">
-                                                        <NavLink href="@($"/user/users/edit/{user.Id}")" class="dropdown-item">
-                                                            <i class="ft-edit-2 mr-1"></i> Editar
-                                                        </NavLink>
-                                                        <button type="button" class="dropdown-item @(user.Active ? "text-warning" : "text-success")"
-                                                                @onclick="() => ToggleActive(user)">
-                                                            <i class="ft-power mr-1"></i> @(user.Active ? "Inativar" : "Ativar")
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                }
+                            <tbody id="usersBody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-3">
+                                        <i class="la la-spinner la-spin font-large-1"></i> Carregando...
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -108,62 +97,221 @@
     </div>
 </section>
 
-<style>
-    .users-list-table .table-responsive {
-        overflow: visible;
+<!-- Modal -->
+<div id="userModal" class="umodal-overlay" style="display:none;">
+    <div class="umodal" id="userModalContent">
+        <div class="umodal-header">
+            <h5><i class="la la-user"></i> Detalhes do Usuário</h5>
+            <button type="button" class="umodal-close" id="btnCloseModal">&times;</button>
+        </div>
+        <div class="umodal-body" id="modalBody"></div>
+        <div class="umodal-footer" id="modalFooter"></div>
+    </div>
+</div>
+
+<script suppress-error="BL9992">
+(function () {
+    'use strict';
+
+    var currentUser = null;
+    var canManage = false;
+    var allUsers = [];
+
+    function $(id) { return document.getElementById(id); }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
     }
 
-    .user-actions-toggle {
-        box-shadow: none !important;
-        background: transparent !important;
-        border: 0 !important;
-        text-decoration: none !important;
+    async function fetchJson(url) {
+        var resp = await fetch(url);
+        if (!resp.ok) throw new Error('Erro');
+        return await resp.json();
     }
 
-    .user-actions-toggle:hover,
-    .user-actions-toggle:focus,
-    .user-actions-toggle:active {
-        color: #404e67 !important;
-        box-shadow: none !important;
-        background: transparent !important;
-        text-decoration: none !important;
+    var userTypeNames = { 0: 'Padrão', 1: 'Andon', 2: 'Gestor', 3: 'Administrador' };
+
+    function isLightColor(hex) {
+        hex = hex.replace('#', '');
+        if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        var r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
+        return (r * 299 + g * 587 + b * 114) / 1000 > 155;
     }
 
-    .user-actions-toggle i {
-        font-size: 1.1rem;
-    }
-</style>
+    function renderTable() {
+        var tbody = $('usersBody');
+        tbody.innerHTML = '';
 
-@code {
-    private List<UserViewModel> users = [];
-    private bool isLoading = true;
-    private string? successMessage;
-    private bool canManage;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadUsersAsync();
-    }
-
-    private async Task LoadUsersAsync()
-    {
-        isLoading = true;
-        var currentUser = Auth.GetCurrentUser();
-        if (currentUser is not null)
-        {
-            canManage = currentUser.UserType == UserType.Administrator || currentUser.Permissions.Contains("users.manage");
-            users = await Api.GetByTenantIdAsync(currentUser.TenantId);
+        if (allUsers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3 text-muted">Nenhum usuário encontrado.</td></tr>';
+            return;
         }
-        isLoading = false;
+
+        allUsers.forEach(function (u, idx) {
+            var tr = document.createElement('tr');
+
+            // Setores
+            var sectorsHtml = '<span class="text-muted">—</span>';
+            if (u.sectors && u.sectors.length > 0) {
+                sectorsHtml = u.sectors.map(function (s) {
+                    var bg = s.sectorColor || '#6c757d';
+                    var textColor = isLightColor(bg) ? '#000' : '#fff';
+                    return '<span class="badge mr-1" style="font-size:0.8em;background-color:' + escapeHtml(bg) + ';color:' + textColor + ';">' + escapeHtml(s.sectorName) + '</span>';
+                }).join('');
+            }
+
+            // Status
+            var statusHtml = u.active
+                ? '<span class="badge badge-success">Ativo</span>'
+                : '<span class="badge badge-danger">Inativo</span>';
+
+            // Ações
+            var actionsHtml = '';
+            if (canManage) {
+                actionsHtml =
+                    '<div class="dropdown">' +
+                        '<button type="button" class="btn btn-sm btn-link text-secondary user-actions-toggle" data-toggle="dropdown"><i class="ft-more-vertical"></i></button>' +
+                        '<div class="dropdown-menu dropdown-menu-right">' +
+                            '<a href="javascript:void(0)" class="dropdown-item btn-view-user" data-idx="' + idx + '"><i class="ft-eye mr-1"></i> Visualizar</a>' +
+                            '<a href="/user/users/edit/' + u.id + '" data-enhance-nav="false" class="dropdown-item"><i class="ft-edit-2 mr-1"></i> Editar</a>' +
+                            '<a href="javascript:void(0)" class="dropdown-item btn-toggle-active ' + (u.active ? 'text-warning' : 'text-success') + '" data-idx="' + idx + '">' +
+                                '<i class="ft-power mr-1"></i> ' + (u.active ? 'Inativar' : 'Ativar') +
+                            '</a>' +
+                        '</div>' +
+                    '</div>';
+            }
+
+            tr.innerHTML =
+                '<td>' + escapeHtml(u.name) + '</td>' +
+                '<td><code>' + escapeHtml(u.login) + '</code></td>' +
+                '<td>' + escapeHtml(u.phone) + '</td>' +
+                '<td>' + escapeHtml(userTypeNames[u.userType] || 'Padrão') + '</td>' +
+                '<td>' + sectorsHtml + '</td>' +
+                '<td>' + statusHtml + '</td>' +
+                '<td class="text-center">' + actionsHtml + '</td>';
+
+            tbody.appendChild(tr);
+        });
+
+        // Bind view buttons
+        document.querySelectorAll('.btn-view-user').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                var idx = parseInt(this.getAttribute('data-idx'));
+                openModal(allUsers[idx]);
+            });
+        });
+
+        // Bind toggle active buttons
+        document.querySelectorAll('.btn-toggle-active').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                var idx = parseInt(this.getAttribute('data-idx'));
+                toggleActive(allUsers[idx]);
+            });
+        });
     }
 
-    private async Task ToggleActive(UserViewModel user)
-    {
-        var response = await Api.ToggleActiveAsync(user.Id);
-        if (response.IsSuccessStatusCode)
-        {
-            user.Active = !user.Active;
-            successMessage = $"Usuário \"{user.Name}\" {(user.Active ? "ativado" : "inativado")} com sucesso.";
+    function openModal(u) {
+        var typeName = userTypeNames[u.userType] || 'Padrão';
+        var initial = u.name && u.name.length > 0 ? u.name[0].toUpperCase() : '?';
+
+        var sectorsHtml = '<span class="text-muted">Nenhum setor vinculado</span>';
+        if (u.sectors && u.sectors.length > 0) {
+            sectorsHtml = u.sectors.map(function (s) {
+                var bg = s.sectorColor || '#6c757d';
+                var textColor = isLightColor(bg) ? '#000' : '#fff';
+                return '<span class="badge mr-1" style="background-color:' + escapeHtml(bg) + ';color:' + textColor + ';">' + escapeHtml(s.sectorName) + '</span>';
+            }).join('');
+        }
+
+        var createdAt = '';
+        try {
+            var d = new Date(u.createdAt);
+            createdAt = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        } catch (e) { createdAt = '—'; }
+
+        $('modalBody').innerHTML =
+            '<div class="umodal-avatar"><span>' + escapeHtml(initial) + '</span></div>' +
+            '<h4 class="umodal-name">' + escapeHtml(u.name) + '</h4>' +
+            '<div class="mb-3">' +
+                (u.active ? '<span class="badge badge-success">Ativo</span>' : '<span class="badge badge-danger">Inativo</span>') +
+                ' <span class="badge badge-info ml-1">' + escapeHtml(typeName) + '</span>' +
+            '</div>' +
+            '<div class="umodal-details">' +
+                '<div class="umodal-row"><span class="umodal-label"><i class="la la-envelope"></i> E-mail</span><span class="umodal-value">' + escapeHtml(u.email || '—') + '</span></div>' +
+                '<div class="umodal-row"><span class="umodal-label"><i class="la la-key"></i> Login</span><span class="umodal-value"><code>' + escapeHtml(u.login) + '</code></span></div>' +
+                '<div class="umodal-row"><span class="umodal-label"><i class="la la-phone"></i> Telefone</span><span class="umodal-value">' + escapeHtml(u.phone || '—') + '</span></div>' +
+                '<div class="umodal-row"><span class="umodal-label"><i class="la la-shield"></i> Perfil</span><span class="umodal-value">' + escapeHtml(u.roleName || '— Sem perfil —') + '</span></div>' +
+                '<div class="umodal-row"><span class="umodal-label"><i class="la la-calendar"></i> Criado em</span><span class="umodal-value">' + escapeHtml(createdAt) + '</span></div>' +
+                '<div class="umodal-row"><span class="umodal-label"><i class="la la-sitemap"></i> Setores</span><span class="umodal-value">' + sectorsHtml + '</span></div>' +
+            '</div>';
+
+        var footerHtml = '';
+        if (canManage) {
+            footerHtml += '<a href="/user/users/edit/' + u.id + '" data-enhance-nav="false" class="btn btn-sm btn-warning"><i class="ft-edit-2"></i> Editar</a>';
+        }
+        footerHtml += '<button type="button" class="btn btn-sm btn-secondary" id="btnCloseModalFooter">Fechar</button>';
+        $('modalFooter').innerHTML = footerHtml;
+
+        document.getElementById('btnCloseModalFooter').addEventListener('click', closeModal);
+
+        $('userModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        $('userModal').style.display = 'none';
+    }
+
+    $('btnCloseModal').addEventListener('click', closeModal);
+    $('userModal').addEventListener('click', function (e) {
+        if (e.target === $('userModal')) closeModal();
+    });
+
+    async function toggleActive(u) {
+        try {
+            var resp = await fetch('/bff/users/' + u.id + '/toggle-active', { method: 'PATCH' });
+            if (resp.ok) {
+                u.active = !u.active;
+                renderTable();
+                showAlert('Usuário "' + u.name + '" ' + (u.active ? 'ativado' : 'inativado') + ' com sucesso.', 'success');
+            }
+        } catch (e) {
+            showAlert('Erro ao alterar status.', 'danger');
         }
     }
-}
+
+    function showAlert(msg, type) {
+        $('alertArea').innerHTML =
+            '<div class="alert alert-' + type + ' alert-dismissible mb-2" role="alert">' +
+            '<button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>' +
+            '<i class="la la-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i> ' + escapeHtml(msg) +
+            '</div>';
+    }
+
+    // Init
+    (async function init() {
+        try {
+            try { currentUser = await fetchJson('/bff/me'); } catch (e) { currentUser = null; }
+
+            if (!currentUser) {
+                $('usersBody').innerHTML = '<tr><td colspan="7" class="text-center text-danger py-3">Sessão expirada.</td></tr>';
+                return;
+            }
+
+            canManage = currentUser.userTypeValue === 3 || (currentUser.permissions && currentUser.permissions.indexOf('users.manage') >= 0);
+
+            if (canManage) {
+                $('btnNew').style.display = '';
+            }
+
+            allUsers = await fetchJson('/bff/users');
+            renderTable();
+        } catch (e) {
+            $('usersBody').innerHTML = '<tr><td colspan="7" class="text-center text-danger py-3"><i class="la la-exclamation-circle"></i> Erro ao carregar dados.</td></tr>';
+        }
+    })();
+})();
+</script>

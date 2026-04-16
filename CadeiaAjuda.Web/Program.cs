@@ -503,7 +503,15 @@ app.MapGet("/bff/me", (AuthStateService auth) =>
 {
     var user = auth.GetCurrentUser();
     if (user is null) return Results.Unauthorized();
-    return Results.Ok(new { user.Id, user.Name, user.UserType, UserTypeValue = (int)user.UserType });
+    return Results.Ok(new
+    {
+        user.Id,
+        user.Name,
+        user.UserType,
+        UserTypeValue = (int)user.UserType,
+        user.TenantId,
+        user.Permissions
+    });
 }).DisableAntiforgery();
 
 var bffTenants = app.MapGroup("/bff/tenants").DisableAntiforgery();
@@ -598,6 +606,53 @@ bffUsers.MapGet("/", async (UserApiClient api, AuthStateService auth) =>
     var user = auth.GetCurrentUser();
     if (user is null) return Results.Unauthorized();
     return Results.Ok(await api.GetByTenantIdAsync(user.TenantId));
+});
+
+bffUsers.MapGet("/{id:guid}", async (Guid id, UserApiClient api) =>
+{
+    var item = await api.GetByIdAsync(id);
+    return item is null ? Results.NotFound() : Results.Ok(item);
+});
+
+bffUsers.MapPost("/", async (HttpContext httpContext, IHttpClientFactory httpFactory, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("users.manage"))
+        return Results.Json(new { error = "Sem permissão para gerenciar usuários." }, statusCode: 403);
+
+    var json = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
+    var http = httpFactory.CreateClient("ApiClient");
+    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+    var resp = await http.PostAsync("/api/users", content);
+    var body = await resp.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
+});
+
+bffUsers.MapPut("/{id:guid}", async (Guid id, HttpContext httpContext, IHttpClientFactory httpFactory, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("users.manage"))
+        return Results.Json(new { error = "Sem permissão para gerenciar usuários." }, statusCode: 403);
+
+    var json = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
+    var http = httpFactory.CreateClient("ApiClient");
+    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+    var resp = await http.PutAsync($"/api/users/{id}", content);
+    var body = await resp.Content.ReadAsStringAsync();
+    return Results.Content(body, "application/json", statusCode: (int)resp.StatusCode);
+});
+
+bffUsers.MapPatch("/{id:guid}/toggle-active", async (Guid id, UserApiClient api, AuthStateService auth) =>
+{
+    var user = auth.GetCurrentUser();
+    if (user is null) return Results.Unauthorized();
+    if (user.UserType != UserType.Administrator && !user.Permissions.Contains("users.manage"))
+        return Results.Json(new { error = "Sem permissão." }, statusCode: 403);
+
+    var resp = await api.ToggleActiveAsync(id);
+    return resp.IsSuccessStatusCode ? Results.Ok() : Results.StatusCode((int)resp.StatusCode);
 });
 
 var bffEscalation = app.MapGroup("/bff/escalation-levels").DisableAntiforgery();

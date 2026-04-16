@@ -60,6 +60,11 @@ public class UserService : IUserService
         await _repository.AddAsync(user);
         await _repository.SaveChangesAsync();
 
+        if (dto.SectorIds is { Count: > 0 })
+        {
+            await _repository.SetUserSectorsAsync(user.Id, dto.SectorIds);
+        }
+
         var created = await _repository.GetByIdWithIncludesAsync(user.Id);
         return MapToDto(created!);
     }
@@ -93,6 +98,8 @@ public class UserService : IUserService
 
         _repository.Update(user);
         await _repository.SaveChangesAsync();
+
+        await _repository.SetUserSectorsAsync(user.Id, dto.SectorIds ?? []);
 
         var updated = await _repository.GetByIdWithIncludesAsync(user.Id);
         return MapToDto(updated!);
@@ -199,6 +206,14 @@ public class UserService : IUserService
         UserTypeName = GetUserTypeName(user.UserType),
         Permissions = user.Role?.RolePermissions
             .Select(rp => rp.Permission.Key)
-            .ToList() ?? []
+            .ToList() ?? [],
+        Sectors = user.UserSectors
+            .Select(us => new UserSectorDto
+            {
+                SectorId = us.SectorId,
+                SectorName = us.Sector?.Name ?? string.Empty,
+                SectorColor = us.Sector?.Color ?? "#000000"
+            })
+            .ToList()
     };
 }

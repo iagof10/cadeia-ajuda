@@ -11,4 +11,5 @@ public interface IUserRepository : IRepository<User>
     Task<bool> ExistsByLoginAsync(Guid tenantId, string login, Guid? excludeId = null);
     Task<bool> ExistsByEmailAsync(Guid tenantId, string email, Guid? excludeId = null);
     Task<int> CountByTenantAndTypeAsync(Guid tenantId, UserType userType, Guid? excludeId = null);
+    Task SetUserSectorsAsync(Guid userId, List<Guid> sectorIds);
 }

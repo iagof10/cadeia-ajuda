@@ -19,6 +19,14 @@ public class UserDto
     public UserType UserType { get; set; }
     public string UserTypeName { get; set; } = string.Empty;
     public List<string> Permissions { get; set; } = [];
+    public List<UserSectorDto> Sectors { get; set; } = [];
+}
+
+public class UserSectorDto
+{
+    public Guid SectorId { get; set; }
+    public string SectorName { get; set; } = string.Empty;
+    public string SectorColor { get; set; } = string.Empty;
 }
 
 public class UserCreateDto
@@ -31,6 +39,7 @@ public class UserCreateDto
     public Guid TenantId { get; set; }
     public Guid? RoleId { get; set; }
     public UserType UserType { get; set; } = UserType.Standard;
+    public List<Guid> SectorIds { get; set; } = [];
 }
 
 public class UserUpdateDto
@@ -45,6 +54,7 @@ public class UserUpdateDto
     public bool Active { get; set; }
     public Guid? RoleId { get; set; }
     public UserType UserType { get; set; } = UserType.Standard;
+    public List<Guid> SectorIds { get; set; } = [];
 }
 
 public class LoginDto

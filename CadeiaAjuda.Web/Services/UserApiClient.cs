@@ -46,6 +46,14 @@ public class UserViewModel
     public string RoleName { get; set; } = string.Empty;
     public UserType UserType { get; set; }
     public string UserTypeName { get; set; } = string.Empty;
+    public List<UserSectorViewModel> Sectors { get; set; } = [];
+}
+
+public class UserSectorViewModel
+{
+    public Guid SectorId { get; set; }
+    public string SectorName { get; set; } = string.Empty;
+    public string SectorColor { get; set; } = string.Empty;
 }
 
 public class UserFormModel
@@ -73,4 +81,5 @@ public class UserFormModel
     public string? SelectedRoleId { get; set; }
     public Guid? RoleId { get; set; }
     public UserType UserType { get; set; } = UserType.Standard;
+    public List<Guid> SectorIds { get; set; } = [];
 }

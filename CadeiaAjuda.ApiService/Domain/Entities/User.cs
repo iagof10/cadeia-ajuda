@@ -11,4 +11,6 @@ public class User : TenantEntityBase
 
     public Guid? RoleId { get; set; }
     public Role? Role { get; set; }
+
+    public ICollection<UserSector> UserSectors { get; set; } = [];
 }
