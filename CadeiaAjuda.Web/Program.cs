@@ -169,6 +169,7 @@ app.Use(async (context, next) =>
         "/andon", "/andon/settings",
         "/help-requests", "/help-requests/close",
         "/settings/company", "/settings/andon",
+        "/reports",
         "/tenants",
         "/login",
         "/auth",

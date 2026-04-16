@@ -1,0 +1,680 @@
+@page "/reports"
+@layout AdminLayout
+
+<PageTitle>Relatórios - Cadeia Ajuda</PageTitle>
+
+<style>
+    .report-kpi { text-align:center; padding:1.2rem .5rem; }
+    .report-kpi h2 { font-size:2rem; font-weight:700; margin-bottom:0; }
+    .report-kpi small { color:#8d9daa; font-size:.8rem; text-transform:uppercase; letter-spacing:.5px; }
+    .filter-bar { background:#fff; border:1px solid #e4e7ed; border-radius:8px; padding:16px 20px; margin-bottom:16px; }
+    .export-btn { border-radius:6px; }
+
+    @@media print {
+        .main-menu, .header-navbar, .filter-bar, .export-btn, #btnExportCsv, #btnPrint { display:none !important; }
+        .app-content { margin-left:0 !important; padding:0 !important; }
+        .content-wrapper { padding:0 !important; }
+        .card { break-inside:avoid; box-shadow:none !important; border:1px solid #ddd !important; }
+        .report-kpi h2 { font-size:1.4rem; }
+        body { background:#fff !important; }
+    }
+</style>
+
+<div class="row mb-2">
+    <div class="col-md-6 col-12">
+        <h4 class="content-header-title mb-0"><i class="ft-bar-chart-2"></i> Relatórios</h4>
+    </div>
+    <div class="col-md-6 col-12 text-md-right">
+        <button class="btn btn-sm btn-outline-success export-btn" id="btnExportCsv" style="display:none;">
+            <i class="ft-download"></i> Exportar CSV
+        </button>
+        <button class="btn btn-sm btn-outline-primary export-btn ml-1" id="btnPrint" style="display:none;">
+            <i class="ft-printer"></i> Imprimir
+        </button>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="filter-bar" id="filterBar">
+    <div class="row align-items-end">
+        <div class="col-md-3 col-6">
+            <div class="form-group mb-md-0 mb-1">
+                <label class="small mb-0"><i class="ft-calendar"></i> Data Início</label>
+                <input type="date" class="form-control form-control-sm" id="filterDateFrom" />
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="form-group mb-md-0 mb-1">
+                <label class="small mb-0"><i class="ft-calendar"></i> Data Fim</label>
+                <input type="date" class="form-control form-control-sm" id="filterDateTo" />
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="form-group mb-md-0 mb-1">
+                <label class="small mb-0"><i class="ft-compass"></i> Setor</label>
+                <select class="form-control form-control-sm" id="filterSector">
+                    <option value="">Todos os Setores</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="form-group mb-md-0 mb-1">
+                <label class="small mb-0"><i class="ft-filter"></i> Status</label>
+                <select class="form-control form-control-sm" id="filterStatus">
+                    <option value="">Todos</option>
+                    <option value="0">Aberto</option>
+                    <option value="1">Em Progresso</option>
+                    <option value="2">Escalado</option>
+                    <option value="3">Resolvido</option>
+                    <option value="4">Encerrado</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-12 d-flex justify-content-between">
+            <div>
+                <button class="btn btn-sm btn-outline-secondary mr-1" data-quick="7">Últimos 7 dias</button>
+                <button class="btn btn-sm btn-outline-secondary mr-1" data-quick="30">Últimos 30 dias</button>
+                <button class="btn btn-sm btn-outline-secondary mr-1" data-quick="90">Últimos 90 dias</button>
+                <button class="btn btn-sm btn-outline-secondary" data-quick="365">Último ano</button>
+            </div>
+            <button class="btn btn-sm btn-warning" id="btnApplyFilter">
+                <i class="ft-search"></i> Gerar Relatório
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="reportLoading" class="text-center py-5" style="display:none;">
+    <i class="la la-spinner la-spin font-large-2"></i>
+    <p class="text-muted mt-1">Gerando relatório...</p>
+</div>
+
+<div id="reportEmpty" class="text-center py-5" style="display:none;">
+    <i class="la la-file-text-o font-large-3 text-muted d-block mb-1"></i>
+    <p class="text-muted">Selecione os filtros e clique em <strong>"Gerar Relatório"</strong> para visualizar os dados.</p>
+</div>
+
+<div id="reportContent" style="display:none;">
+
+    <!-- KPIs do Período -->
+    <div class="row">
+        <div class="col-xl-2 col-lg-4 col-6">
+            <div class="card"><div class="report-kpi">
+                <h2 class="text-primary" id="rptTotal">0</h2>
+                <small>Total</small>
+            </div></div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-6">
+            <div class="card"><div class="report-kpi">
+                <h2 class="warning" id="rptOpen">0</h2>
+                <small>Abertos</small>
+            </div></div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-6">
+            <div class="card"><div class="report-kpi">
+                <h2 class="success" id="rptClosed">0</h2>
+                <small>Encerrados</small>
+            </div></div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-6">
+            <div class="card"><div class="report-kpi">
+                <h2 class="danger" id="rptEscalated">0</h2>
+                <small>Escalados</small>
+            </div></div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-6">
+            <div class="card"><div class="report-kpi">
+                <h2 class="info" id="rptAvgTime">—</h2>
+                <small>Tempo Médio</small>
+            </div></div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-6">
+            <div class="card"><div class="report-kpi">
+                <h2 class="text-muted" id="rptMaxTime">—</h2>
+                <small>Tempo Máximo</small>
+            </div></div>
+        </div>
+    </div>
+
+    <!-- Gráficos Linha 1 -->
+    <div class="row">
+        <div class="col-xl-8 col-12">
+            <div class="card">
+                <div class="card-header"><h4 class="card-title mb-0"><i class="la la-line-chart"></i> Chamados por Dia</h4></div>
+                <div class="card-body"><canvas id="rptDailyChart" height="250"></canvas></div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-12">
+            <div class="card">
+                <div class="card-header"><h4 class="card-title mb-0"><i class="la la-pie-chart"></i> Por Status</h4></div>
+                <div class="card-body"><canvas id="rptStatusChart" height="250"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos Linha 2 -->
+    <div class="row">
+        <div class="col-xl-6 col-12">
+            <div class="card">
+                <div class="card-header"><h4 class="card-title mb-0"><i class="la la-pie-chart"></i> Por Setor</h4></div>
+                <div class="card-body"><canvas id="rptSectorChart" height="280"></canvas></div>
+            </div>
+        </div>
+        <div class="col-xl-6 col-12">
+            <div class="card">
+                <div class="card-header"><h4 class="card-title mb-0"><i class="la la-tags"></i> Por Tipo de Solicitação</h4></div>
+                <div class="card-body"><canvas id="rptTypeChart" height="280"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos Linha 3 -->
+    <div class="row">
+        <div class="col-xl-6 col-12">
+            <div class="card">
+                <div class="card-header"><h4 class="card-title mb-0"><i class="la la-clock-o"></i> Horários de Pico</h4></div>
+                <div class="card-body"><canvas id="rptHourChart" height="250"></canvas></div>
+            </div>
+        </div>
+        <div class="col-xl-6 col-12">
+            <div class="card">
+                <div class="card-header"><h4 class="card-title mb-0"><i class="la la-calendar"></i> Por Dia da Semana</h4></div>
+                <div class="card-body"><canvas id="rptWeekdayChart" height="250"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Solicitantes + Ranking Setores -->
+    <div class="row">
+        <div class="col-xl-6 col-12">
+            <div class="card">
+                <div class="card-header"><h4 class="card-title mb-0"><i class="la la-user"></i> Top 10 Solicitantes</h4></div>
+                <div class="card-body"><canvas id="rptRequesterChart" height="280"></canvas></div>
+            </div>
+        </div>
+        <div class="col-xl-6 col-12">
+            <div class="card">
+                <div class="card-header"><h4 class="card-title mb-0"><i class="la la-bar-chart"></i> Tempo Médio por Setor</h4></div>
+                <div class="card-body"><canvas id="rptSectorTimeChart" height="280"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela detalhada -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0"><i class="la la-list"></i> Chamados no Período</h4>
+            <small class="text-muted" id="rptTableCount"></small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Setor</th>
+                            <th>Tipo</th>
+                            <th>Recurso</th>
+                            <th>Solicitante</th>
+                            <th>Status</th>
+                            <th>Abertura</th>
+                            <th>Encerramento</th>
+                            <th>Duração</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rptTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script suppress-error="BL9992">
+(function () {
+    'use strict';
+    if (window.__reportsInitialized) return;
+    window.__reportsInitialized = true;
+
+    var allRequests = [];
+    var filtered = [];
+    var sectors = [];
+    var charts = {};
+    var palette = ['#f57c00','#1e9ff2','#4caf50','#f44336','#9c27b0','#00bcd4','#ff5722','#607d8b','#e91e63','#8bc34a','#3f51b5','#ffc107'];
+
+    function $(id) { return document.getElementById(id); }
+    function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    function fmtDuration(min) {
+        if (!min || min <= 0) return '\u2014';
+        if (min < 60) return Math.round(min) + 'min';
+        var h = Math.floor(min / 60), m = Math.round(min % 60);
+        return h + 'h' + (m > 0 ? ' ' + m + 'min' : '');
+    }
+
+    function fmtDate(iso) {
+        if (!iso) return '\u2014';
+        var d = new Date(iso);
+        return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    }
+
+    function fmtDateShort(iso) {
+        if (!iso) return '';
+        return new Date(iso).toLocaleDateString('pt-BR');
+    }
+
+    function statusName(s) {
+        return { 0:'Aberto', 1:'Em Progresso', 2:'Escalado', 3:'Resolvido', 4:'Encerrado' }[s] || '';
+    }
+    function statusColor(s) {
+        return { 0:'#ffc107', 1:'#1e9ff2', 2:'#f44336', 3:'#4caf50', 4:'#9e9e9e' }[s] || '#ccc';
+    }
+    function statusBadge(s) {
+        return { 0:'status-open', 1:'status-inprogress', 2:'status-escalated', 3:'status-resolved', 4:'status-closed' }[s] || '';
+    }
+
+    function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+    function getDurationMinutes(r) {
+        var end = r.closedAt ? new Date(r.closedAt) : new Date();
+        return Math.floor((end - new Date(r.createdAt)) / 60000);
+    }
+
+    // ---- Init: load data ----
+    async function init() {
+        try {
+            var resp1 = await fetch('/bff/help-requests');
+            allRequests = resp1.ok ? await resp1.json() : [];
+
+            var resp2 = await fetch('/bff/sectors');
+            sectors = resp2.ok ? await resp2.json() : [];
+
+            // Populate sector filter
+            sectors.filter(function (s) { return s.active; }).forEach(function (s) {
+                var opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.name;
+                $('filterSector').appendChild(opt);
+            });
+
+            // Default: last 30 days
+            var now = new Date();
+            var from = new Date(now);
+            from.setDate(from.getDate() - 30);
+            $('filterDateFrom').value = from.toISOString().split('T')[0];
+            $('filterDateTo').value = now.toISOString().split('T')[0];
+
+            $('reportEmpty').style.display = '';
+        } catch (e) {
+            $('reportEmpty').innerHTML = '<p class="text-danger">Erro ao carregar dados.</p>';
+            $('reportEmpty').style.display = '';
+        }
+    }
+
+    // ---- Filter & Generate ----
+    function applyFilter() {
+        var from = $('filterDateFrom').value ? new Date($('filterDateFrom').value + 'T00:00:00') : null;
+        var to = $('filterDateTo').value ? new Date($('filterDateTo').value + 'T23:59:59') : null;
+        var sectorId = $('filterSector').value;
+        var statusVal = $('filterStatus').value;
+
+        filtered = allRequests.filter(function (r) {
+            var created = new Date(r.createdAt);
+            if (from && created < from) return false;
+            if (to && created > to) return false;
+            if (sectorId && r.sectorId !== sectorId) return false;
+            if (statusVal !== '' && String(r.status) !== statusVal) return false;
+            return true;
+        });
+
+        $('reportEmpty').style.display = 'none';
+        $('reportLoading').style.display = '';
+
+        // Small delay for UX
+        setTimeout(function () {
+            $('reportLoading').style.display = 'none';
+            $('reportContent').style.display = '';
+            $('btnExportCsv').style.display = '';
+            $('btnPrint').style.display = '';
+            renderAll();
+        }, 300);
+    }
+
+    // ---- Render All ----
+    function renderAll() {
+        renderKPIs();
+        renderDailyChart();
+        renderStatusChart();
+        renderSectorChart();
+        renderTypeChart();
+        renderHourChart();
+        renderWeekdayChart();
+        renderRequesterChart();
+        renderSectorTimeChart();
+        renderTable();
+    }
+
+    // ---- KPIs ----
+    function renderKPIs() {
+        var total = filtered.length;
+        var open = filtered.filter(function (r) { return r.status === 0 || r.status === 1; }).length;
+        var closed = filtered.filter(function (r) { return r.status === 3 || r.status === 4; }).length;
+        var escalated = filtered.filter(function (r) { return r.status === 2; }).length;
+
+        var closedItems = filtered.filter(function (r) { return r.closedAt; });
+        var durations = closedItems.map(getDurationMinutes);
+        var avg = durations.length > 0 ? durations.reduce(function (a, b) { return a + b; }, 0) / durations.length : 0;
+        var max = durations.length > 0 ? Math.max.apply(null, durations) : 0;
+
+        $('rptTotal').textContent = total;
+        $('rptOpen').textContent = open;
+        $('rptClosed').textContent = closed;
+        $('rptEscalated').textContent = escalated;
+        $('rptAvgTime').textContent = fmtDuration(avg);
+        $('rptMaxTime').textContent = fmtDuration(max);
+    }
+
+    // ---- Daily Line Chart ----
+    function renderDailyChart() {
+        destroyChart('rptDailyChart');
+        if (filtered.length === 0) return;
+
+        var counts = {};
+        filtered.forEach(function (r) {
+            var day = new Date(r.createdAt).toLocaleDateString('pt-BR');
+            counts[day] = (counts[day] || 0) + 1;
+        });
+
+        // Sort by date
+        var entries = Object.keys(counts).map(function (k) {
+            var parts = k.split('/');
+            return { label: k, count: counts[k], sort: parts[2] + parts[1] + parts[0] };
+        });
+        entries.sort(function (a, b) { return a.sort.localeCompare(b.sort); });
+
+        charts['rptDailyChart'] = new Chart($('rptDailyChart'), {
+            type: 'line',
+            data: {
+                labels: entries.map(function (e) { return e.label; }),
+                datasets: [{
+                    label: 'Chamados',
+                    data: entries.map(function (e) { return e.count; }),
+                    borderColor: '#1e9ff2',
+                    backgroundColor: 'rgba(30,159,242,0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#1e9ff2'
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } }
+            }
+        });
+    }
+
+    // ---- Status Pie ----
+    function renderStatusChart() {
+        destroyChart('rptStatusChart');
+        if (filtered.length === 0) return;
+
+        var counts = {};
+        filtered.forEach(function (r) {
+            var name = statusName(r.status);
+            if (!counts[r.status]) counts[r.status] = { name: name, count: 0 };
+            counts[r.status].count++;
+        });
+
+        var data = Object.keys(counts).map(function (k) { return counts[k]; });
+        var statuses = Object.keys(counts).map(Number);
+
+        charts['rptStatusChart'] = new Chart($('rptStatusChart'), {
+            type: 'pie',
+            data: {
+                labels: data.map(function (d) { return d.name; }),
+                datasets: [{ data: data.map(function (d) { return d.count; }), backgroundColor: statuses.map(statusColor), borderWidth: 2, borderColor: '#fff' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true } } } }
+        });
+    }
+
+    // ---- Sector Pie ----
+    function renderSectorChart() {
+        destroyChart('rptSectorChart');
+        if (filtered.length === 0) return;
+
+        var counts = {};
+        filtered.forEach(function (r) {
+            if (!counts[r.sectorName]) counts[r.sectorName] = { count: 0, color: r.sectorColor || '#999' };
+            counts[r.sectorName].count++;
+        });
+
+        var labels = Object.keys(counts);
+        charts['rptSectorChart'] = new Chart($('rptSectorChart'), {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{ data: labels.map(function (l) { return counts[l].count; }), backgroundColor: labels.map(function (l) { return counts[l].color; }), borderWidth: 2, borderColor: '#fff' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true } } } }
+        });
+    }
+
+    // ---- Type Doughnut ----
+    function renderTypeChart() {
+        destroyChart('rptTypeChart');
+        if (filtered.length === 0) return;
+
+        var counts = {};
+        filtered.forEach(function (r) {
+            var name = r.helpRequestTypeName || 'Sem tipo';
+            counts[name] = (counts[name] || 0) + 1;
+        });
+
+        var labels = Object.keys(counts);
+        charts['rptTypeChart'] = new Chart($('rptTypeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{ data: labels.map(function (l) { return counts[l]; }), backgroundColor: labels.map(function (_, i) { return palette[i % palette.length]; }), borderWidth: 2, borderColor: '#fff' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true } } } }
+        });
+    }
+
+    // ---- Hours Bar ----
+    function renderHourChart() {
+        destroyChart('rptHourChart');
+        if (filtered.length === 0) return;
+
+        var hours = new Array(24).fill(0);
+        filtered.forEach(function (r) { hours[new Date(r.createdAt).getHours()]++; });
+        var max = Math.max.apply(null, hours);
+
+        charts['rptHourChart'] = new Chart($('rptHourChart'), {
+            type: 'bar',
+            data: {
+                labels: hours.map(function (_, i) { return (i < 10 ? '0' : '') + i + 'h'; }),
+                datasets: [{
+                    label: 'Chamados',
+                    data: hours,
+                    backgroundColor: hours.map(function (h) { var i = max > 0 ? h / max : 0; return i > 0.7 ? '#f44336' : i > 0.4 ? '#ffc107' : '#1e9ff2'; }),
+                    borderRadius: 4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }, x: { ticks: { font: { size: 10 } } } } }
+        });
+    }
+
+    // ---- Weekday Bar ----
+    function renderWeekdayChart() {
+        destroyChart('rptWeekdayChart');
+        if (filtered.length === 0) return;
+
+        var dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        var days = new Array(7).fill(0);
+        filtered.forEach(function (r) { days[new Date(r.createdAt).getDay()]++; });
+
+        charts['rptWeekdayChart'] = new Chart($('rptWeekdayChart'), {
+            type: 'bar',
+            data: {
+                labels: dayNames,
+                datasets: [{
+                    label: 'Chamados',
+                    data: days,
+                    backgroundColor: 'rgba(245,124,0,0.7)',
+                    borderColor: '#f57c00',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    barPercentage: 0.6
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } } }
+        });
+    }
+
+    // ---- Top Requesters Bar ----
+    function renderRequesterChart() {
+        destroyChart('rptRequesterChart');
+        if (filtered.length === 0) return;
+
+        var counts = {};
+        filtered.forEach(function (r) {
+            var name = r.requestedByUserName || 'Desconhecido';
+            counts[name] = (counts[name] || 0) + 1;
+        });
+
+        var sorted = Object.keys(counts).map(function (k) { return { name: k, count: counts[k] }; });
+        sorted.sort(function (a, b) { return b.count - a.count; });
+        sorted = sorted.slice(0, 10);
+
+        charts['rptRequesterChart'] = new Chart($('rptRequesterChart'), {
+            type: 'bar',
+            data: {
+                labels: sorted.map(function (s) { return s.name; }),
+                datasets: [{
+                    label: 'Chamados',
+                    data: sorted.map(function (s) { return s.count; }),
+                    backgroundColor: 'rgba(30,159,242,0.7)',
+                    borderRadius: 6,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: { x: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } }
+            }
+        });
+    }
+
+    // ---- Sector Avg Time Bar ----
+    function renderSectorTimeChart() {
+        destroyChart('rptSectorTimeChart');
+        var closedItems = filtered.filter(function (r) { return r.closedAt; });
+        if (closedItems.length === 0) return;
+
+        var sectorData = {};
+        closedItems.forEach(function (r) {
+            if (!sectorData[r.sectorName]) sectorData[r.sectorName] = { total: 0, count: 0, color: r.sectorColor || '#999' };
+            sectorData[r.sectorName].total += getDurationMinutes(r);
+            sectorData[r.sectorName].count++;
+        });
+
+        var labels = Object.keys(sectorData);
+        var avgs = labels.map(function (l) { return Math.round(sectorData[l].total / sectorData[l].count); });
+        var colors = labels.map(function (l) { return sectorData[l].color; });
+
+        charts['rptSectorTimeChart'] = new Chart($('rptSectorTimeChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Tempo Médio (min)',
+                    data: avgs,
+                    backgroundColor: colors,
+                    borderRadius: 6,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: { x: { beginAtZero: true } }
+            }
+        });
+    }
+
+    // ---- Table ----
+    function renderTable() {
+        var body = $('rptTableBody');
+        body.innerHTML = '';
+        $('rptTableCount').textContent = filtered.length + ' chamado(s)';
+
+        filtered.forEach(function (r) {
+            var dur = getDurationMinutes(r);
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td><span style="font-family:monospace;font-weight:700;color:#1e9ff2;">' + esc(r.code) + '</span></td>' +
+                '<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + esc(r.sectorColor || '#999') + ';margin-right:5px;"></span>' + esc(r.sectorName) + '</td>' +
+                '<td>' + esc(r.helpRequestTypeName) + '</td>' +
+                '<td>' + esc(r.areaName) + '</td>' +
+                '<td>' + esc(r.requestedByUserName) + '</td>' +
+                '<td><span class="badge ' + statusBadge(r.status) + '" style="font-size:.78rem;padding:3px 8px;border-radius:4px;">' + esc(statusName(r.status)) + '</span></td>' +
+                '<td>' + fmtDate(r.createdAt) + '</td>' +
+                '<td>' + (r.closedAt ? fmtDate(r.closedAt) : '\u2014') + '</td>' +
+                '<td>' + fmtDuration(dur) + '</td>';
+            body.appendChild(tr);
+        });
+    }
+
+    // ---- Export CSV ----
+    function exportCsv() {
+        var sep = ';';
+        var lines = ['Código' + sep + 'Setor' + sep + 'Tipo' + sep + 'Recurso' + sep + 'Solicitante' + sep + 'Status' + sep + 'Abertura' + sep + 'Encerramento' + sep + 'Duração (min)'];
+        filtered.forEach(function (r) {
+            lines.push([
+                r.code, r.sectorName, r.helpRequestTypeName, r.areaName,
+                r.requestedByUserName, statusName(r.status),
+                fmtDate(r.createdAt), r.closedAt ? fmtDate(r.closedAt) : '',
+                getDurationMinutes(r)
+            ].join(sep));
+        });
+        var bom = '\uFEFF';
+        var blob = new Blob([bom + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'relatorio-chamados-' + new Date().toISOString().split('T')[0] + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // ---- Print ----
+    function printReport() {
+        window.print();
+    }
+
+    // ---- Event Bindings ----
+    $('btnApplyFilter').addEventListener('click', applyFilter);
+    $('btnExportCsv').addEventListener('click', exportCsv);
+    $('btnPrint').addEventListener('click', printReport);
+
+    document.querySelectorAll('[data-quick]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var days = parseInt(btn.getAttribute('data-quick'));
+            var now = new Date();
+            var from = new Date(now);
+            from.setDate(from.getDate() - days);
+            $('filterDateFrom').value = from.toISOString().split('T')[0];
+            $('filterDateTo').value = now.toISOString().split('T')[0];
+        });
+    });
+
+    init();
+})();
+</script>

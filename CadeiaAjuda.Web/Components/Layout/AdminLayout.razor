@@ -194,7 +194,7 @@
             @if (!isAndonUser && HasPermission("reports.view"))
             {
                 <li class="nav-item @(IsActive("/reports") ? "active" : "")">
-                    <NavLink href="/reports" Match="NavLinkMatch.Prefix">
+                    <NavLink href="/reports" Match="NavLinkMatch.Prefix" data-enhance-nav="false">
                         <i class="ft-bar-chart-2"></i>
                         <span class="menu-title">Relatório</span>
                     </NavLink>
