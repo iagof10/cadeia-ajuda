@@ -320,6 +320,93 @@
     </div>
 </div>
 
+<!-- Modal: Detalhes do Chamado -->
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="la la-info-circle"></i> Detalhes do Chamado <span class="help-request-code" id="detailCode"></span></h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <small class="text-muted text-uppercase d-block">Status</small>
+                            <span id="detailStatus"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <small class="text-muted text-uppercase d-block">Setor</small>
+                            <strong id="detailSector"></strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <small class="text-muted text-uppercase d-block">Tipo de Solicitação</small>
+                            <strong id="detailType"></strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <small class="text-muted text-uppercase d-block">Recurso / Posição</small>
+                            <strong id="detailArea"></strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <small class="text-muted text-uppercase d-block">Solicitante</small>
+                            <strong id="detailRequester"></strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <small class="text-muted text-uppercase d-block">Encerrado por</small>
+                            <strong id="detailClosedBy"></strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <small class="text-muted text-uppercase d-block">Data de Abertura</small>
+                            <strong id="detailCreatedAt"></strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <small class="text-muted text-uppercase d-block">Data de Encerramento</small>
+                            <strong id="detailClosedAt"></strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <small class="text-muted text-uppercase d-block">Tempo Decorrido</small>
+                            <strong id="detailElapsed"></strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6" id="detailDescriptionWrap" style="display:none;">
+                        <div class="mb-3">
+                            <small class="text-muted text-uppercase d-block">Descrição</small>
+                            <span id="detailDescription"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script suppress-error="BL9992">
     (function () {
         'use strict';
@@ -376,6 +463,43 @@
             if (!isoStr) return '\u2014';
             var d = new Date(isoStr);
             return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+        }
+
+        function fmtDuration(minutes) {
+            if (!minutes || minutes <= 0) return '\u2014';
+            if (minutes < 60) return Math.round(minutes) + 'min';
+            var h = Math.floor(minutes / 60);
+            var m = Math.round(minutes % 60);
+            return h + 'h' + (m > 0 ? ' ' + m + 'min' : '');
+        }
+
+        function openDetail(r) {
+            $('detailCode').textContent = r.code;
+            $('detailStatus').innerHTML = '<span class="badge ' + statusBadge(r.status) + '" style="font-size:.85rem;padding:4px 12px;border-radius:4px;">' + escapeHtml(r.statusName) + '</span>';
+            $('detailSector').innerHTML = '<span class="sector-dot" style="background-color:' + escapeHtml(r.sectorColor || '#999') + ';"></span>' + escapeHtml(r.sectorName);
+            $('detailType').textContent = r.helpRequestTypeName || '\u2014';
+            $('detailArea').textContent = r.areaName || '\u2014';
+            $('detailRequester').textContent = r.requestedByUserName || '\u2014';
+            $('detailClosedBy').textContent = r.closedByUserName || '\u2014';
+            $('detailCreatedAt').textContent = formatDate(r.createdAt);
+            $('detailClosedAt').textContent = r.closedAt ? formatDate(r.closedAt) : '\u2014';
+
+            var minutes;
+            if (r.closedAt) {
+                minutes = Math.floor((new Date(r.closedAt) - new Date(r.createdAt)) / 60000);
+            } else {
+                minutes = Math.floor((new Date() - new Date(r.createdAt)) / 60000);
+            }
+            $('detailElapsed').textContent = fmtDuration(minutes);
+
+            if (r.description) {
+                $('detailDescription').textContent = r.description;
+                $('detailDescriptionWrap').style.display = '';
+            } else {
+                $('detailDescriptionWrap').style.display = 'none';
+            }
+
+            jQuery('#detailModal').modal('show');
         }
 
         // ---- API ----
@@ -486,6 +610,7 @@
 
             pageItems.forEach(function (r) {
                 var tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
                 var isClosed = r.status === 4 || r.status === 3;
                 var actionHtml = isClosed
                     ? '<span class="text-muted"><i class="la la-check-circle"></i> Encerrado</span>'
@@ -502,6 +627,15 @@
                     '<td><span class="badge ' + statusBadge(r.status) + '" style="font-size:.8rem;padding:4px 10px;border-radius:4px;">' + escapeHtml(r.statusName) + '</span></td>' +
                     '<td>' + formatDate(r.createdAt) + '</td>' +
                     '<td>' + actionHtml + '</td>';
+
+                // Click row to open detail (except if clicking a button)
+                (function (req) {
+                    tr.addEventListener('click', function (e) {
+                        if (e.target.closest('button')) return;
+                        openDetail(req);
+                    });
+                })(r);
+
                 body.appendChild(tr);
             });
 
