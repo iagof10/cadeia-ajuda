@@ -272,6 +272,7 @@
 
         // ---- State ----
         var currentUser = null;
+        var currentUserData = null;
         var requests = [];
         var sectors = [];
         var helpRequestTypes = [];
@@ -445,8 +446,15 @@
 
             var active = sectors.filter(function (s) { return s.active; });
 
+            // Filter by user's linked sectors (unless admin)
+            var isAdmin = currentUser && currentUser.userTypeValue === 3;
+            if (!isAdmin && currentUserData && currentUserData.sectors) {
+                var userSectorIds = currentUserData.sectors.map(function (us) { return us.sectorId; });
+                active = active.filter(function (s) { return userSectorIds.indexOf(s.id) >= 0; });
+            }
+
             if (active.length === 0) {
-                grid.innerHTML = '<div class="text-center text-muted py-3">Nenhum setor cadastrado.</div>';
+                grid.innerHTML = '<div class="text-center text-muted py-3"><i class="la la-info-circle"></i> Nenhum setor disponível para você. Solicite ao administrador que vincule setores ao seu cadastro.</div>';
                 return;
             }
 
@@ -673,7 +681,7 @@
             try {
                 await loadCurrentUser();
 
-                var isAdmin = currentUser && currentUser.userType === 3;
+                var isAdmin = currentUser && currentUser.userTypeValue === 3;
                 var perms = (currentUser && currentUser.permissions) || [];
                 canCreate = isAdmin || perms.indexOf('help_requests.create') >= 0;
                 canClose = isAdmin || perms.indexOf('help_requests.close') >= 0;
@@ -681,6 +689,11 @@
                 if (!canCreate) {
                     $('btnNewRequest').style.display = 'none';
                 }
+
+                // Load user data to get linked sectors
+                try {
+                    currentUserData = await fetchJson('/bff/users/' + currentUser.id);
+                } catch (e) { currentUserData = null; }
 
                 await Promise.all([loadRequests(), loadSectors(), loadHelpRequestTypes(), loadAreas()]);
             } catch (e) {
