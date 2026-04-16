@@ -8,6 +8,9 @@
     var CRITICAL_MINUTES = 60;
     var SHOW_CLOCK = true;
     var ENABLE_SOUND = false;
+    var AREA_ID = null;
+    var USER_SECTOR_IDS = [];
+    var ALL_AREAS = [];
     var requests = [];
     var sortedCards = [];
     var visibleStart = 0;
@@ -206,7 +209,8 @@
             var r = await fetch('/bff/help-requests');
             if (!r.ok) return;
             var all = await r.json();
-            requests = all.filter(function (x) { return x.status <= 2; });
+            var active = all.filter(function (x) { return x.status <= 2; });
+            requests = filterByConfig(active);
         } catch (e) { }
         sortReqs();
         if (!animating) renderFull();
@@ -258,6 +262,44 @@
     setInterval(updateClock, 1000);
     setInterval(tickTimers, 1000);
 
+    // Get all descendant area IDs for a given areaId
+    function getAreaAndDescendants(areaId) {
+        if (!areaId) return [];
+        var ids = [areaId];
+        var queue = [areaId];
+        while (queue.length > 0) {
+            var current = queue.shift();
+            ALL_AREAS.forEach(function (a) {
+                if (a.parentId && a.parentId === current) {
+                    ids.push(a.id);
+                    queue.push(a.id);
+                }
+            });
+        }
+        return ids;
+    }
+
+    function filterByConfig(items) {
+        var result = items;
+
+        // Filter by user's sectors
+        if (USER_SECTOR_IDS.length > 0) {
+            result = result.filter(function (r) {
+                return USER_SECTOR_IDS.indexOf(r.sectorId) >= 0;
+            });
+        }
+
+        // Filter by area (selected level + all sub-levels)
+        if (AREA_ID && ALL_AREAS.length > 0) {
+            var allowedAreaIds = getAreaAndDescendants(AREA_ID);
+            result = result.filter(function (r) {
+                return r.areaId && allowedAreaIds.indexOf(r.areaId) >= 0;
+            });
+        }
+
+        return result;
+    }
+
     async function loadAndonSettings() {
         try {
             var r = await fetch('/bff/andon-user-settings');
@@ -278,8 +320,32 @@
                 if (typeof data.enableSound === 'boolean') {
                     ENABLE_SOUND = data.enableSound;
                 }
+                if (data.areaId) {
+                    AREA_ID = data.areaId;
+                }
             }
         } catch (e) { }
+
+        // Load current user data to get sectors
+        try {
+            var me = await (await fetch('/bff/me')).json();
+            if (me && me.id) {
+                var userData = await (await fetch('/bff/users/' + me.id)).json();
+                if (userData && userData.sectors && userData.sectors.length > 0) {
+                    USER_SECTOR_IDS = userData.sectors.map(function (s) { return s.sectorId; });
+                }
+            }
+        } catch (e) { }
+
+        // Load areas for hierarchy resolution
+        if (AREA_ID) {
+            try {
+                var areasResp = await fetch('/bff/areas');
+                if (areasResp.ok) {
+                    ALL_AREAS = await areasResp.json();
+                }
+            } catch (e) { }
+        }
     }
 
     (async function () {
