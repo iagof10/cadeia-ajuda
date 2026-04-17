@@ -903,7 +903,19 @@ img { max-width: 100%; }
   align-items: center;
   justify-content: center;
   font-size: 1.3rem;
-  color: var(--orange);
+  color: #9ca3af;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.tech-card:hover .tech-icon {
+  color: var(--tech-color, var(--orange));
+  transform: scale(1.08);
+}
+
+.tech-icon svg {
+  width: 1.3rem;
+  height: 1.3rem;
+  display: block;
 }
 
 .tech-letter {

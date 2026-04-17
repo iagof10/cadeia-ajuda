@@ -348,8 +348,37 @@
         }
     }
 
+    function createCompanyBanner(name) {
+        if (!name) return;
+        var bar = document.createElement('div');
+        bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:150;display:flex;align-items:center;justify-content:center;padding:6px 0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);';
+        var span = document.createElement('span');
+        span.style.cssText = 'font-size:1.2rem;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:2px;text-transform:uppercase;';
+        span.textContent = name;
+        bar.appendChild(span);
+        document.body.insertBefore(bar, document.body.firstChild);
+        var container = document.querySelector('.andon-board-container');
+        if (container) container.style.paddingTop = '38px';
+        var exitBtn = document.querySelector('.andon-exit-btn');
+        if (exitBtn) exitBtn.style.top = '46px';
+    }
+
     (async function () {
         await loadAndonSettings();
+        try {
+            var meResp = await fetch('/bff/me');
+            var me = await meResp.json();
+            if (me && me.tenantId) {
+                var tResp = await fetch('/bff/tenants/' + me.tenantId);
+                var tenant = await tResp.json();
+                var bannerText = tenant.tradeName || tenant.name;
+                if (AREA_ID && ALL_AREAS.length > 0) {
+                    var selectedArea = ALL_AREAS.find(function (a) { return a.id === AREA_ID; });
+                    if (selectedArea) bannerText += '  ·  ' + selectedArea.name;
+                }
+                createCompanyBanner(bannerText);
+            }
+        } catch (e) { }
         await load();
         startCarousel();
         await connectSignalR();

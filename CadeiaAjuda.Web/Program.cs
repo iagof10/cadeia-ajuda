@@ -518,6 +518,12 @@ app.MapGet("/bff/me", (AuthStateService auth) =>
 var bffTenants = app.MapGroup("/bff/tenants").DisableAntiforgery();
 bffTenants.MapGet("/", async (TenantApiClient api) => Results.Ok(await api.GetAllAsync()));
 
+bffTenants.MapGet("/{id:guid}", async (Guid id, TenantApiClient api) =>
+{
+    var tenant = await api.GetByIdAsync(id);
+    return tenant is null ? Results.NotFound() : Results.Ok(tenant);
+});
+
 // /bff/tenant-settings
 app.MapGet("/bff/tenant-settings", async (AuthStateService auth, IHttpClientFactory httpFactory) =>
 {
