@@ -31,7 +31,7 @@ export default function ParticleCanvas() {
 
     const initParticles = () => {
       const rect = canvas.getBoundingClientRect()
-      const count = Math.min(Math.floor((rect.width * rect.height) / 8000), 120)
+      const count = Math.min(Math.floor((rect.width * rect.height) / 15000), 60)
       particlesRef.current = Array.from({ length: count }, () => ({
         x: Math.random() * rect.width,
         y: Math.random() * rect.height,
@@ -90,7 +90,7 @@ export default function ParticleCanvas() {
       }
 
       // Draw connections
-      const connectionDist = 120
+      const connectionDist = 100
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x

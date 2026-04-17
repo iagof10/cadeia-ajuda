@@ -1,6 +1,9 @@
 import { useClock } from '../hooks/useClock'
 
-export default function AndonShowcase() {
+import { memo } from 'react'
+import { useClock } from '../hooks/useClock'
+
+function AndonShowcaseInner() {
   const clock = useClock()
 
   return (
@@ -56,3 +59,6 @@ export default function AndonShowcase() {
     </section>
   )
 }
+
+const AndonShowcase = memo(AndonShowcaseInner)
+export default AndonShowcase
