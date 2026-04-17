@@ -1,5 +1,3 @@
-import { useClock } from '../hooks/useClock'
-
 import { memo } from 'react'
 import { useClock } from '../hooks/useClock'
 
