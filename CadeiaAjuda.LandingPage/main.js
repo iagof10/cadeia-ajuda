@@ -194,8 +194,8 @@
         y: Math.random() * rect.height,
         vx: (Math.random() - 0.5) * 0.4,
         vy: (Math.random() - 0.5) * 0.4,
-        radius: Math.random() * 1.5 + 0.5,
-        opacity: Math.random() * 0.5 + 0.2,
+        radius: Math.random() * 1.8 + 0.8,
+        opacity: Math.random() * 0.5 + 0.5,
       }));
     }
 
@@ -220,23 +220,23 @@
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(245, 124, 0, ${p.opacity})`;
+        ctx.fillStyle = `rgba(255, 152, 0, ${p.opacity})`;
         ctx.fill();
       }
 
-      const cd = 120;
+      const cd = 140;
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < cd) {
-            const alpha = (1 - dist / cd) * 0.15;
+            const alpha = (1 - dist / cd) * 0.45;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(245, 124, 0, ${alpha})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `rgba(255, 152, 0, ${alpha})`;
+            ctx.lineWidth = 0.8;
             ctx.stroke();
           }
         }
@@ -246,13 +246,13 @@
         for (const p of particles) {
           const dx = p.x - mouse.x, dy = p.y - mouse.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 200) {
-            const alpha = (1 - dist / 200) * 0.3;
+          if (dist < 220) {
+            const alpha = (1 - dist / 220) * 0.7;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = `rgba(255, 152, 0, ${alpha})`;
-            ctx.lineWidth = 0.8;
+            ctx.strokeStyle = `rgba(255, 167, 38, ${alpha})`;
+            ctx.lineWidth = 1.2;
             ctx.stroke();
           }
         }
@@ -262,11 +262,16 @@
 
     resize(); init(); draw();
     window.addEventListener('resize', () => { resize(); init(); });
-    canvas.addEventListener('mousemove', (e) => {
+
+    // The canvas has pointer-events: none (so it doesn't block hero buttons),
+    // therefore mousemove never reaches it. Listen on the hero section instead
+    // and convert coordinates to the canvas's local space.
+    const hero = canvas.closest('.hero') || document;
+    hero.addEventListener('mousemove', (e) => {
       const rect = canvas.getBoundingClientRect();
       mouse = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     });
-    canvas.addEventListener('mouseleave', () => { mouse = { x: -1000, y: -1000 }; });
+    hero.addEventListener('mouseleave', () => { mouse = { x: -1000, y: -1000 }; });
   }
 
   /* ---------- Stats (animated counters) ---------- */
