@@ -5,14 +5,262 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AssistChain - Plataforma Industrial de Cadeia de Ajuda</title>
     <meta name="description" content="O sistema Andon definitivo. Controle em tempo real, escalonamento automático e relatórios precisos para operações que não podem parar." />
-    <link rel="icon" type="image/x-icon" href="/image/ico/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="image/ico/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <!-- Scroll Progress -->
+    <div class="scroll-progress-track">
+      <div class="scroll-progress-bar" id="scrollProgressBar"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+      <div class="container nav-container">
+        <a href="#" class="nav-logo" aria-label="AssistChain">
+          <img src="image/logo/AssistChain-logo.png" alt="AssistChain" class="logo-img" />
+        </a>
+        <div class="nav-links" id="navLinks">
+          <a href="#funcionalidades" data-nav-link>Funcionalidades</a>
+          <a href="#como-funciona" data-nav-link>Como Funciona</a>
+          <a href="#tecnologias" data-nav-link>Tecnologias</a>
+          <a href="#contato" data-nav-link>Contato</a>
+        </div>
+        <div class="nav-actions">
+          <a href="https://app.assistchain.com.br" id="navEnterBtn" class="nav-btn-enter">
+            <i class="fas fa-sign-in-alt"></i> Entrar
+          </a>
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+            <i class="fas fa-bars" id="mobileMenuIcon"></i>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+      <div class="hero-bg-effects">
+        <div class="hero-gradient-orb orb-1"></div>
+        <div class="hero-gradient-orb orb-2"></div>
+        <div class="hero-gradient-orb orb-3"></div>
+        <div class="hero-grid-overlay"></div>
+        <canvas class="particle-canvas" id="particleCanvas"></canvas>
+      </div>
+      <div class="container hero-content">
+        <div class="hero-top">
+          <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            <span>Plataforma Industrial de Cadeia de Ajuda</span>
+          </div>
+          <h1 class="hero-title-swap" id="heroTitle">
+            <span class="hero-line-1"></span>
+            <span class="hero-line-2"></span>
+          </h1>
+          <p class="hero-subtitle">
+            O sistema Andon definitivo. Controle em tempo real, escalonamento
+            automático e relatórios precisos para operações que não podem parar.
+          </p>
+          <div class="hero-buttons">
+            <a href="https://wa.me/5511924692776" target="_blank" rel="noreferrer" class="btn btn-primary btn-lg btn-magnetic">
+              Orçamento
+              <i class="fas fa-arrow-right"></i>
+            </a>
+            <a href="#plataforma" class="btn btn-ghost btn-lg btn-magnetic">
+              <i class="fas fa-play-circle"></i>
+              Ver Demonstração
+            </a>
+          </div>
+        </div>
+        <div class="hero-mockup">
+          <div class="hero-mockup-inner">
+            <div class="hero-mockup-glow"></div>
+            <img src="image/print/AssistChain-Dashboard.png" alt="AssistChain Dashboard" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats-section">
+      <div class="container">
+        <div class="stats-grid" id="statsGrid"></div>
+      </div>
+    </section>
+
+    <!-- Platform Demo -->
+    <section class="platform-section" id="plataforma">
+      <div class="container">
+        <div class="section-badge">PLATAFORMA REAL</div>
+        <h2 class="section-title">Veja o AssistChain em ação</h2>
+        <p class="section-subtitle">
+          Interface limpa, funcional e projetada para o dia a dia industrial.
+        </p>
+
+        <div class="platform-demo">
+          <div class="browser-frame">
+            <div class="browser-header">
+              <div class="browser-tabs" id="browserTabs"></div>
+              <div class="browser-url">
+                <i class="fas fa-lock"></i>
+                <span id="browserUrl"></span>
+              </div>
+            </div>
+            <div class="browser-content">
+              <img id="browserImage" src="" alt="" class="platform-screenshot" />
+            </div>
+          </div>
+          <p class="platform-caption">
+            Painel Andon ao vivo: cards de chamados com cronômetros, alertas
+            visuais e carrossel automático para TVs industriais.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features-section" id="funcionalidades">
+      <div class="container">
+        <div class="section-badge">FUNCIONALIDADES</div>
+        <h2 class="section-title">Tudo o que sua produção precisa</h2>
+        <p class="section-subtitle">
+          Um conjunto completo de ferramentas projetado para visibilidade total e
+          resposta imediata.
+        </p>
+        <div class="features-bento" id="featuresBento"></div>
+      </div>
+    </section>
+
+    <!-- Andon Showcase -->
+    <section class="andon-showcase">
+      <div class="container">
+        <div class="showcase-grid">
+          <div class="showcase-text">
+            <h2>Visibilidade de ponta a ponta na fábrica</h2>
+            <p>
+              Transforme qualquer TV em um centro de comando operacional.
+              Identifique gargalos, acompanhe tempos de resposta e garanta que
+              nenhuma máquina fique parada esperando suporte.
+            </p>
+            <ul class="showcase-features">
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span>Alertas sonoros e visuais customizáveis</span>
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span>Temporizadores de SLA em tempo real</span>
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span>Layout adaptativo para diferentes telas</span>
+              </li>
+            </ul>
+            <a href="#plataforma" class="btn btn-primary">
+              Explore o Painel Andon
+              <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+          <div class="showcase-visual">
+            <div class="andon-live-panel">
+              <div class="live-panel-header">
+                <span>Painel Andon em funcionamento</span>
+                <span class="live-indicator">
+                  <i class="fas fa-circle"></i> ONLINE
+                </span>
+                <span class="live-clock" id="liveClock">--:--:--</span>
+              </div>
+              <div class="andon-gif-wrap">
+                <img
+                  src="image/print/AssistChain-Andon.gif"
+                  alt="Painel Andon em funcionamento"
+                  class="andon-gif"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it Works -->
+    <section class="how-section" id="como-funciona">
+      <div class="container">
+        <div class="section-badge">COMO FUNCIONA</div>
+        <h2 class="section-title">Três passos para transformar sua operação</h2>
+        <p class="section-subtitle">
+          Um fluxo de trabalho projetado para simplicidade de implantação e
+          robustez na operação.
+        </p>
+        <div class="timeline" id="timeline"></div>
+      </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section class="tech-section" id="tecnologias">
+      <div class="container">
+        <div class="section-badge">ARQUITETURA MODERNA E ESCALÁVEL</div>
+        <div class="tech-grid" id="techGrid"></div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="contato">
+      <div class="container">
+        <div class="cta-card">
+          <div class="cta-glow"></div>
+          <div class="cta-content">
+            <div class="cta-badge">
+              <i class="fas fa-rocket"></i> COMECE HOJE
+            </div>
+            <h2>Pronto para transformar sua operação?</h2>
+            <p>
+              Pare de perder dinheiro com máquinas paradas. Implante o AssistChain
+              em horas, não semanas.
+            </p>
+            <div class="cta-buttons">
+              <a href="https://wa.me/5511924692776" target="_blank" rel="noreferrer" class="btn btn-primary btn-lg btn-magnetic">
+                Orçamento
+                <i class="fas fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-brand">
+            <a href="#" class="nav-logo" aria-label="AssistChain">
+              <img src="image/logo/AssistChain-logo.png" alt="AssistChain" class="logo-img logo-footer" />
+            </a>
+          </div>
+          <div class="footer-links">
+            <a href="#funcionalidades">Funcionalidades</a>
+            <a href="#como-funciona">Como Funciona</a>
+            <a href="#tecnologias">Tecnologias</a>
+            <a href="#contato">Contato</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2026 AssistChain. Todos os direitos reservados.</p>
+          <div class="footer-legal">
+            <a href="#">Termos de Serviço</a>
+            <a href="#">Política de Privacidade</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="main.js"></script>
   </body>
 </html>

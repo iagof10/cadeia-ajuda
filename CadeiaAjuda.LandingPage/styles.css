@@ -916,6 +916,7 @@ img { max-width: 100%; }
   width: 1.3rem;
   height: 1.3rem;
   display: block;
+  fill: currentColor;
 }
 
 .tech-letter {
