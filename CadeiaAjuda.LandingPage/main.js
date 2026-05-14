@@ -32,7 +32,7 @@
       const isDev = host === 'localhost' || host === '127.0.0.1' || host.includes('dev.');
       enterBtn.href = isDev
         ? 'https://app.dev.assistchain.com.br'
-        : 'https://app.assistchain.com.br';
+        : 'https://app.dev.assistchain.com.br';
     }
 
     const onScroll = () => {
