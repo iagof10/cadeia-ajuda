@@ -1056,7 +1056,8 @@ img { max-width: 100%; }
   .features-bento { grid-template-columns: repeat(2, 1fr); }
   .feature-card.bento-wide { grid-column: span 1; }
   .showcase-grid { grid-template-columns: 1fr; gap: 40px; }
-  .andon-live-panel { transform: none; }
+  .showcase-visual { perspective: none; width: 100%; }
+  .andon-live-panel { transform: none; width: 100%; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .hero-mockup { max-width: 100%; }
 }

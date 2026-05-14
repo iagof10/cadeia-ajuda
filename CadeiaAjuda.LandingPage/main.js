@@ -458,11 +458,12 @@
     const tl = gsap.timeline({
       scrollTrigger: { trigger: '.andon-showcase', start: 'top 70%', once: true },
     });
+    const isMobile = window.matchMedia('(max-width: 1024px)').matches;
     tl.from('.showcase-text h2', { x: -60, opacity: 0, duration: 0.8, ease: 'power3.out' })
       .from('.showcase-text p', { x: -40, opacity: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4')
       .from('.showcase-features li', { x: -30, opacity: 0, duration: 0.4, stagger: 0.08, ease: 'power3.out' }, '-=0.3')
       .from('.showcase-text .btn', { y: 15, opacity: 0, duration: 0.4, ease: 'back.out(1.7)' }, '-=0.2')
-      .from('.andon-live-panel', { x: 80, opacity: 0, rotateY: -12, duration: 1, ease: 'power3.out' }, '-=1');
+      .from('.andon-live-panel', { x: isMobile ? 0 : 80, opacity: 0, rotateY: isMobile ? 0 : -12, duration: 1, ease: 'power3.out', clearProps: 'transform' }, '-=1');
 
     gsap.from('.andon-gif', {
       scrollTrigger: { trigger: '.andon-live-panel', start: 'top 80%', once: true },
