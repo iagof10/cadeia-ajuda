@@ -38,3 +38,4 @@ substitutions:
   _REGION: us-central1
   _REPOSITORY: cloud-run-source-deploy
   _IMAGE: cadeia-ajuda-landing
+
