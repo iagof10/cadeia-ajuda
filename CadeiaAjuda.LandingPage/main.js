@@ -110,19 +110,24 @@
     renderHeroTitle(0);
     let activeIdx = 0;
 
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
     if (gsap) {
       const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
-      gsap.to('.orb-1', { x: 80, y: 50, duration: 8, repeat: -1, yoyo: true, ease: 'sine.inOut' });
-      gsap.to('.orb-2', { x: -60, y: -40, duration: 10, repeat: -1, yoyo: true, ease: 'sine.inOut' });
-      gsap.to('.orb-3', { x: 40, y: -50, duration: 12, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+      // Animações infinitas custosas: apenas no desktop
+      if (!isMobile) {
+        gsap.to('.orb-1', { x: 80, y: 50, duration: 8, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+        gsap.to('.orb-2', { x: -60, y: -40, duration: 10, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+        gsap.to('.orb-3', { x: 40, y: -50, duration: 12, repeat: -1, yoyo: true, ease: 'sine.inOut' });
 
-      gsap.to('.hero-grid-overlay', {
-        backgroundPosition: '30px 30px',
-        duration: 20,
-        repeat: -1,
-        ease: 'none',
-      });
+        gsap.to('.hero-grid-overlay', {
+          backgroundPosition: '30px 30px',
+          duration: 20,
+          repeat: -1,
+          ease: 'none',
+        });
+      }
 
       tl.from('.hero-badge', { y: 30, opacity: 0, scale: 0.85, duration: 0.7, ease: 'back.out(1.7)' })
         .from('.hero-line-1 .split-char', { y: 60, opacity: 0, rotateX: -80, duration: 0.5, stagger: 0.02, ease: 'power4.out' }, '-=0.15')
@@ -132,23 +137,26 @@
         .from('.hero-buttons .btn', { y: 25, scale: 0.9, duration: 0.5, stagger: 0.12, ease: 'back.out(1.7)', clearProps: 'all' }, '-=0.4')
         .from('.hero-mockup', { y: 100, opacity: 0, scale: 0.85, rotateX: 15, duration: 1.2, ease: 'power3.out' }, '-=0.6');
 
-      gsap.to('.hero-mockup-inner', { y: -12, duration: 3, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+      // Animações de loop contínuo: apenas no desktop
+      if (!isMobile) {
+        gsap.to('.hero-mockup-inner', { y: -12, duration: 3, repeat: -1, yoyo: true, ease: 'sine.inOut' });
 
-      gsap.to('.hero-badge', {
-        boxShadow: '0 0 25px rgba(245,124,0,0.25), 0 0 50px rgba(245,124,0,0.08)',
-        duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 1.5,
-      });
+        gsap.to('.hero-badge', {
+          boxShadow: '0 0 25px rgba(245,124,0,0.25), 0 0 50px rgba(245,124,0,0.08)',
+          duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 1.5,
+        });
 
-      // Hero parallax on scroll
-      if (ScrollTrigger) {
-        gsap.to('.hero-content', {
-          y: 120, opacity: 0.2, ease: 'none',
-          scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true },
-        });
-        gsap.to('.hero-bg-effects', {
-          y: 60, scale: 1.05, ease: 'none',
-          scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true },
-        });
+        // Parallax no scroll: evitar no mobile (layout shift + overdraw)
+        if (ScrollTrigger) {
+          gsap.to('.hero-content', {
+            y: 120, opacity: 0.2, ease: 'none',
+            scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true },
+          });
+          gsap.to('.hero-bg-effects', {
+            y: 60, scale: 1.05, ease: 'none',
+            scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true },
+          });
+        }
       }
     }
 
@@ -172,6 +180,12 @@
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Partículas com algoritmo O(n²) são inviáveis no GPU mobile → desabilita.
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      canvas.style.display = 'none';
+      return;
+    }
 
     let particles = [];
     let mouse = { x: -1000, y: -1000 };
@@ -260,7 +274,22 @@
       raf = requestAnimationFrame(draw);
     }
 
-    resize(); init(); draw();
+    resize(); init();
+
+    // Pausa a animação quando o canvas sai da viewport (economiza CPU/GPU no scroll)
+    const visibilityObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          if (!raf) raf = requestAnimationFrame(draw);
+        } else {
+          cancelAnimationFrame(raf);
+          raf = 0;
+        }
+      },
+      { threshold: 0 }
+    );
+    visibilityObserver.observe(canvas);
+
     window.addEventListener('resize', () => { resize(); init(); });
 
     // The canvas has pointer-events: none (so it doesn't block hero buttons),
